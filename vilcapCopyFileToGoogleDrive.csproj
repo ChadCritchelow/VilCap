@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Podio.Async" Version="2.0.1" />
+    <PackageReference Include="PodioCore.Applications" Version="0.0.16" />
+    <PackageReference Include="PodioCore.Async" Version="0.0.20" />
+    <PackageReference Include="PodioCore.Items" Version="0.0.24" />
+    <PackageReference Include="PodioCore.Spaces" Version="0.0.7" />
+    <PackageReference Include="Saasafras" Version="0.1.157" />
+    <PackageReference Include="Saasafras.Database" Version="0.1.25" />
+    <PackageReference Include="Saasafras.Lambda" Version="0.0.2" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.36.1.1390" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Amazon.Lambda.Tools" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="credentials.json" />
+  </ItemGroup>
+</Project>
