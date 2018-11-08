@@ -71,41 +71,40 @@ namespace BrickBridge.Lambda.VilCap
             return "";
         }
 
-        private static async Task IterateAsync(DriveService ds, IEnumerable<Embed> embedList, EmbedItemField embedHere, Podio podio, string childFolder, RoutedPodioEvent rpe)
+        private static async Task IterateAsync(DriveService ds, IEnumerable<Embed> embedList, EmbedItemField embedHere, Podio podio, string subfolderId, RoutedPodioEvent rpe)
         {
-            //IEnumerable<Task> tasks;
             foreach (Embed em in embedList)
             {
-                await Task.Run(() => { UpdateOneEmbed(ds, em, embedHere, childFolder, podio, rpe); });
+                await Task.Run(() => { UpdateOneEmbed(ds, em, embedHere, subfolderId, podio, rpe); });
             }
         }
 
-        // Returns a STRING link to the new file
-        private static string CopyFile(DriveService ds, string originalId, string subfolderId)
+        private static void UpdateOneEmbed(DriveService ds, Embed embed, EmbedItemField embedHere, string subfolderId, Podio podio, RoutedPodioEvent rpe)
         {
-            File original = ds.Files.Get(originalId).Execute();
+            File original = ds.Files.Get(GetFileIdByTitle(ds, embed.Title)).Execute();
             original.Parents.Clear();
             original.Parents.Add(subfolderId);
-            return ds.Files.Copy(original, original.Id).Execute().WebViewLink;
+            File clone = ds.Files.Copy(original, original.Id).Execute();
+
+            Task.Run(() =>
+            {   // Todo Implement: { "type": "anyone", "role": "writer" }
+                Google.Apis.Drive.v3.Data.Permission permission = null; 
+                new PermissionsResource.CreateRequest(ds, permission, clone.Id).Execute();
+            });
+
+            Task.Run(() =>
+            {
+                Embed newEmbed = new Embed { OriginalUrl = clone.WebViewLink };
+                embedHere.AddEmbed(newEmbed.EmbedId);
+            });
         }
 
-        // Returns the FILE matching the provided title
-        private static File GetFileId(DriveService ds, string title)
+        private static string GetFileIdByTitle(DriveService ds, string title)
         {
-            var request = ds.Files.List();
-            request.Q = "title='" + title + "'"; // Todo: format
-            return request.Execute().Files[0];
+            FilesResource.ListRequest listReq = ds.Files.List();
+            listReq.Q = "name='" + title + "'"; // Todo: format         
+            return listReq.Execute().Files[0].Id;
         }
-
-        private static void UpdateOneEmbed(DriveService ds, Embed embed, EmbedItemField embedHere, string childFolder, Podio podio, RoutedPodioEvent rpe)
-        {
-            var original = GetFileId(ds, embed.Title);
-            File file = original;
-            file.Parents[0] = childFolder;
-            var request = ds.Files.Copy(file, original.Id);
-            var result = request.Execute().WebContentLink;
-        }
-
         
     }
 }
