@@ -25,7 +25,7 @@ namespace BrickBridge.Lambda.VilCap
         static string ApplicationName = "VilCap";
         static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
 
-        private async Task<string> FunctionHandler(RoutedPodioEvent rpe, ILambdaContext context)
+        private async void FunctionHandler(RoutedPodioEvent rpe, ILambdaContext context)
         {
             //These are stored in AWS Lambda
             string client_id = System.Environment.GetEnvironmentVariable("GOOGLE_API_CLIENT_ID");
@@ -56,7 +56,7 @@ namespace BrickBridge.Lambda.VilCap
             var X_ID = rpe.podioEvent.external_id;
             var CLIENT_SECRET = "JqvyW2a3SdhRzD7BUkYvJ66UI6nNkuVQfRZZXAcZGi5JksFVTiCtzkTIUek2CR3h"; //ex
             var CLIENT_WS_ID = rpe.clientId;
-            //var CLONE_FOLDER_ID = " ######### "; // rpe.currentEnvironment.name?
+            var cloneFolderId = " ######### "; // rpe.currentEnvironment.name?
             IAccessTokenProvider CLIENT_ID = null;
 
             Podio podio = new Podio(CLIENT_ID, CLIENT_SECRET);
@@ -67,8 +67,14 @@ namespace BrickBridge.Lambda.VilCap
             EmbedItemField cloneEmbedField = clone.Field<EmbedItemField>(CHILD_EMBED_FIELD);
             IEnumerable<Embed> parentEmbeds = parentEmbedField.Embeds;
 
-            await IterateAsync(service, parentEmbeds, cloneEmbedField, podio, rpe.currentEnvironment.name, rpe); //Option 2
-            return "";
+            List<Task> tasks = new List<Task>();
+            foreach (Embed em in parentEmbedField.Embeds)
+            {
+                  tasks.Add( 
+                      Task.Run(() => { UpdateOneEmbed(service, em, cloneEmbedField, cloneFolderId, podio, rpe); }) 
+                  );
+            }
+            await Task.WhenAll(tasks);
         }
 
         private static async Task IterateAsync(DriveService ds, IEnumerable<Embed> embedList, EmbedItemField embedHere, Podio podio, string subfolderId, RoutedPodioEvent rpe)
