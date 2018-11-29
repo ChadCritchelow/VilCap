@@ -46,11 +46,11 @@ namespace BrickBridge.Lambda.VilCap
                 ApplicationName = ApplicationName,
             });
 
-            const int VC_ADMIN = 6145742; // VC Administration Workspace (21310276?)
+            const int VC_ADMIN = 6145742; // VC Administration Workspace space_id
             string PTR_FIELD = "000000000"; // ExID of master item, located on child
             var PARENT_EMBED_FIELD = "link";
             var CHILD_EMBED_FIELD = "link-to-material";
-            var APP_ID = rpe.podioEvent.app_id; // task-list-cuanfh
+            var APP_ID = rpe.podioEvent.app_id; // task-list-cuanfh? master-schedule:21310276
             var I_ID = rpe.podioEvent.item_id;
             var R_ID = rpe.podioEvent.item_revision_id;
             var X_ID = rpe.podioEvent.external_id;
@@ -77,23 +77,18 @@ namespace BrickBridge.Lambda.VilCap
             await Task.WhenAll(tasks);
         }
 
-        private static async Task IterateAsync(DriveService ds, IEnumerable<Embed> embedList, EmbedItemField embedHere, Podio podio, string subfolderId, RoutedPodioEvent rpe)
-        {
-            foreach (Embed em in embedList)
-            {
-                await Task.Run(() => { UpdateOneEmbed(ds, em, embedHere, subfolderId, podio, rpe); });
-            }
-        }
-
         private static void UpdateOneEmbed(DriveService ds, Embed embed, EmbedItemField embedHere, string subfolderId, Podio podio, RoutedPodioEvent rpe)
         {
-            File original = ds.Files.Get(GetFileIdByTitle(ds, embed.Title)).Execute();
+            FilesResource.ListRequest listReq = ds.Files.List();
+            listReq.Q = "name='" + embed.Title + "'";
+            listReq.OrderBy = "createdTime";
+            File original = ds.Files.Get(listReq.Execute().Files[0].Id).Execute();
             original.Parents.Clear();
             original.Parents.Add(subfolderId);
             File clone = ds.Files.Copy(original, original.Id).Execute();
 
             Task.Run(() =>
-            {   // Todo Implement: { "type": "anyone", "role": "writer" }
+            {   /* Todo Implement: { "type": "anyone", "role": "writer" } */
                 Google.Apis.Drive.v3.Data.Permission permission = null; 
                 new PermissionsResource.CreateRequest(ds, permission, clone.Id).Execute();
             });
@@ -103,13 +98,6 @@ namespace BrickBridge.Lambda.VilCap
                 Embed newEmbed = new Embed { OriginalUrl = clone.WebViewLink };
                 embedHere.AddEmbed(newEmbed.EmbedId);
             });
-        }
-
-        private static string GetFileIdByTitle(DriveService ds, string title)
-        {
-            FilesResource.ListRequest listReq = ds.Files.List();
-            listReq.Q = "name='" + title + "'"; // Todo: format         
-            return listReq.Execute().Files[0].Id;
         }
         
     }
