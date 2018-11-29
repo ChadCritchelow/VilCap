@@ -37,13 +37,3 @@ namespace BrickBridge.Lambda.VilCap
         }
     }
 }
-
-/*{
-    "fileId": "1zLAsLbN6lkvTtSafnu9kG7jdV76e80d6-JveBj8r3ks",
-    "convert": true,
-    "resource": {
-        "title": "FileFromAPI",
-        "parents": [{
-            "id": "1QyvnXx21CfXV0xlyQtD_zhBQGT1_CtKp"
-        }]
- }*/

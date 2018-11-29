@@ -12,6 +12,7 @@ using PodioCore.Items;
 
 using Task = System.Threading.Tasks.Task;
 using File = Google.Apis.Drive.v3.Data.File;
+using Permission = Google.Apis.Drive.v3.Data.Permission;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
 
@@ -46,25 +47,24 @@ namespace BrickBridge.Lambda.VilCap
                 ApplicationName = ApplicationName,
             });
 
-            const int VC_ADMIN = 6145742; // VC Administration Workspace space_id
+
+
+            const string COMPANY_DIRECTORY_ID = "1m0sPA-z8NXmkinz1xvdbZB7CxvGj9ozk"; // All company folders will be added here
+
             string PTR_FIELD = "000000000"; // ExID of master item, located on child
             var PARENT_EMBED_FIELD = "link";
             var CHILD_EMBED_FIELD = "link-to-material";
-            var APP_ID = rpe.podioEvent.app_id; // task-list-cuanfh? master-schedule:21310276
-            var I_ID = rpe.podioEvent.item_id;
-            var R_ID = rpe.podioEvent.item_revision_id;
-            var X_ID = rpe.podioEvent.external_id;
+            int int_app_id = int.Parse(rpe.podioEvent.app_id); // const, master-schedule: 21310276
             var CLIENT_SECRET = "JqvyW2a3SdhRzD7BUkYvJ66UI6nNkuVQfRZZXAcZGi5JksFVTiCtzkTIUek2CR3h"; //ex
-            var CLIENT_WS_ID = rpe.clientId;
-            var cloneFolderId = " ######### "; // rpe.currentEnvironment.name?
+
             IAccessTokenProvider CLIENT_ID = null;
 
             Podio podio = new Podio(CLIENT_ID, CLIENT_SECRET);
+            string cloneFolderId = GetSubfolderId(service, podio, rpe, COMPANY_DIRECTORY_ID);
             ItemService itemService = new ItemService(podio);
-            Item parentItem = await itemService.GetItemByExternalId(VC_ADMIN, PTR_FIELD);
-            Item clone = rpe.currentItem;
+            Item parentItem = await itemService.GetItemByExternalId(int_app_id, PTR_FIELD);
             EmbedItemField parentEmbedField = parentItem.Field<EmbedItemField>(PARENT_EMBED_FIELD);
-            EmbedItemField cloneEmbedField = clone.Field<EmbedItemField>(CHILD_EMBED_FIELD);
+            EmbedItemField cloneEmbedField = rpe.currentItem.Field<EmbedItemField>(CHILD_EMBED_FIELD);
             IEnumerable<Embed> parentEmbeds = parentEmbedField.Embeds;
 
             List<Task> tasks = new List<Task>();
@@ -77,6 +77,25 @@ namespace BrickBridge.Lambda.VilCap
             await Task.WhenAll(tasks);
         }
 
+        private static string GetSubfolderId(DriveService ds, Podio podio, RoutedPodioEvent rpe, string parentFolder)
+        {
+            FilesResource.ListRequest listReq = ds.Files.List();
+            listReq.Q = "name='" + rpe.currentEnvironment.name + "'";
+            var folderId = listReq.Execute().Files[0].Id;
+
+            if(folderId == null)
+            {
+                File folder = new File
+                {
+                    Name = rpe.currentEnvironment.name,
+                    MimeType = "application/vnd.google-apps.folder",
+                };
+                folder.Parents.Add(parentFolder);
+                folderId = ds.Files.Create(folder).Execute().Id;
+            }
+            return folderId;
+        }
+
         private static void UpdateOneEmbed(DriveService ds, Embed embed, EmbedItemField embedHere, string subfolderId, Podio podio, RoutedPodioEvent rpe)
         {
             FilesResource.ListRequest listReq = ds.Files.List();
@@ -85,11 +104,16 @@ namespace BrickBridge.Lambda.VilCap
             File original = ds.Files.Get(listReq.Execute().Files[0].Id).Execute();
             original.Parents.Clear();
             original.Parents.Add(subfolderId);
+            original.Name = "###" + original.Name;
             File clone = ds.Files.Copy(original, original.Id).Execute();
 
             Task.Run(() =>
-            {   /* Todo Implement: { "type": "anyone", "role": "writer" } */
-                Google.Apis.Drive.v3.Data.Permission permission = null; 
+            {
+                Permission permission = new Permission
+                {
+                    Role = "writer",
+                    Type = "anyone"
+                };
                 new PermissionsResource.CreateRequest(ds, permission, clone.Id).Execute();
             });
 
