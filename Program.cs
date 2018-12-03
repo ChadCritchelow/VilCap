@@ -45,6 +45,7 @@ namespace vilcapCopyFileToGoogleDrive
             System.Environment.SetEnvironmentVariable("PODIO_PROXY_URL", Config.PODIO_PROXY_URL);
             System.Environment.SetEnvironmentVariable("BBC_SERVICE_URL", Config.BBC_SERVICE_URL);
             System.Environment.SetEnvironmentVariable("BBC_SERVICE_API_KEY", Config.BBC_SERVICE_API_KEY);
+            Console.WriteLine("LETS GO");
             context.Logger.LogLine($"e.version={e.version}");
             context.Logger.LogLine($"e.clientId={e.clientId}");
             context.Logger.LogLine($"e.clientId={e.clientId}");
@@ -66,7 +67,7 @@ namespace vilcapCopyFileToGoogleDrive
                 ClientId = client_id,
                 ClientSecret = client_secret
             };
-            credential = GoogleWebAuthorizationBroker.AuthorizeAsync(secrets, Scopes, "user", System.Threading.CancellationToken.None, memoryStore).Result;
+            credential = GoogleWebAuthorizationBroker.AuthorizeAsync(secrets, Scopes, "toolkit@vilcap.com", System.Threading.CancellationToken.None, memoryStore).Result;
 
             // Create Drive API service.
             var service = new DriveService(new BaseClientService.Initializer()

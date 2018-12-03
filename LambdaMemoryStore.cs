@@ -29,8 +29,10 @@ namespace BrickBridge.Lambda.VilCap
 
         public Task StoreAsync<T>(string key, T value)
         {
+            
+            System.Console.WriteLine($"Adding key: [{key}]");
             return Task.Run(() =>
-            {
+            { 
                 var t = Newtonsoft.Json.JsonConvert.SerializeObject(value);
                 dictionary.Add(key, t);
             });
