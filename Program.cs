@@ -84,24 +84,7 @@ namespace vilcapCopyFileToGoogleDrive
 
             fieldId = 0;
             Item currentItem = await podio.GetItem(int.Parse(e.podioEvent.item_id));
-            ////These are stored in AWS Lambda
-            //string client_id = System.Environment.GetEnvironmentVariable("GOOGLE_API_CLIENT_ID");
-            //string client_secret = System.Environment.GetEnvironmentVariable("GOOGLE_API_CLIENT_SECRET");
 
-            //UserCredential credential;
-            //var secrets = new ClientSecrets
-            //{
-            //    ClientId = client_id,
-            //    ClientSecret = client_secret
-            //};
-            //credential = GoogleWebAuthorizationBroker.AuthorizeAsync(secrets, Scopes, "toolkit@vilcap.com", System.Threading.CancellationToken.None, memoryStore).Result;
-
-            //// Create Drive API service.
-            //var service = new DriveService(new BaseClientService.Initializer()
-            //{
-            //    HttpClientInitializer = credential,
-            //    ApplicationName = ApplicationName,
-            //});
             string serviceAcccount = System.Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
             var cred = GoogleCredential.FromJson(serviceAcccount).CreateScoped(Scopes).UnderlyingCredential;
             // Create Drive API service.
@@ -111,14 +94,7 @@ namespace vilcapCopyFileToGoogleDrive
                 ApplicationName = ApplicationName,
             });
 
-            //var APP_ID = e.podioEvent.app_id; // task-list-cuanfh
-            //var I_ID = e.podioEvent.item_id;
-            //var R_ID = e.podioEvent.item_revision_id;
-            //var X_ID = e.podioEvent.external_id;
-            //var CLIENT_SECRET = "JqvyW2a3SdhRzD7BUkYvJ66UI6nNkuVQfRZZXAcZGi5JksFVTiCtzkTIUek2CR3h"; //ex
-            //var CLIENT_WS_ID = e.clientId;
             var cloneFolderId = currentItem.App.Name;
-            //IAccessTokenProvider CLIENT_ID = null;
 
             ItemService itemService = new ItemService(podio);
             fieldId = GetfieldId("VC Toolkit Template|Task List|Parent ID");//add in the field ID's key for "Parent ID"

@@ -6,12 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Podio.Async" Version="2.0.1" />
-    <PackageReference Include="PodioCore.Applications" Version="0.0.16" />
-    <PackageReference Include="PodioCore.Async" Version="0.0.20" />
     <PackageReference Include="PodioCore.Items" Version="0.0.24" />
-    <PackageReference Include="PodioCore.Spaces" Version="0.0.7" />
-    <PackageReference Include="Saasafras" Version="0.1.139" />
+    <PackageReference Include="Saasafras" Version="0.1.177" />
     <PackageReference Include="Saasafras.Database" Version="0.1.25" />
     <PackageReference Include="Google.Apis.Drive.v3" Version="1.36.1.1390" />
   </ItemGroup>
@@ -22,9 +18,5 @@
 
   <ItemGroup>
     <None Remove="credentials.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\podiolambdaBrickBridge\saasafrasLambdaBaseFunction\src\saasafrasLambdaBaseFunction\saasafrasLambdaBaseFunction.csproj" />
   </ItemGroup>
 </Project>
