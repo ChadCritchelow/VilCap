@@ -13,10 +13,11 @@ using PodioCore.Utils.ItemFields;
 using PodioCore.Items;
 using BrickBridge;
 using PodioCore.Models;
-using System.Collections;
+using BrickBridge.Lambda.VilCap;
 using Task = System.Threading.Tasks.Task;
 using File = Google.Apis.Drive.v3.Data.File;
-using BrickBridge.Lambda.VilCap;
+using Permission = Google.Apis.Drive.v3.Data.Permission;
+
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
 
@@ -127,28 +128,43 @@ namespace vilcapCopyFileToGoogleDrive
                     Task.Run(() => { UpdateOneEmbed(service, em, cloneEmbedField, cloneFolderId, podio, e); })
                 );
             }
-            context.Logger.LogLine($"Count of tasks: {tasks.Count()}");
             await Task.WhenAll(tasks);
         }
 
-        public static async Task IterateAsync(DriveService ds, IEnumerable<Embed> embedList, EmbedItemField embedHere, Podio podio, string subfolderId, RoutedPodioEvent rpe)
+        private static string GetSubfolderId(DriveService ds, Podio podio, RoutedPodioEvent e, string parentFolder)
         {
-            foreach (Embed em in embedList)
+            FilesResource.ListRequest listReq = ds.Files.List();
+            listReq.Q = "name='" + e.environmentId + "'";
+            var folderId = listReq.Execute().Files[0].Id;
+
+            if (folderId == null)
             {
-                await Task.Run(() => { UpdateOneEmbed(ds, em, embedHere, subfolderId, podio, rpe); });
+                File folder = new File
+                {
+                    Name = e.environmentId,
+                    MimeType = "application/vnd.google-apps.folder",
+                };
+                folder.Parents.Add(parentFolder);
+                folderId = ds.Files.Create(folder).Execute().Id;
             }
+            return folderId;
         }
 
-        public static void UpdateOneEmbed(DriveService ds, Embed embed, EmbedItemField embedHere, string subfolderId, Podio podio, RoutedPodioEvent rpe)
+        public static void UpdateOneEmbed(DriveService ds, Embed embed, EmbedItemField embedHere, string subfolderId, Podio podio, RoutedPodioEvent e)
         {
-            File original = ds.Files.Get(GetFileIdByTitle(ds, embed.Title)).Execute();
+            File original = GetFileByTitle(ds, embed.Title);
             original.Parents.Clear();
             original.Parents.Add(subfolderId);
+            original.Name = "###" + original.Name;
             File clone = ds.Files.Copy(original, original.Id).Execute();
 
             Task.Run(() =>
-            {   // Todo Implement: { "type": "anyone", "role": "writer" }
-                            Google.Apis.Drive.v3.Data.Permission permission = null;
+            {
+                Permission permission = new Permission
+                {
+                    Role = "writer",
+                    Type = "anyone"
+                };
                 new PermissionsResource.CreateRequest(ds, permission, clone.Id).Execute();
             });
 
@@ -159,12 +175,13 @@ namespace vilcapCopyFileToGoogleDrive
             });
         }
 
-        public static string GetFileIdByTitle(DriveService ds, string title)
+        public static File GetFileByTitle(DriveService ds, string title)
         {
             FilesResource.ListRequest listReq = ds.Files.List();
-            listReq.Q = "name='" + title + "'"; // Todo: format         
-            return listReq.Execute().Files[0].Id;
-
+            listReq.Q = "name='" + title + "'";
+            listReq.OrderBy = "createdTime";
+            return ds.Files.Get(listReq.Execute().Files[0].Id).Execute();
         }
+
     }
 }
