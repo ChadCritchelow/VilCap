@@ -121,14 +121,13 @@ namespace vilcapCopyFileToGoogleDrive
             EmbedItemField cloneEmbedField = clone.Field<EmbedItemField>(CHILD_EMBED_FIELD);
             IEnumerable<Embed> parentEmbeds = parentEmbedField.Embeds;
             context.Logger.LogLine($"{parentEmbeds.Count()} files on master item");
-            List<Task> tasks = new List<Task>();
             foreach (Embed em in parentEmbedField.Embeds)
             {
-                tasks.Add(
-                    Task.Run(() => { UpdateOneEmbed(service, em, cloneEmbedField, cloneFolderId, podio, e); })
-                );
+                context.Logger.LogLine($"Running method \"UpdateOneEmbed\" on {em.Title}");
+                UpdateOneEmbed(service, em, cloneEmbedField, cloneFolderId, podio, e);
             }
-            await Task.WhenAll(tasks);
+            context.Logger.LogLine("Updating item in Podio");
+            await podio.UpdateItem(clone, false);
         }
 
         private static string GetSubfolderId(DriveService ds, Podio podio, RoutedPodioEvent e, string parentFolder)
@@ -173,10 +172,12 @@ namespace vilcapCopyFileToGoogleDrive
                 Embed newEmbed = new Embed { OriginalUrl = clone.WebViewLink };
                 embedHere.AddEmbed(newEmbed.EmbedId);
             });
+            
         }
 
         public static File GetFileByTitle(DriveService ds, string title)
         {
+            Console.WriteLine($"Embed title: {title}");
             FilesResource.ListRequest listReq = ds.Files.List();
             listReq.Q = "name='" + title + "'";
             listReq.OrderBy = "createdTime";
