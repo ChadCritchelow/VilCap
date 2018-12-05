@@ -151,6 +151,9 @@ namespace vilcapCopyFileToGoogleDrive
 
         public static void UpdateOneEmbed(DriveService ds, Embed embed, EmbedItemField embedHere, string subfolderId, Podio podio, RoutedPodioEvent e)
         {
+            Console.WriteLine($"Embed description: {embed.Description}");
+            Console.WriteLine($"Embed Provider name: {embed.ProviderName}");
+            Console.WriteLine($"Count of files on embed: {embed.Files.Count}");
             File original = GetFileByTitle(ds, embed.Title);
             original.Parents.Clear();
             original.Parents.Add(subfolderId);
@@ -177,7 +180,6 @@ namespace vilcapCopyFileToGoogleDrive
 
         public static File GetFileByTitle(DriveService ds, string title)
         {
-            Console.WriteLine($"Embed title: {title}");
             FilesResource.ListRequest listReq = ds.Files.List();
             listReq.Q = "name='" + title + "'";
             listReq.OrderBy = "createdTime";
