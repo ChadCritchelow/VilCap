@@ -37,14 +37,6 @@ namespace vilcapCopyFileToGoogleDrive
 
     public class CopyFileToGoogleDrive
     {
-        private int GetfieldId(string key)
-        {
-            var field = vilcapSpaces[key];
-            return int.Parse(field);
-        }
-
-        private Dictionary<string, string> vilcapSpaces;
-        int fieldId;
 
         static string[] Scopes = { DriveService.Scope.DriveReadonly };
         static string ApplicationName = "BrickBridgeVilCap";
@@ -78,11 +70,9 @@ namespace vilcapCopyFileToGoogleDrive
             //started here
             var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
             var podio = factory.ForClient(e.clientId, e.environmentId);
-            
-            
+                       
             //vilcapSpaces = e.currentEnvironment.deployments.First(a => a.appId == "vilcap").deployedSpaces;
 
-            fieldId = 0;
             Item currentItem = await podio.GetItem(int.Parse(e.podioEvent.item_id));
 
             string serviceAcccount = System.Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
@@ -95,37 +85,41 @@ namespace vilcapCopyFileToGoogleDrive
             });
 
             var cloneFolderId = currentItem.App.Name;
-
+            context.Logger.LogLine($"cloneFolderId={currentItem.App.Name}");
             ItemService itemService = new ItemService(podio);
-            fieldId = GetfieldId("VC Toolkit Template|Task List|Parent ID");//add in the field ID's key for "Parent ID"
-            var parentId = Convert.ToInt32(currentItem.Field<TextItemField>(fieldId).Value);
+            var parentId = Convert.ToInt32(currentItem.Field<TextItemField>(await GetID("VC Toolkit Template|Task List|Parent ID")).Value);
             Item parentItem = await itemService.GetItem(parentId);
             Item clone = new Item { ItemId = currentItem.ItemId };
 
             //TODO: Add in multi app functionality when deployed spaces dict is ready to go
             string PARENT_EMBED_FIELD="";
             int CHILD_EMBED_FIELD=0;
+            context.Logger.LogLine("Checking app name");
             switch(currentItem.App.Name)
             {
                 case "Task List":
+                    context.Logger.LogLine("App was Task List");
                     CHILD_EMBED_FIELD= await GetID("VC Toolkit Template|Task List|Linked Files");
                     PARENT_EMBED_FIELD = "link";
                     break;
 
                 case "Workshop Modules":
+                    context.Logger.LogLine("App was Workshop Modules");
                     CHILD_EMBED_FIELD = await GetID("VC Toolkit Template|Workshop Modules|Link to Material");
                     PARENT_EMBED_FIELD = "gdrive-file-name";
                     break;
                 case "Surveys":
+                    context.Logger.LogLine("App was Link to Survey");
                     CHILD_EMBED_FIELD = await GetID("VC Toolkit Template|Surveys|Link to Survey");
                     PARENT_EMBED_FIELD = "gdrive-survey";
                     break;
                     
             }
+            context.Logger.LogLine("Continuing after switch statement");
             EmbedItemField parentEmbedField = parentItem.Field<EmbedItemField>(PARENT_EMBED_FIELD);
             EmbedItemField cloneEmbedField = clone.Field<EmbedItemField>(CHILD_EMBED_FIELD);
             IEnumerable<Embed> parentEmbeds = parentEmbedField.Embeds;
-
+            context.Logger.LogLine($"{parentEmbeds.Count()} files on master item");
             List<Task> tasks = new List<Task>();
             foreach (Embed em in parentEmbedField.Embeds)
             {
@@ -133,6 +127,7 @@ namespace vilcapCopyFileToGoogleDrive
                     Task.Run(() => { UpdateOneEmbed(service, em, cloneEmbedField, cloneFolderId, podio, e); })
                 );
             }
+            context.Logger.LogLine($"Count of tasks: {tasks.Count()}");
             await Task.WhenAll(tasks);
         }
 
