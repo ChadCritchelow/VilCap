@@ -13,107 +13,154 @@ using PodioCore.Utils.ItemFields;
 using PodioCore.Items;
 using BrickBridge;
 using PodioCore.Models;
-using PodioCore.Comments;
-using System.Collections;
+using BrickBridge.Lambda.VilCap;
 using Task = System.Threading.Tasks.Task;
 using File = Google.Apis.Drive.v3.Data.File;
-using BrickBridge.Lambda.VilCap;
+using Permission = Google.Apis.Drive.v3.Data.Permission;
+
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
 
 
 namespace vilcapCopyFileToGoogleDrive
 {
-    public class CopyFileToGoogleDrive : saasafrasLambdaBaseFunction.Function
+    public class RoutedPodioEvent
     {
-        private int GetfieldId(string key)
-        {
-            var field = vilcapSpaces[key];
-            return int.Parse(field);
-        }
+        public PodioEvent podioEvent { get; set; }
+        public string clientId { get; set; }
+        public string version { get; set; }
+        public string solutionId { get; set; }
+        public string environmentId { get; set; }
+    };
 
-        private Dictionary<string, string> vilcapSpaces;
-        int fieldId;
+
+
+
+    public class CopyFileToGoogleDrive
+    {
 
         static string[] Scopes = { DriveService.Scope.DriveReadonly };
-        static string ApplicationName = "VilCap";
+        static string ApplicationName = "BrickBridgeVilCap";
         static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
-
-        public override async System.Threading.Tasks.Task InnerHandler(RoutedPodioEvent e, ILambdaContext context)
+        string cId;
+        string eId;
+        string sId;
+        string v;
+        string baseUrl;
+        string apiKey;
+        public async Task<int> GetID(string key)
         {
-            context.Logger.LogLine($"Podio proxy url: {Config.PODIO_PROXY_URL}, bbc service url: {Config.BBC_SERVICE_URL}, bbc service api key: {Config.BBC_SERVICE_API_KEY}");
-            System.Environment.SetEnvironmentVariable("PODIO_PROXY_URL", Config.PODIO_PROXY_URL);
-            System.Environment.SetEnvironmentVariable("BBC_SERVICE_URL", Config.BBC_SERVICE_URL);
-            System.Environment.SetEnvironmentVariable("BBC_SERVICE_API_KEY", Config.BBC_SERVICE_API_KEY);
+            BbcServiceClient bbc = new BbcServiceClient(baseUrl, apiKey);//TODO
+            var x = await bbc.GetKey(cId,eId,sId,v, key);
+            return int.Parse(x);
+        }
+        public async System.Threading.Tasks.Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
+        {
+            cId = e.clientId;
+            eId = e.environmentId;
+            sId = e.solutionId;
+            v = e.version;
+            baseUrl = System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL");
+            apiKey = System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY");
             Console.WriteLine("LETS GO");
             context.Logger.LogLine($"e.version={e.version}");
             context.Logger.LogLine($"e.clientId={e.clientId}");
             context.Logger.LogLine($"e.clientId={e.clientId}");
-            context.Logger.LogLine($"e.currentEnvironment.environmentId={e.currentEnvironment.environmentId}");
-            var factory = new AuditedPodioClientFactory(e.appId, e.version, e.clientId, e.currentEnvironment.environmentId);
-            var podio = factory.ForClient(e.clientId, e.currentEnvironment.environmentId);
+            context.Logger.LogLine($"e.currentEnvironment.environmentId={e.environmentId}");
+            context.Logger.LogLine($"{Newtonsoft.Json.JsonConvert.SerializeObject(e.podioEvent)}");
+            //started here
+            var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
+            var podio = factory.ForClient(e.clientId, e.environmentId);
+                       
+            //vilcapSpaces = e.currentEnvironment.deployments.First(a => a.appId == "vilcap").deployedSpaces;
 
-            vilcapSpaces = e.currentEnvironment.deployments.First(a => a.appId == "vilcap").deployedSpaces;
+            Item currentItem = await podio.GetItem(int.Parse(e.podioEvent.item_id));
 
-            fieldId = 0;
-
-            //These are stored in AWS Lambda
-            string client_id = System.Environment.GetEnvironmentVariable("GOOGLE_API_CLIENT_ID");
-            string client_secret = System.Environment.GetEnvironmentVariable("GOOGLE_API_CLIENT_SECRET");
-
-            UserCredential credential;
-            var secrets = new ClientSecrets
-            {
-                ClientId = client_id,
-                ClientSecret = client_secret
-            };
-            credential = GoogleWebAuthorizationBroker.AuthorizeAsync(secrets, Scopes, "toolkit@vilcap.com", System.Threading.CancellationToken.None, memoryStore).Result;
-
+            string serviceAcccount = System.Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
+            var cred = GoogleCredential.FromJson(serviceAcccount).CreateScoped(Scopes).UnderlyingCredential;
             // Create Drive API service.
             var service = new DriveService(new BaseClientService.Initializer()
             {
-                HttpClientInitializer = credential,
+                HttpClientInitializer = cred,
                 ApplicationName = ApplicationName,
             });
 
-            var cloneFolderId = e.currentItem.App.Name;
-
+            var cloneFolderId = currentItem.App.Name;
+            context.Logger.LogLine($"cloneFolderId={currentItem.App.Name}");
             ItemService itemService = new ItemService(podio);
-            fieldId = GetfieldId("VC Toolkit Template|Task List|Parent ID");//add in the field ID's key for "Parent ID"
-            var parentId = Convert.ToInt32(e.currentItem.Field<TextItemField>(fieldId).Value);
+            var parentId = Convert.ToInt32(currentItem.Field<TextItemField>(await GetID("VC Toolkit Template|Task List|Parent ID")).Value);
             Item parentItem = await itemService.GetItem(parentId);
-            Item clone = new Item { ItemId = e.currentItem.ItemId };
+            Item clone = new Item { ItemId = currentItem.ItemId };
 
             //TODO: Add in multi app functionality when deployed spaces dict is ready to go
-            var PARENT_EMBED_FIELD = "link";
-            var CHILD_EMBED_FIELD = "linked-files";
+            string PARENT_EMBED_FIELD="";
+            int CHILD_EMBED_FIELD=0;
+            context.Logger.LogLine("Checking app name");
+            switch(currentItem.App.Name)
+            {
+                case "Task List":
+                    context.Logger.LogLine("App was Task List");
+                    CHILD_EMBED_FIELD= await GetID("VC Toolkit Template|Task List|Linked Files");
+                    PARENT_EMBED_FIELD = "link";
+                    break;
+
+                case "Workshop Modules":
+                    context.Logger.LogLine("App was Workshop Modules");
+                    CHILD_EMBED_FIELD = await GetID("VC Toolkit Template|Workshop Modules|Link to Material");
+                    PARENT_EMBED_FIELD = "gdrive-file-name";
+                    break;
+                case "Surveys":
+                    context.Logger.LogLine("App was Link to Survey");
+                    CHILD_EMBED_FIELD = await GetID("VC Toolkit Template|Surveys|Link to Survey");
+                    PARENT_EMBED_FIELD = "gdrive-survey";
+                    break;
+                    
+            }
+            context.Logger.LogLine("Continuing after switch statement");
             EmbedItemField parentEmbedField = parentItem.Field<EmbedItemField>(PARENT_EMBED_FIELD);
             EmbedItemField cloneEmbedField = clone.Field<EmbedItemField>(CHILD_EMBED_FIELD);
             IEnumerable<Embed> parentEmbeds = parentEmbedField.Embeds;
-
-            List<Task> tasks = new List<Task>();
+            context.Logger.LogLine($"{parentEmbeds.Count()} files on master item");
             foreach (Embed em in parentEmbedField.Embeds)
             {
-                tasks.Add(
-                    Task.Run(() => { UpdateOneEmbed(service, em, cloneEmbedField, cloneFolderId, podio, e); })
-                );
+                context.Logger.LogLine($"Running method \"UpdateOneEmbed\" on {em.Title}");
+                UpdateOneEmbed(service, em, cloneEmbedField, cloneFolderId, podio, e);
             }
-            await Task.WhenAll(tasks);
+            context.Logger.LogLine("Updating item in Podio");
+            await podio.UpdateItem(clone, false);
         }
 
-        public static async Task IterateAsync(DriveService ds, IEnumerable<Embed> embedList, EmbedItemField embedHere, Podio podio, string subfolderId, RoutedPodioEvent e)
+        //public static async Task IterateAsync(DriveService ds, IEnumerable<Embed> embedList, EmbedItemField embedHere, Podio podio, string subfolderId, RoutedPodioEvent e)
+
+        private static string GetSubfolderId(DriveService ds, Podio podio, RoutedPodioEvent e, string parentFolder)
         {
-            foreach (Embed em in embedList)
+            FilesResource.ListRequest listReq = ds.Files.List();
+            listReq.Q = "name='" + e.environmentId + "'";
+            var folderId = listReq.Execute().Files[0].Id;
+
+            if (folderId == null)
             {
-                await Task.Run(() => { UpdateOneEmbed(ds, em, embedHere, subfolderId, podio, e); });
+                //await Task.Run(() => { UpdateOneEmbed(ds, em, embedHere, subfolderId, podio, e); });
+                File folder = new File
+                {
+                    Name = e.environmentId,
+                    MimeType = "application/vnd.google-apps.folder",
+                };
+                folder.Parents.Add(parentFolder);
+                folderId = ds.Files.Create(folder).Execute().Id;
             }
+            return folderId;
         }
 
         public static void UpdateOneEmbed(DriveService ds, Embed embed, EmbedItemField embedHere, string subfolderId, Podio podio, RoutedPodioEvent e)
         {
-            File original = GetFile(ds, embed.title);
+            Console.WriteLine($"Embed description: {embed.Description}");
+            Console.WriteLine($"Embed Provider name: {embed.ProviderName}");
+            Console.WriteLine($"Count of files on embed: {embed.Files.Count}");
+            File original = GetFileByTitle(ds, embed.Title);
             original.Parents.Clear();
             original.Parents.Add(subfolderId);
+            original.Name = "###" + original.Name;
             File clone = ds.Files.Copy(original, original.Id).Execute();
 
             Task.Run(() =>
@@ -131,6 +178,7 @@ namespace vilcapCopyFileToGoogleDrive
                 Embed newEmbed = new Embed { OriginalUrl = clone.WebViewLink };
                 embedHere.AddEmbed(newEmbed.EmbedId);
             });
+            
         }
 
         public static File GetFile(DriveService ds, string title)
