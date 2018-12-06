@@ -164,8 +164,10 @@ namespace vilcapCopyFileToGoogleDrive
                     MimeType = "application/vnd.google-apps.folder",
                 };
                 folder.Parents.Add(parentFolder);
-                var request=ds.Files.Create(folder).Execute();
-                folderId = request.Id;
+                var request=ds.Files.Create(folder);
+                request.Fields = "id";
+
+                folderId = request.Execute().Id;
             }
             return folderId;
         }
