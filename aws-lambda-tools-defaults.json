@@ -13,7 +13,7 @@
   "configuration": "Release",
   "framework": "netcoreapp2.1",
   "function-runtime": "dotnetcore2.1",
-  "function-memory-size": 256,
-  "function-timeout": 30,
+  "function-memory-size": 512,
+  "function-timeout": 65,
   "function-handler": "vilcapCopyFileToGoogleDrive::vilcapCopyFileToGoogleDrive.CopyFileToGoogleDrive::FunctionHandler"
 }

@@ -17,6 +17,7 @@ using BrickBridge.Lambda.VilCap;
 using Task = System.Threading.Tasks.Task;
 using File = Google.Apis.Drive.v3.Data.File;
 using Permission = Google.Apis.Drive.v3.Data.Permission;
+using PodioCore.Services;
 
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
@@ -85,7 +86,7 @@ namespace vilcapCopyFileToGoogleDrive
                 ApplicationName = ApplicationName,
             });
 
-            var cloneFolderId = currentItem.App.Name;
+            
             context.Logger.LogLine($"cloneFolderId={currentItem.App.Name}");
             ItemService itemService = new ItemService(podio);
             var parentId = Convert.ToInt32(currentItem.Field<TextItemField>(await GetID("VC Toolkit Template|Task List|Parent ID")).Value);
@@ -116,17 +117,28 @@ namespace vilcapCopyFileToGoogleDrive
                     break;
                     
             }
+
             context.Logger.LogLine("Continuing after switch statement");
             EmbedItemField parentEmbedField = parentItem.Field<EmbedItemField>(PARENT_EMBED_FIELD);
-            EmbedItemField cloneEmbedField = clone.Field<EmbedItemField>(CHILD_EMBED_FIELD);
+            
             IEnumerable<Embed> parentEmbeds = parentEmbedField.Embeds;
+            List<Embed> embeds= new List<Embed>();
             context.Logger.LogLine($"{parentEmbeds.Count()} files on master item");
+            var cloneFolderId = GetSubfolderId(service, podio, e, "1m0sPA-z8NXmkinz1xvdbZB7CxvGj9ozk");//TODO:
             foreach (Embed em in parentEmbedField.Embeds)
             {
                 context.Logger.LogLine($"Running method \"UpdateOneEmbed\" on {em.Title}");
-                UpdateOneEmbed(service, em, cloneEmbedField, cloneFolderId, podio, e);
+                UpdateOneEmbed(service, em, embeds, cloneFolderId, podio, e);
             }
             context.Logger.LogLine("Updating item in Podio");
+            //context.Logger.LogLine($"Embed Field Count for item we're updating {cloneEmbedField.Embeds.Count()}");
+            EmbedItemField cloneEmbedField = clone.Field<EmbedItemField>(CHILD_EMBED_FIELD);
+            context.Logger.LogLine($"Embed Count in list: {embeds.Count}");
+            foreach (var embed in embeds)
+            {
+                context.Logger.LogLine($"Embed ID: {embed.EmbedId}");
+                cloneEmbedField.AddEmbed(embed.EmbedId);
+            }
             await podio.UpdateItem(clone, false);
         }
 
@@ -134,6 +146,7 @@ namespace vilcapCopyFileToGoogleDrive
 
         private static string GetSubfolderId(DriveService ds, Podio podio, RoutedPodioEvent e, string parentFolder)
         {
+            Console.WriteLine($"EnvID: {e.environmentId}");
             FilesResource.ListRequest listReq = ds.Files.List();
             listReq.Q = "name='" + e.environmentId + "'";
             string folderId="";
@@ -151,24 +164,22 @@ namespace vilcapCopyFileToGoogleDrive
                     MimeType = "application/vnd.google-apps.folder",
                 };
                 folder.Parents.Add(parentFolder);
-                folderId = ds.Files.Create(folder).Execute().Id;
+                var request=ds.Files.Create(folder).Execute();
+                folderId = request.Id;
             }
             return folderId;
         }
 
-        public static void UpdateOneEmbed(DriveService ds, Embed embed, EmbedItemField embedHere, string subfolderId, Podio podio, RoutedPodioEvent e)
+        public static void UpdateOneEmbed(DriveService ds, Embed embed, List<Embed> embeds, string subfolderId, Podio podio, RoutedPodioEvent e)
         {
-            Console.WriteLine($"Embed description: {embed.Description}");
-            Console.WriteLine($"Embed Provider name: {embed.ProviderName}");
-            Console.WriteLine($"Count of files on embed: {embed.Files.Count}");
 
        //     File original = GetFile(ds, embed.Title);          
             var id = GetDriveId(embed.OriginalUrl);
-            id = id.Remove(id.Length - 5, 5);
-            File original = GetFile(ds, id);
+            Console.WriteLine($"ID that we pull from the URL: {id}");
+            File original=GetFileByTitle(ds,id);
             if (original.Parents == null)
                 original.Parents = new List<string>();
-
+            Console.WriteLine($"ID from the file itself: {original.Id}, Name: {original.Name}");
             original.Parents.Clear();
             original.Parents.Add(subfolderId);
             original.Name = "###" + original.Name;
@@ -187,15 +198,25 @@ namespace vilcapCopyFileToGoogleDrive
 
             Task.Run(() =>
             {
-                Embed newEmbed = new Embed { OriginalUrl = clone.WebViewLink };
-                embedHere.AddEmbed(newEmbed.EmbedId);
+                PodioCore.Services.EmbedService embedServ = new EmbedService(podio);
+                Console.WriteLine("Adding embed thru service");
+                
+                Console.WriteLine($"CloneID: {clone.Id}");
+                var req=ds.Files.Get(clone.Id);
+                req.Fields = "webViewLink";
+                clone=req.Execute();
+                Embed em= embedServ.AddAnEmbed(clone.WebViewLink).Result;
+                Console.WriteLine($"Embed Link: {em.OriginalUrl}");
+                Console.WriteLine("Embed added");
+                Console.WriteLine($"WebViewLink: {clone.WebViewLink}");
+                embeds.Add(em);
             });
             
         }
         public static string GetDriveId(string url)
         {
-            string[] substr = url.split(new char[] { '=', '/' });
-            foreach (string s in substr) if (s.length == 44) return s;
+            string[] substr = url.Split(new char[] { '=', '/' });
+            foreach (string s in substr) if (s.Length == 44) return s;
             return null;
         }
 
@@ -209,7 +230,6 @@ namespace vilcapCopyFileToGoogleDrive
 
         public static File GetFileByTitle(DriveService ds, string id)
         {
-            FilesResource.ListRequest listReq = ds.Files.List();
             var request = ds.Files.Get(id);
             request.Fields = "parents";
             var file = request.Execute();
