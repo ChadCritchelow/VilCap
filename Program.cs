@@ -39,7 +39,7 @@ namespace vilcapCopyFileToGoogleDrive
     public class CopyFileToGoogleDrive
     {
 
-        static string[] Scopes = { DriveService.Scope.DriveReadonly };
+        static string[] Scopes = { DriveService.Scope.Drive };
         static string ApplicationName = "BrickBridgeVilCap";
         static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
         string cId;
@@ -136,9 +136,13 @@ namespace vilcapCopyFileToGoogleDrive
         {
             FilesResource.ListRequest listReq = ds.Files.List();
             listReq.Q = "name='" + e.environmentId + "'";
-            var folderId = listReq.Execute().Files[0].Id;
+            string folderId="";
 
-            if (folderId == null)
+            if (listReq.Execute().Files.Any())
+            {
+                 folderId = listReq.Execute().Files[0].Id;
+            }
+            else if (folderId == "")
             {
                 //await Task.Run(() => { UpdateOneEmbed(ds, em, embedHere, subfolderId, podio, e); });
                 File folder = new File
@@ -157,11 +161,19 @@ namespace vilcapCopyFileToGoogleDrive
             Console.WriteLine($"Embed description: {embed.Description}");
             Console.WriteLine($"Embed Provider name: {embed.ProviderName}");
             Console.WriteLine($"Count of files on embed: {embed.Files.Count}");
-            File original = GetFile(ds, embed.Title);
+
+       //     File original = GetFile(ds, embed.Title);          
+            var id = GetDriveId(embed.OriginalUrl);
+            id = id.Remove(id.Length - 5, 5);
+            File original = GetFile(ds, id);
+            if (original.Parents == null)
+                original.Parents = new List<string>();
+
             original.Parents.Clear();
             original.Parents.Add(subfolderId);
             original.Name = "###" + original.Name;
-            File clone = ds.Files.Copy(original, original.Id).Execute();
+
+            File clone = ds.Files.Copy(original, id).Execute();
 
             Task.Run(() =>
             {
@@ -180,13 +192,28 @@ namespace vilcapCopyFileToGoogleDrive
             });
             
         }
+        public static string GetDriveId(string url)
+        {
+            string[] substr = url.split(new char[] { '=', '/' });
+            foreach (string s in substr) if (s.length == 44) return s;
+            return null;
+        }
 
-        public static File GetFile(DriveService ds, string title)
+        //public static File GetFile(DriveService ds, string title)
+        //{
+        //    FilesResource.ListRequest listReq = ds.Files.List();
+        //    listReq.Q = "name='" + title + "'"; // Todo: format 
+        //    listReq.orderBy = "createdTime";
+        //    return ds.Files.Get(listReq.Execute().Files[0].Id).Execute();
+        //}
+
+        public static File GetFileByTitle(DriveService ds, string id)
         {
             FilesResource.ListRequest listReq = ds.Files.List();
-            listReq.Q = "name='" + title + "'"; // Todo: format 
-            listReq.orderBy = "createdTime";        
-            return ds.Files.Get(listReq.Execute().Files[0].Id).Execute();
+            var request = ds.Files.Get(id);
+            request.Fields = "parents";
+            var file = request.Execute();
+            return file;
         }
 
     }
