@@ -39,7 +39,7 @@ namespace vilcapCopyFileToGoogleDrive
     public class CopyFileToGoogleDrive
     {
 
-        static string[] Scopes = { DriveService.Scope.DriveReadonly };
+        static string[] Scopes = { DriveService.Scope.Drive };
         static string ApplicationName = "BrickBridgeVilCap";
         static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
         string cId;
@@ -134,9 +134,13 @@ namespace vilcapCopyFileToGoogleDrive
         {
             FilesResource.ListRequest listReq = ds.Files.List();
             listReq.Q = "name='" + e.environmentId + "'";
-            var folderId = listReq.Execute().Files[0].Id;
+            string folderId="";
 
-            if (folderId == null)
+            if (listReq.Execute().Files.Any())
+            {
+                 folderId = listReq.Execute().Files[0].Id;
+            }
+            else if (folderId == "")
             {
                 File folder = new File
                 {
@@ -154,11 +158,16 @@ namespace vilcapCopyFileToGoogleDrive
             Console.WriteLine($"Embed description: {embed.Description}");
             Console.WriteLine($"Embed Provider name: {embed.ProviderName}");
             Console.WriteLine($"Count of files on embed: {embed.Files.Count}");
-            File original = GetFileByTitle(ds, embed.Title);
+            var id = embed.OriginalUrl.Remove(0, 35);//@"https://docs.google.com/document/d/";
+            id = id.Remove(id.Length - 5, 5);
+            File original = GetFileByTitle(ds, id);
+            if (original.Parents == null)
+                original.Parents = new List<string>();
             original.Parents.Clear();
             original.Parents.Add(subfolderId);
             original.Name = "###" + original.Name;
-            File clone = ds.Files.Copy(original, original.Id).Execute();
+
+            File clone = ds.Files.Copy(original, id).Execute();
 
             Task.Run(() =>
             {
@@ -178,12 +187,13 @@ namespace vilcapCopyFileToGoogleDrive
             
         }
 
-        public static File GetFileByTitle(DriveService ds, string title)
+        public static File GetFileByTitle(DriveService ds, string id)
         {
             FilesResource.ListRequest listReq = ds.Files.List();
-            listReq.Q = "name='" + title + "'";
-            listReq.OrderBy = "createdTime";
-            return ds.Files.Get(listReq.Execute().Files[0].Id).Execute();
+            var request = ds.Files.Get(id);
+            request.Fields = "parents";
+            var file = request.Execute();
+            return file;
         }
 
     }
