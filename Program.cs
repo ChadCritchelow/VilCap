@@ -184,7 +184,7 @@ namespace vilcapCopyFileToGoogleDrive
             Console.WriteLine($"ID from the file itself: {original.Id}, Name: {original.Name}");
             original.Parents.Clear();
             original.Parents.Add(subfolderId);
-            original.Name = "###" + original.Name;
+            original.Name = e.environmentId + " " + original.Name;
 
             File clone = ds.Files.Copy(original, id).Execute();
 
@@ -233,7 +233,7 @@ namespace vilcapCopyFileToGoogleDrive
         public static File GetFileByTitle(DriveService ds, string id)
         {
             var request = ds.Files.Get(id);
-            request.Fields = "parents";
+            request.Fields = "parents, name";
             var file = request.Execute();
             return file;
         }
