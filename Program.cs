@@ -49,7 +49,8 @@ namespace vilcapCopyFileToGoogleDrive
 
         public async System.Threading.Tasks.Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
         {
-            try {
+            try
+            {
                 cId = e.clientId;
                 eId = e.environmentId;
                 sId = e.solutionId;
@@ -295,6 +296,7 @@ namespace vilcapCopyFileToGoogleDrive
                 foreach (Embed em in parentEmbedField.Embeds)
                 {
                     context.Logger.LogLine($"{currentItem.ItemId} - Original embed url: {em.OriginalUrl}");
+                    context.Logger.LogLine($"{currentItem.ItemId} - Resolved embed url: {em.ResolvedUrl}");
                     if (em.OriginalUrl.Contains(".google."))
                     {
                         context.Logger.LogLine($"{currentItem.ItemId} - Running method \"UpdateOneEmbed\" on {em.OriginalUrl}");
@@ -357,6 +359,8 @@ namespace vilcapCopyFileToGoogleDrive
         {
             try
             {
+                Console.WriteLine($"{e.podioEvent.item_id} - Old Embed Link (resolved): {embed.ResolvedUrl}");
+                Console.WriteLine($"{e.podioEvent.item_id} - Old Embed Link (original): {embed.OriginalUrl}");
                 var id = GetDriveId(embed.OriginalUrl, e);
                 Console.WriteLine($"{e.podioEvent.item_id} - ID that we pull from the URL: {id}");
                 File original = GetFileByTitle(ds, id,e);
@@ -389,8 +393,9 @@ namespace vilcapCopyFileToGoogleDrive
                     req.Fields = "webViewLink";
                     clone = req.Execute();
                     Embed em = embedServ.AddAnEmbed(clone.WebViewLink).Result;
-                    Console.WriteLine($"{e.podioEvent.item_id} - Embed Link: {em.OriginalUrl}");
-                    Console.WriteLine($"{e.podioEvent.item_id} - Embed added");
+                    Console.WriteLine($"{e.podioEvent.item_id} - New Embed Link (resolved): {em.ResolvedUrl}");
+                    Console.WriteLine($"{e.podioEvent.item_id} - New Embed Link (original): {em.OriginalUrl}");
+                    Console.WriteLine($"{e.podioEvent.item_id} - New Embed added");
                     Console.WriteLine($"{e.podioEvent.item_id} - WebViewLink: {clone.WebViewLink}");
                     embeds.Add(em);
                 });
