@@ -245,24 +245,7 @@ namespace vilcapCopyFileToGoogleDrive
 
                 ItemService itemService = new ItemService(podio);
                 var parentId = 0;
-                //search for correct parent item based on title????
-                if (currentItem.App.Name == "Task List")
-                {
-                    parentId = Convert.ToInt32(currentItem.Field<TextItemField>(fieldIds["Task List Parent ID"]).Value);
-                }
-                else if (currentItem.App.Name == "Workshop Modules")
-                {
-                    parentId = Convert.ToInt32(currentItem.Field<TextItemField>(fieldIds["Workshop Modules Parent ID"]).Value);
-                }
-                else
-                {
-                    parentId = Convert.ToInt32(currentItem.Field<TextItemField>(fieldIds["Survey Parent ID"]).Value);
-                }
 
-                Item parentItem = await itemService.GetItem(parentId);
-                Item clone = new Item { ItemId = currentItem.ItemId };
-
-                //TODO: Add in multi app functionality when deployed spaces dict is ready to go
                 string PARENT_EMBED_FIELD = "";
                 int CHILD_EMBED_FIELD = 0;
                 context.Logger.LogLine($"{currentItem.ItemId} - Checking app name");
@@ -271,18 +254,23 @@ namespace vilcapCopyFileToGoogleDrive
                     case "Task List":
                         CHILD_EMBED_FIELD = fieldIds["Task List Embed"];
                         PARENT_EMBED_FIELD = "link";
-                        break;
+						parentId = Convert.ToInt32(currentItem.Field<TextItemField>(fieldIds["Task List Parent ID"]).Value);
+						break;
 
                     case "Workshop Modules":
                         CHILD_EMBED_FIELD = fieldIds["Workshop Modules Embed"];
                         PARENT_EMBED_FIELD = "gdrive-file-name";
-                        break;
+						parentId = Convert.ToInt32(currentItem.Field<TextItemField>(fieldIds["Workshop Modules Parent ID"]).Value);
+						break;
                     case "Surveys":
                         CHILD_EMBED_FIELD = fieldIds["Survey Embed"];
                         PARENT_EMBED_FIELD = "gdrive-survey";
-                        break;
+						parentId = Convert.ToInt32(currentItem.Field<TextItemField>(fieldIds["Survey Parent ID"]).Value);
+						break;
                 }
-                context.Logger.LogLine($"{currentItem.ItemId} - App name was: {currentItem.App.Name}");
+				Item parentItem = await itemService.GetItem(parentId);
+				Item clone = new Item { ItemId = currentItem.ItemId };
+				context.Logger.LogLine($"{currentItem.ItemId} - App name was: {currentItem.App.Name}");
 
 
                 EmbedItemField parentEmbedField = parentItem.Field<EmbedItemField>(PARENT_EMBED_FIELD);
@@ -315,7 +303,7 @@ namespace vilcapCopyFileToGoogleDrive
             }
             catch(Exception ex)
             {
-                Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace}");
+                Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
                 throw ex;
             }
         }
@@ -350,7 +338,7 @@ namespace vilcapCopyFileToGoogleDrive
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace}");
+                Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
                 throw ex;
             }
         }
@@ -402,7 +390,7 @@ namespace vilcapCopyFileToGoogleDrive
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace}");
+                Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
                 throw ex;
             }
         }
@@ -411,10 +399,10 @@ namespace vilcapCopyFileToGoogleDrive
             try
             {
                 Console.WriteLine($"{e.podioEvent.item_id} - Attempting to get the ID from URL: {url}");
-                string[] substr = url.Split(new char[] { '=', '/' });
+                string[] substr = url.Split(new char[] { '=', '/','?' });
                 foreach (string s in substr)
                 {
-                    if (s.Length == 44)
+                    if (s.Length == 44||s.Length==33)
                     {
                         Console.WriteLine($"{e.podioEvent.item_id} - Found ID: {s} from url: {url}");
                         return s;
@@ -425,7 +413,7 @@ namespace vilcapCopyFileToGoogleDrive
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace}");
+                Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
                 throw ex;
             }
         }
@@ -441,7 +429,7 @@ namespace vilcapCopyFileToGoogleDrive
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace}");
+                Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
                 throw ex;
             }
         }
