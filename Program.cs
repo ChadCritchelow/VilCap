@@ -18,7 +18,8 @@ using Task = System.Threading.Tasks.Task;
 using File = Google.Apis.Drive.v3.Data.File;
 using Permission = Google.Apis.Drive.v3.Data.Permission;
 using PodioCore.Services;
-
+using PodioCore.Models.Request;
+using System.Text.RegularExpressions;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
 
@@ -46,7 +47,145 @@ namespace vilcapCopyFileToGoogleDrive
         string v;
         string baseUrl;
         string apiKey;
+		int fieldId = 0;
+		Dictionary<string, string> dict;
+		Dictionary<string, string> fullNames;
+		RoutedPodioEvent ev;
+		public int GetFieldId(string key)
+		{
+			if (key.Split('|').Count() == 2)
+			{
+				return Convert.ToInt32(dict[$"{fullNames[ev.environmentId]}|{key}"]);
+			}
+			else return Convert.ToInt32(dict[key]);
+		}
+		public static string StripHTML(string input)
+		{
+			return Regex.Replace(input, "<.*?>", String.Empty);
+		}
+		public async Task Attempt1(RoutedPodioEvent e, ILambdaContext context)
+		{
+			ev = e;
+			var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
+			var podio = factory.ForClient(e.clientId, e.environmentId);
 
+			Item check = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
+			BbcServiceClient bbc = new BbcServiceClient(System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
+			dict = await bbc.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
+			fullNames = new Dictionary<string, string>()
+			{
+				{"andela" ,"Andela"},
+				{"anza" ,"Anza"},
+				{"bluemoon" ,"blueMoon"},
+				{"energygeneration" ,"Energy Generation"},
+				{"entreprenarium" ,"Entreprenarium"},
+				{"etrilabs" ,"Etrilabs"},
+				{"globalentrepreneurshipnetwork" ,"Global Entrepreneurship Network (GEN) Freetown"},
+				{"growthmosaic" ,"Growth Mosaic"},
+				{"jokkolabs" ,"Jokkolabs"},
+				{"privatesectorhealthallianceofnigeria" ,"Private Sector Health Alliance of Nigeria"},
+				{"southernafricaventurepartnership" ,"Southern Africa Venture Partnership (SAVP)"},
+				{"suguba" ,"Suguba"},
+				{"sycomoreventure" ,"Sycomore Venture"},
+				{"theinnovationvillage" ,"The Innovation Village"},
+				{"universityofbritishcolumbia" ,"University of British Columbia"},
+				{"venturesplatform" ,"Ventures Platform"},
+				{"toolkittemplate" ,"VC Toolkit Template"}
+
+			};
+
+					//TODO: Address date calc
+		    switch (check.App.Name)
+			{
+				case "Admin":
+					fieldId = GetFieldId("Admin|Task List Status");
+					if (check.Field<CategoryItemField>(fieldId).Options.Any() && check.Field<CategoryItemField>(fieldId).Options.First().Text == "New")
+					{
+						var revision = await podio.GetRevisionDifference(Convert.ToInt32(check.ItemId), check.CurrentRevision.Revision - 1, check.CurrentRevision.Revision);
+						var firstRevision = revision.First();
+						if (firstRevision.FieldId == fieldId)
+						{
+							ViewService viewServ = new ViewService(podio);
+							var view = await viewServ.GetView(21310276, "Package");
+							FilterOptions op = new FilterOptions();
+							op.Filters = view.Filters;
+							op.Limit = 500;
+							var filter = await podio.FilterItems(21310276, op);
+
+							foreach (var masterItem in filter.Items)
+							{
+								Item child = new Item();
+								//assign fields								
+								fieldId = GetFieldId("VC Administration|Master Schedule|Task Name");
+								var nameMaster = masterItem.Field<TextItemField>(fieldId);								
+								if (nameMaster.Value !=null)
+								{
+									fieldId = GetFieldId("Task List|Title");
+									var nameChild = child.Field<TextItemField>(fieldId);
+									nameChild.Value = nameMaster.Value;
+								}
+
+								fieldId = GetFieldId("VC Administration|Master Schedule|Description");
+								var descrMaster = masterItem.Field<TextItemField>(fieldId);
+								if (descrMaster.Value != null)
+								{
+									fieldId = GetFieldId("Task List|Description");
+									var descrChild = child.Field<TextItemField>(fieldId);
+									descrChild.Value =StripHTML(descrMaster.Value);
+								}
+
+								fieldId = GetFieldId("VC Administration|Master Schedule|Phase");
+								var phaseMaster = masterItem.Field<CategoryItemField>(fieldId);
+								if(phaseMaster.Options.Any())
+								{
+									fieldId = GetFieldId("Task List|Phase");
+									var phaseChild = child.Field<CategoryItemField>(fieldId);
+									phaseChild.OptionText = phaseMaster.Options.First().Text;
+								}
+
+								fieldId = GetFieldId("VC Administration|Master Schedule|ESO Member Role");
+								var esoMaster = masterItem.Field<CategoryItemField>(fieldId);
+								if(esoMaster.Options.Any())
+								{
+									fieldId = GetFieldId("Task List| ESO Member Role");
+									var esoChild = child.Field<CategoryItemField>(fieldId);
+									esoChild.OptionText = esoMaster.Options.First().Text;
+								}
+
+
+							}
+						}
+					}
+					break;
+
+				case "Create Workshop":
+					
+						break;
+			}
+
+			
+			//get all master schedule items
+			//runs 1 time
+			
+			foreach(var item in fil.Items)
+			{
+				Item i = new Item();
+				//assign fields
+				foreach(var embed in item.Field<EmbedItemField>(0).Embeds)
+				{
+					//copy embed, add to new item
+					EmbedService embedServ = new EmbedService(podio);
+					//runs approx 130 times
+					Embed em = embedServ.AddAnEmbed("").Result;
+					i.Field<EmbedItemField>(0).AddEmbed(embed.EmbedId);
+
+				}
+				//runs 208x
+				await podio.CreateItem(i, 0, false);
+				//aprox 339 podio calls for task list
+				//754 calls 
+			}
+		}
         public async System.Threading.Tasks.Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
         {
             try
@@ -67,6 +206,7 @@ namespace vilcapCopyFileToGoogleDrive
                 var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
                 var podio = factory.ForClient(e.clientId, e.environmentId);
 
+				//runs 208 times
                 Item currentItem = await podio.GetItem(int.Parse(e.podioEvent.item_id));
 
                 string serviceAcccount = System.Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
@@ -243,7 +383,6 @@ namespace vilcapCopyFileToGoogleDrive
 
                 context.Logger.LogLine($"{currentItem.ItemId} - cloneFolderId={currentItem.App.Name}");
 
-                ItemService itemService = new ItemService(podio);
                 var parentId = 0;
 
                 string PARENT_EMBED_FIELD = "";
@@ -268,7 +407,8 @@ namespace vilcapCopyFileToGoogleDrive
 						parentId = Convert.ToInt32(currentItem.Field<TextItemField>(fieldIds["Survey Parent ID"]).Value);
 						break;
                 }
-				Item parentItem = await itemService.GetItem(parentId);
+				//runs 208 times
+				Item parentItem = await podio.GetItem(parentId);
 				Item clone = new Item { ItemId = currentItem.ItemId };
 				context.Logger.LogLine($"{currentItem.ItemId} - App name was: {currentItem.App.Name}");
 
@@ -299,6 +439,7 @@ namespace vilcapCopyFileToGoogleDrive
                     context.Logger.LogLine($"{currentItem.ItemId} - Embed ID: {embed.EmbedId}");
                     cloneEmbedField.AddEmbed(embed.EmbedId);
                 }
+				//runs 208 times
                 await podio.UpdateItem(clone, false);
             }
             catch(Exception ex)
@@ -380,6 +521,7 @@ namespace vilcapCopyFileToGoogleDrive
                     var req = ds.Files.Get(clone.Id);
                     req.Fields = "webViewLink";
                     clone = req.Execute();
+					//runs 130x approx
                     Embed em = embedServ.AddAnEmbed(clone.WebViewLink).Result;
                     Console.WriteLine($"{e.podioEvent.item_id} - New Embed Link (resolved): {em.ResolvedUrl}");
                     Console.WriteLine($"{e.podioEvent.item_id} - New Embed Link (original): {em.OriginalUrl}");
