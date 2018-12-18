@@ -20,6 +20,7 @@ using Permission = Google.Apis.Drive.v3.Data.Permission;
 using PodioCore.Services;
 using PodioCore.Models.Request;
 using System.Text.RegularExpressions;
+using System.Collections;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
 
@@ -53,11 +54,14 @@ namespace vilcapCopyFileToGoogleDrive
 		RoutedPodioEvent ev;
 		public int GetFieldId(string key)
 		{
-			if (key.Split('|').Count() == 2)
+			var parts = key.Split('|');
+			if (parts.Count() < 3)
 			{
 				return Convert.ToInt32(dict[$"{fullNames[ev.environmentId]}|{key}"]);
 			}
-			else return Convert.ToInt32(dict[key]);
+			else 
+				return Convert.ToInt32(dict[key]);
+
 		}
 		public static string StripHTML(string input)
 		{
@@ -71,7 +75,9 @@ namespace vilcapCopyFileToGoogleDrive
 
 			Item check = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
 			BbcServiceClient bbc = new BbcServiceClient(System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
+			Solution s = new Solution();
 			dict = await bbc.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
+			
 			fullNames = new Dictionary<string, string>()
 			{
 				{"andela" ,"Andela"},
@@ -98,27 +104,35 @@ namespace vilcapCopyFileToGoogleDrive
 		    switch (check.App.Name)
 			{
 				case "Admin":
-					fieldId = GetFieldId("Admin|Task List Status");
-					if (check.Field<CategoryItemField>(fieldId).Options.Any() && check.Field<CategoryItemField>(fieldId).Options.First().Text == "New")
+					var TlStatusId = GetFieldId("Admin|Task List Status");
+					var startDateId = GetFieldId("Admin|Program Start Date");
+					if (check.Field<CategoryItemField>(TlStatusId).Options.Any() && check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "New")
 					{
 						var revision = await podio.GetRevisionDifference(Convert.ToInt32(check.ItemId), check.CurrentRevision.Revision - 1, check.CurrentRevision.Revision);
 						var firstRevision = revision.First();
-						if (firstRevision.FieldId == fieldId)
+						if (firstRevision.FieldId == TlStatusId)
 						{
 							ViewService viewServ = new ViewService(podio);
-							var view = await viewServ.GetView(21310276, "Package");
+							var view = await viewServ.GetView(21310276, "Package");//VC Admin Master Schedule App ID
 							FilterOptions op = new FilterOptions();
 							op.Filters = view.Filters;
 							op.Limit = 500;
 							var filter = await podio.FilterItems(21310276, op);
-
+							string serviceAcccount = System.Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
+							var cred = GoogleCredential.FromJson(serviceAcccount).CreateScoped(Scopes).UnderlyingCredential;
+							// Create Drive API service.
+							var service = new DriveService(new BaseClientService.Initializer()
+							{
+								HttpClientInitializer = cred,
+								ApplicationName = ApplicationName,
+							});
 							foreach (var masterItem in filter.Items)
 							{
 								Item child = new Item();
 								//assign fields								
 								fieldId = GetFieldId("VC Administration|Master Schedule|Task Name");
-								var nameMaster = masterItem.Field<TextItemField>(fieldId);								
-								if (nameMaster.Value !=null)
+								var nameMaster = masterItem.Field<TextItemField>(fieldId);
+								if (nameMaster.Value != null)
 								{
 									fieldId = GetFieldId("Task List|Title");
 									var nameChild = child.Field<TextItemField>(fieldId);
@@ -131,12 +145,12 @@ namespace vilcapCopyFileToGoogleDrive
 								{
 									fieldId = GetFieldId("Task List|Description");
 									var descrChild = child.Field<TextItemField>(fieldId);
-									descrChild.Value =StripHTML(descrMaster.Value);
+									descrChild.Value = StripHTML(descrMaster.Value);
 								}
 
 								fieldId = GetFieldId("VC Administration|Master Schedule|Phase");
 								var phaseMaster = masterItem.Field<CategoryItemField>(fieldId);
-								if(phaseMaster.Options.Any())
+								if (phaseMaster.Options.Any())
 								{
 									fieldId = GetFieldId("Task List|Phase");
 									var phaseChild = child.Field<CategoryItemField>(fieldId);
@@ -145,12 +159,177 @@ namespace vilcapCopyFileToGoogleDrive
 
 								fieldId = GetFieldId("VC Administration|Master Schedule|ESO Member Role");
 								var esoMaster = masterItem.Field<CategoryItemField>(fieldId);
-								if(esoMaster.Options.Any())
+								if (esoMaster.Options.Any())
 								{
-									fieldId = GetFieldId("Task List| ESO Member Role");
+									fieldId = GetFieldId("Task List|ESO Member Role");
 									var esoChild = child.Field<CategoryItemField>(fieldId);
 									esoChild.OptionText = esoMaster.Options.First().Text;
 								}
+
+								fieldId = GetFieldId("VC Administration|Master Schedule|Project");
+								var projectMaster = masterItem.Field<CategoryItemField>(fieldId);
+								if (projectMaster.Options.Any())
+								{
+									fieldId = GetFieldId("Task List|Project");
+									var projectChild = child.Field<CategoryItemField>(fieldId);
+									projectChild.OptionText = projectMaster.Options.First().Text;
+								}
+
+								fieldId = GetFieldId("VC Administration|Master Schedule|Base Workshop Association");
+								var wsMaster = masterItem.Field<TextItemField>(fieldId);
+								if (wsMaster.Value != null)
+								{
+									fieldId = GetFieldId("Task List|WS Association");
+									var wsChild = child.Field<TextItemField>(fieldId);
+									wsChild.Value = wsMaster.Value;
+									fieldId = GetFieldId("Task List|Parent WS");
+									var parentChild = child.Field<CategoryItemField>(fieldId);
+									parentChild.OptionText = wsMaster.Value;
+								}
+
+								fieldId = GetFieldId("VC Administration|Master Schedule|Weeks Off-Set");
+								var offsetMaster = masterItem.Field<NumericItemField>(fieldId);
+								if (offsetMaster.Value.HasValue)
+								{
+									fieldId = GetFieldId("Task List|Week Offset");
+									var offsetChild = child.Field<NumericItemField>(fieldId);
+									offsetChild.Value = offsetMaster.Value;
+									fieldId = GetFieldId("Task List|Weeks Before WS");
+									var weeksChild = child.Field<NumericItemField>(fieldId);
+									weeksChild.Value = offsetMaster.Value;
+								}
+
+								fieldId = GetFieldId("Task List|Completion");
+								var comChild = child.Field<CategoryItemField>(fieldId);
+								comChild.OptionText = "Incomplete";
+
+								//TODO: Add 2 date field calcs
+
+								fieldId = GetFieldId("VC Administration|Master Schedule|Duration (Days)");
+								var durMaster = masterItem.Field<NumericItemField>(fieldId);
+								if (durMaster.Value.HasValue)
+								{
+									fieldId = GetFieldId("Task List|Duration (Days)");
+									var durChild = child.Field<NumericItemField>(fieldId);
+									durChild.Value = durMaster.Value;
+								}
+
+								fieldId = GetFieldId("VC Administration|Master Schedule|Dependancy");
+								var depMaster = masterItem.Field<TextItemField>(fieldId);
+								if (depMaster.Value != null)
+								{
+									fieldId = GetFieldId("Task List|Additional Dependencies");
+									var depChild = child.Field<TextItemField>(fieldId);
+									depChild.Value = depMaster.Value;
+								}
+
+								fieldId = GetFieldId("VC Administration|Master Schedule|Gdrive Link");
+								var embedMaster = masterItem.Field<EmbedItemField>(fieldId);
+								fieldId = GetFieldId("Task List|Linked Files");
+								var embedChild = child.Field<EmbedItemField>(fieldId);
+								List<Embed> embeds = new List<Embed>();
+								string parentFolderId = System.Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
+								var cloneFolderId = GetSubfolderId(service, podio, e, parentFolderId);//TODO:
+								foreach (var em in embedMaster.Embeds)
+								{
+									if (em.OriginalUrl.Contains(".google."))
+									{
+										await UpdateOneEmbed(service, em, embeds, cloneFolderId, podio, e);
+									}
+								}
+								foreach (var embed in embeds)
+								{
+									embedChild.AddEmbed(embed.EmbedId);
+								}
+								var taskListAppId = Convert.ToInt32(dict[$"Task List"]);
+								await podio.CreateItem(child, taskListAppId, true);//child task list appId
+
+							}
+						}
+						else if (firstRevision.FieldId == startDateId)
+						{
+							//Update - Launch Date First Set
+							dynamic previous = firstRevision.From;
+							context.Logger.LogLine("Attempting to log previous value");
+							context.Logger.LogLine(previous.value.status);
+							if (previous.value.status == null)
+							{
+								//run Corrected Trigger -Create Program Budget Template
+								ViewService viewServ = new ViewService(podio);
+								var view = await viewServ.GetView(21481130,"Workshop Associations");//VC Admin Expenditures Curation App ID
+								FilterOptions op = new FilterOptions();
+								op.Filters = view.Filters;
+								op.Limit = 500;
+								var filter = await podio.FilterItems(21481130, op);
+								foreach(var master in filter.Items)
+								{
+									Item child = new Item();
+
+									fieldId = GetFieldId("VC Administration|Expenditures Curation|Purpose");
+									var purposeMaster = master.Field<TextItemField>(fieldId);
+									if(purposeMaster.Value!=null)
+									{
+										fieldId = GetFieldId("Expenditures|Purpose");
+										var purposeChild = child.Field<TextItemField>(fieldId);
+										purposeChild.Value = purposeMaster.Value;
+									}
+
+									fieldId = GetFieldId("VC Administration|Expenditures Curation|Workshop Associations");
+									var waMaster = master.Field<CategoryItemField>(fieldId);
+									if(waMaster.Options.Any())
+									{
+										fieldId = GetFieldId("Expenditures|Workshop Associations");
+										var waChild = child.Field<CategoryItemField>(fieldId);
+										waChild.OptionText = waMaster.Options.First().Text;
+									}
+
+									fieldId = GetFieldId("VC Administration|Expenditures Curation|Expense Type");
+									var expMaster = master.Field<CategoryItemField>(fieldId);
+									if(expMaster.Options.Any())
+									{
+										fieldId = GetFieldId("Expenditures|Task List");
+										var expChild = child.Field<CategoryItemField>(fieldId);
+										expChild.OptionText = expMaster.Options.First().Text;
+									}
+
+									fieldId = GetFieldId("VC Administration|Expenditures Curation|Amount");
+									var amountMaster = master.Field<MoneyItemField>(fieldId);
+									if(amountMaster.Value.HasValue)
+									{
+										fieldId = GetFieldId("Expenditures|Amount");
+										var amountChild = child.Field<MoneyItemField>(fieldId);
+										amountChild.Value = amountMaster.Value;
+									}
+									fieldId = GetFieldId("Admin|Program Manager");
+									var managerMaster = check.Field<ContactItemField>(fieldId);
+									if(managerMaster.Contacts.Any())
+									{
+										fieldId = GetFieldId("Expenditures|Spender");
+										var managerChild = child.Field<ContactItemField>(fieldId);
+										List<int> cs = new List<int>();
+										foreach(var contact in managerMaster.Contacts)
+										{
+											cs.Add(contact.ProfileId);
+											managerChild.ContactIds = cs;
+										}
+									}
+									fieldId = GetFieldId("Expenditures|Status");
+									var status = child.Field<CategoryItemField>(fieldId);
+									status.OptionText = "Template";
+
+									await podio.CreateItem(child, GetFieldId($"Expenditures"),false);
+								}
+
+								//run Corrected Trigger - Create PreWS Surveys
+
+
+
+
+
+
+
+
+
 
 
 							}
@@ -167,24 +346,6 @@ namespace vilcapCopyFileToGoogleDrive
 			//get all master schedule items
 			//runs 1 time
 			
-			foreach(var item in fil.Items)
-			{
-				Item i = new Item();
-				//assign fields
-				foreach(var embed in item.Field<EmbedItemField>(0).Embeds)
-				{
-					//copy embed, add to new item
-					EmbedService embedServ = new EmbedService(podio);
-					//runs approx 130 times
-					Embed em = embedServ.AddAnEmbed("").Result;
-					i.Field<EmbedItemField>(0).AddEmbed(embed.EmbedId);
-
-				}
-				//runs 208x
-				await podio.CreateItem(i, 0, false);
-				//aprox 339 podio calls for task list
-				//754 calls 
-			}
 		}
         public async System.Threading.Tasks.Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
         {
@@ -415,9 +576,8 @@ namespace vilcapCopyFileToGoogleDrive
 
                 EmbedItemField parentEmbedField = parentItem.Field<EmbedItemField>(PARENT_EMBED_FIELD);
 
-                IEnumerable<Embed> parentEmbeds = parentEmbedField.Embeds;
                 List<Embed> embeds = new List<Embed>();
-                context.Logger.LogLine($"{currentItem.ItemId} - {parentEmbeds.Count()} embeds on master item");
+                context.Logger.LogLine($"{currentItem.ItemId} - {parentEmbedField.Embeds.Count()} embeds on master item");
                 string parentFolderId = System.Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
                 var cloneFolderId = GetSubfolderId(service, podio, e, parentFolderId);//TODO:
                 context.Logger.LogLine($"{currentItem.ItemId} - Foreaching thru parent item embeds");
