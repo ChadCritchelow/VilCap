@@ -62,7 +62,6 @@ namespace vilcapCopyFileToGoogleDrive
 			}
 			else 
 				return Convert.ToInt32(dict[key]);
-
 		}
 		public static string StripHTML(string input)
 		{
@@ -239,6 +238,11 @@ namespace vilcapCopyFileToGoogleDrive
 									{
 										await UpdateOneEmbed(service, em, embeds, cloneFolderId, podio, e);
 									}
+                                    //// Hold for 2.0 //
+                                    //else
+                                    //{
+                                    //    await DoublePlusUnGoog(em, embeds, podio, e);
+                                    //}
 								}
 								foreach (var embed in embeds)
 								{
@@ -749,6 +753,27 @@ namespace vilcapCopyFileToGoogleDrive
                 throw ex;
             }
         }
+
+        //// Hold for 2.0 //
+        //public static async Task DoublePlusUnGoog(Embed embed, List<Embed> embeds, Podio podio, RoutedPodioEvent e)
+        //{
+        //    try
+        //    {
+        //        Console.WriteLine($"{e.podioEvent.item_id} - Direct URL Embed Link (resolved): {embed.ResolvedUrl}");
+        //        Console.WriteLine($"{e.podioEvent.item_id} - Direct URL Embed Link (original): {embed.OriginalUrl}");
+        //        await Task.Run(() =>
+        //        {
+        //            embeds.Add(embed);
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
+        //        throw ex;
+        //    }
+        //}
+
+
         public static string GetDriveId(string url,RoutedPodioEvent e)
         {
             try
