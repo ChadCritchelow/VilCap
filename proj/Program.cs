@@ -563,19 +563,33 @@ namespace newVilcapCopyFileToGoogleDrive
 
 							fieldId = GetFieldId("VC Administration|Content Curation |Duration");
 							var durMaster = master.Field<DurationItemField>(fieldId);
+							context.Logger.LogLine($"Master Duration: {durMaster.Value.Value}");
 							if (durMaster.Status != null)
 							{
 								fieldId = GetFieldId("Workshop Modules|Duration");
 								var durChild = child.Field<DurationItemField>(fieldId);
 								durChild.Value = durMaster.Value;
 							}
-                            // Datetime Set //
-                            TimeSpan minutes = child.Field<DurationItemField>(offsetF).Value.GetValueOrDefault();
-                            child.Field<DateItemField>(childDTF).Start = baseDT.Value.Add(minutes);
-                            minutes = master.Field<DurationItemField>(offsetF).Value.GetValueOrDefault();
-                            child.Field<DateItemField>(childDTF).End = child.Field<DateItemField>(childDTF).Start.Value.Add(minutes);
 
-                            fieldId = GetFieldId("VC Administration|Content Curation |Entrepreneur Pre-Work Required");
+							var offsetMaster = master.Field<NumericItemField>(GetFieldId("VC Administration|Content Curation |Minute Offset"));
+							if(offsetMaster.Value!=null)
+							{
+								fieldId = GetFieldId("Workshop Modules|Minute Offset");
+								var offsetChild = child.Field<NumericItemField>(fieldId);
+								offsetChild.Value = offsetMaster.Value;
+							}
+							// Datetime Set //
+							context.Logger.LogLine("Checking Date information");
+                            double minutes =Convert.ToDouble(child.Field<NumericItemField>(offsetF).Value);
+							context.Logger.LogLine($"Minutes: {minutes}");
+                            child.Field<DateItemField>(childDTF).Start = baseDT.Value.AddMinutes(minutes);
+							context.Logger.LogLine($"Child Start Date: {child.Field<DateItemField>(childDTF).Start}");
+							minutes = master.Field<DurationItemField>(durationF).Value.Value.TotalMinutes;
+							context.Logger.LogLine($"New minutes: {minutes}");
+							child.Field<DateItemField>(childDTF).End = child.Field<DateItemField>(childDTF).Start.Value.AddMinutes(minutes);
+							context.Logger.LogLine($"Child date end: {child.Field<DateItemField>(childDTF).End}");
+							
+						    fieldId = GetFieldId("VC Administration|Content Curation |Entrepreneur Pre-Work Required");
 							var workMaster = master.Field<TextItemField>(fieldId);
 							if (workMaster.Value != null)
 							{
