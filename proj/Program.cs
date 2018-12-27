@@ -207,83 +207,83 @@ namespace newVilcapCopyFileToGoogleDrive
 									count += 1;
 									context.Logger.LogLine($"On item #: {count}");
 									Item child = new Item();
-									//assign fields								
-									fieldId = GetFieldId("VC Administration|Master Schedule|Task Name");
-									var nameMaster = masterItem.Field<TextItemField>(fieldId);
-									if (nameMaster.Value != null)
-									{
-										fieldId = GetFieldId("Task List|Title");
-										var nameChild = child.Field<TextItemField>(fieldId);
-										nameChild.Value = nameMaster.Value;
-									}
-									context.Logger.LogLine($"Added field:{nameMaster.Label}");
-									fieldId = GetFieldId("VC Administration|Master Schedule|Desciption");
-									var descrMaster = masterItem.Field<TextItemField>(fieldId);
-									if (descrMaster.Value != null)
-									{
-										fieldId = GetFieldId("Task List|Description");
-										var descrChild = child.Field<TextItemField>(fieldId);
-										descrChild.Value = StripHTML(descrMaster.Value);
-									}
-									context.Logger.LogLine($"Added field:{descrMaster.Label}");
-									fieldId = GetFieldId("VC Administration|Master Schedule|Phase");
-									var phaseMaster = masterItem.Field<CategoryItemField>(fieldId);
-									if (phaseMaster.Options.Any())
-									{
-										fieldId = GetFieldId("Task List|Phase");
-										var phaseChild = child.Field<CategoryItemField>(fieldId);
-										phaseChild.OptionText = phaseMaster.Options.First().Text;
-									}
-									context.Logger.LogLine($"Added field:{phaseMaster.Label}");
-									fieldId = GetFieldId("VC Administration|Master Schedule|ESO Member Role");
-									var esoMaster = masterItem.Field<CategoryItemField>(fieldId);
-									if (esoMaster.Options.Any())
-									{
-										fieldId = GetFieldId("Task List|ESO Member Role");
-										var esoChild = child.Field<CategoryItemField>(fieldId);
-										esoChild.OptionText = esoMaster.Options.First().Text;
-									}
-									context.Logger.LogLine($"Added field:{esoMaster.Label}");
-									fieldId = GetFieldId("VC Administration|Master Schedule|Project");
-									var projectMaster = masterItem.Field<CategoryItemField>(fieldId);
-									if (projectMaster.Options.Any())
-									{
-										fieldId = GetFieldId("Task List|Project");
-										var projectChild = child.Field<CategoryItemField>(fieldId);
-										projectChild.OptionText = projectMaster.Options.First().Text;
-									}
-									context.Logger.LogLine($"Added field:{projectMaster.Label}");
 
-									fieldId = GetFieldId("VC Administration|Master Schedule|Base Workshop Association");
-									var wsMaster = masterItem.Field<CategoryItemField>(fieldId);
-									if (wsMaster.Options.Any())
-									{
-										fieldId = GetFieldId("Task List|WS Association");
-										var wsChild = child.Field<TextItemField>(fieldId);
-										wsChild.Value = wsMaster.Options.First().Text;
-										fieldId = GetFieldId("Task List|Parent WS");
-										var parentChild = child.Field<CategoryItemField>(fieldId);
-										parentChild.OptionText = wsMaster.Options.First().Text;
-									}
-									context.Logger.LogLine($"Added field:{wsMaster.Label}");
-									fieldId = GetFieldId("VC Administration|Master Schedule|Weeks Off-Set");
-									var offsetMaster = masterItem.Field<NumericItemField>(fieldId);
-									if (offsetMaster.Value.HasValue)
-									{
-										fieldId = GetFieldId("Task List|Week Offset");
-										var offsetChild = child.Field<NumericItemField>(fieldId);
-										offsetChild.Value = offsetMaster.Value;
-										fieldId = GetFieldId("Task List|Weeks Before WS");
-										var weeksChild = child.Field<NumericItemField>(fieldId);
-										weeksChild.Value = offsetMaster.Value;
-									}
-									context.Logger.LogLine($"Added field:{offsetMaster.Label}");
-									fieldId = GetFieldId("Task List|Completetion");
-									var comChild = child.Field<CategoryItemField>(fieldId);
-									comChild.OptionText = "Incomplete";
-									context.Logger.LogLine($"Added field: Completion");									
+                                    //--- Assign Fields ---//	
+                                    fieldId = GetFieldId("VC Administration|Master Schedule|Task Name");
+                                    var nameMaster = masterItem.Field<TextItemField>(fieldId);
+                                    if (nameMaster.Value != null)
+                                    {
+                                        fieldId = GetFieldId("Task List|Title");
+                                        var nameChild = child.Field<TextItemField>(fieldId);
+                                        nameChild.Value = nameMaster.Value;
+                                    }
+                                    context.Logger.LogLine($"Added field:{nameMaster.Label}");
+                                    fieldId = GetFieldId("VC Administration|Master Schedule|Desciption");
+                                    var descrMaster = masterItem.Field<TextItemField>(fieldId);
+                                    if (descrMaster.Value != null)
+                                    {
+                                        fieldId = GetFieldId("Task List|Description");
+                                        var descrChild = child.Field<TextItemField>(fieldId);
+                                        descrChild.Value = StripHTML(descrMaster.Value);
+                                    }
+                                    context.Logger.LogLine($"Added field:{descrMaster.Label}");
+                                    fieldId = GetFieldId("VC Administration|Master Schedule|Phase");
+                                    var phaseMaster = masterItem.Field<CategoryItemField>(fieldId);
+                                    if (phaseMaster.Options.Any())
+                                    {
+                                        fieldId = GetFieldId("Task List|Phase");
+                                        var phaseChild = child.Field<CategoryItemField>(fieldId);
+                                        phaseChild.OptionText = phaseMaster.Options.First().Text;
+                                    }
+                                    context.Logger.LogLine($"Added field:{phaseMaster.Label}");
+                                    fieldId = GetFieldId("VC Administration|Master Schedule|ESO Member Role");
+                                    var esoMaster = masterItem.Field<CategoryItemField>(fieldId);
+                                    if (esoMaster.Options.Any())
+                                    {
+                                        fieldId = GetFieldId("Task List|ESO Member Role");
+                                        var esoChild = child.Field<CategoryItemField>(fieldId);
+                                        esoChild.OptionText = esoMaster.Options.First().Text;
+                                    }
+                                    context.Logger.LogLine($"Added field:{esoMaster.Label}");
+                                    fieldId = GetFieldId("VC Administration|Master Schedule|Project");
+                                    var projectMaster = masterItem.Field<CategoryItemField>(fieldId);
+                                    if (projectMaster.Options.Any())
+                                    {
+                                        fieldId = GetFieldId("Task List|Project");
+                                        var projectChild = child.Field<CategoryItemField>(fieldId);
+                                        projectChild.OptionText = projectMaster.Options.First().Text;
+                                    }
+                                    context.Logger.LogLine($"Added field:{projectMaster.Label}");
 
-									//-------------------------------------------------------------------------------------------
+                                    fieldId = GetFieldId("VC Administration|Master Schedule|Base Workshop Association");
+                                    var wsMaster = masterItem.Field<CategoryItemField>(fieldId);
+                                    if (wsMaster.Options.Any())
+                                    {
+                                        fieldId = GetFieldId("Task List|WS Association");
+                                        var wsChild = child.Field<TextItemField>(fieldId);
+                                        wsChild.Value = wsMaster.Options.First().Text;
+                                        fieldId = GetFieldId("Task List|Parent WS");
+                                        var parentChild = child.Field<CategoryItemField>(fieldId);
+                                        parentChild.OptionText = wsMaster.Options.First().Text;
+                                    }
+                                    context.Logger.LogLine($"Added field:{wsMaster.Label}");
+                                    fieldId = GetFieldId("VC Administration|Master Schedule|Weeks Off-Set");
+                                    var offsetMaster = masterItem.Field<NumericItemField>(fieldId);
+                                    if (offsetMaster.Value.HasValue)
+                                    {
+                                        fieldId = GetFieldId("Task List|Week Offset");
+                                        var offsetChild = child.Field<NumericItemField>(fieldId);
+                                        offsetChild.Value = offsetMaster.Value;
+                                        fieldId = GetFieldId("Task List|Weeks Before WS");
+                                        var weeksChild = child.Field<NumericItemField>(fieldId);
+                                        weeksChild.Value = offsetMaster.Value;
+                                    }
+                                    context.Logger.LogLine($"Added field:{offsetMaster.Label}");
+                                    fieldId = GetFieldId("Task List|Completetion");
+                                    var comChild = child.Field<CategoryItemField>(fieldId);
+                                    comChild.OptionText = "Incomplete";
+                                    context.Logger.LogLine($"Added field: Completion");
+
 									fieldId = GetFieldId("VC Administration|Master Schedule|Duration (Days)");
 									var durMaster = masterItem.Field<NumericItemField>(fieldId);
 									if (durMaster.Value.HasValue)
@@ -315,8 +315,12 @@ namespace newVilcapCopyFileToGoogleDrive
 										{
 											await UpdateOneEmbed(service, em, embeds, cloneFolderId, podio, e);
 										}
-									}
-									foreach (var embed in embeds)
+                                        //else          // Hold for 2.0 //
+                                        //{
+                                        //    await NonGDriveCopy(em, embeds, podio, e);
+                                        //}
+                                    }
+                                    foreach (var embed in embeds)
 									{
 										embedChild.AddEmbed(embed.EmbedId);
 									}
@@ -351,16 +355,15 @@ namespace newVilcapCopyFileToGoogleDrive
 									return;
 								}
 								context.Logger.LogLine($"Lock Value: {lockValue}");
-								//Update - Launch Date First Set
-								dynamic previous = firstRevision.From;
+								dynamic previous = firstRevision.From; // Prevents the function from running every time the date is changed 
 								context.Logger.LogLine("Attempting to log previous value");
 								context.Logger.LogLine(previous.value.status);
 								if (previous.value.status == null)
 								{
-									//run Corrected Trigger -Create Program Budget Template
+									//--- Create Program Budget Template (Expendatures) ---//
 									viewServ = new ViewService(podio);
 									context.Logger.LogLine("Got View Service");
-									var views = await viewServ.GetViews(21481130);//VC Admin Master Schedule App
+									var views = await viewServ.GetViews(21481130); //VC Admin Master Schedule App
 								    var view = from v in views
 											   where v.Name == "Workshop Associations"
 											   select v;
@@ -428,10 +431,10 @@ namespace newVilcapCopyFileToGoogleDrive
 										await podio.CreateItem(child, GetFieldId($"Expenditures"), false);
 									}
 
-									//run Corrected Trigger - Create PreWS Surveys
+									//--- Create Pre-Workshop Surveys ---//
 									viewServ = new ViewService(podio);
 									context.Logger.LogLine("Got View Service");
-									views = await viewServ.GetViews(21389770);//VC Admin Master Schedule App
+									views = await viewServ.GetViews(21389770); //VC Admin Master Schedule App
 									view = from v in views
 											   where v.Name == "PreWS"
 											   select v;
@@ -484,12 +487,15 @@ namespace newVilcapCopyFileToGoogleDrive
 											{
 												await UpdateOneEmbed(service, em, embeds, cloneFolderId, podio, e);
 											}
-										}
-										foreach (var embed in embeds)
+                                            //else          // Hold for 2.0 //
+                                            //{
+                                            //    await NonGDriveCopy(em, embeds, podio, e);
+                                            //}
+                                        }
+                                        foreach (var embed in embeds)
 										{
 											embedChild.AddEmbed(embed.EmbedId);
 										}
-										//embed fields
 										await podio.CreateItem(child, GetFieldId("Survey"), false);
 									}
 								}
@@ -569,10 +575,9 @@ namespace newVilcapCopyFileToGoogleDrive
 								context.Logger.LogLine("Status was not null");
 								fieldId = GetFieldId("Workshop Modules|Duration");
 								var durChild = child.Field<DurationItemField>(fieldId);
-								durChild.Value.Value.Add(durMaster.Value.Value);
-								context.Logger.LogLine($"Child Duration: {durChild.Value.Value}");
+                                durChild.Value = durMaster.Value.Value.Duration(); // durChild.Value.Value.Add(durMaster.Value.Value);? durChild.Value = durMaster.Value;?
+                                context.Logger.LogLine($"Child Duration: {durChild.Value.Value}");
 							}
-
 							var offsetMaster = master.Field<NumericItemField>(GetFieldId("VC Administration|Content Curation |Minute Offset"));
 							if(offsetMaster.Value!=null)
 							{
@@ -580,7 +585,6 @@ namespace newVilcapCopyFileToGoogleDrive
 								var offsetChild = child.Field<NumericItemField>(fieldId);
 								offsetChild.Value = offsetMaster.Value;
 							}
-							// Datetime Set //
 							context.Logger.LogLine("Checking Date information");
                             double minutes =Convert.ToDouble(child.Field<NumericItemField>(offsetF).Value);
 							context.Logger.LogLine($"Minutes: {minutes}");
@@ -639,9 +643,8 @@ namespace newVilcapCopyFileToGoogleDrive
 							//TODO: Add embed fields 
 							await podio.CreateItem(child, GetFieldId("Workshop Modules"), true);
 						}
-						//create surveys
 
-
+						// Create surveys //
 						var parts = checkType.Options.First().Text.Split('/');
 						if (parts[1].Trim() == "Day 1")
 						{
@@ -811,6 +814,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
             }
         }
+
         public static string GetDriveId(string url,RoutedPodioEvent e)
         {
             try
@@ -850,6 +854,24 @@ namespace newVilcapCopyFileToGoogleDrive
 				return null;
             }
         }
+
+        //public static async Task NonGDriveCopy(Embed embed, List<Embed> embeds, Podio podio, RoutedPodioEvent e)  // Hold for 2.0 //
+        //{
+        //    try
+        //    {
+        //        Console.WriteLine($"{e.podioEvent.item_id} - Direct URL Embed Link (resolved): {embed.ResolvedUrl}");
+        //        Console.WriteLine($"{e.podioEvent.item_id} - Direct URL Embed Link (original): {embed.OriginalUrl}");
+        //        await Task.Run(() =>
+        //        {
+        //            embeds.Add(embed);
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
+        //        throw ex;
+        //    }
+        //}
 
     }
 }
