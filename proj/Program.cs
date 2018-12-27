@@ -525,13 +525,18 @@ namespace newVilcapCopyFileToGoogleDrive
 						int textFieldId = GetFieldId("VC Administration|Content Curation |Workshop Type (Text)");
 
 						var filterConditions = new Dictionary<string, string>
-					{
-						{textFieldId.ToString(), checkType.Options.First().Text} 
-					};
+					    {
+						    {textFieldId.ToString(), checkType.Options.First().Text} 
+					    };
 						op.Filters = filterConditions;
 						filter = await podio.FilterItems(21310273, op);
 
-						foreach (var master in filter.Items)
+                        var baseDT = check.Field<DateItemField>(GetFieldId("Create Workshop|Date")).Start;
+                        int childDTF = GetFieldId("Workshop Modules|Date");
+                        int offsetF = GetFieldId("Workshop Modules|Minute Offset");
+                        int durationF = GetFieldId("VC Administration|Content Curation |Duration");
+
+                        foreach (var master in filter.Items)
 						{
 							Item child = new Item();
 							fieldId = GetFieldId("Workshop Modules|Workshop");
@@ -564,8 +569,13 @@ namespace newVilcapCopyFileToGoogleDrive
 								var durChild = child.Field<DurationItemField>(fieldId);
 								durChild.Value = durMaster.Value;
 							}
+                            // Datetime Set //
+                            TimeSpan minutes = child.Field<DurationItemField>(offsetF).Value.GetValueOrDefault();
+                            child.Field<DateItemField>(childDTF).Start = baseDT.Value.Add(minutes);
+                            minutes = master.Field<DurationItemField>(offsetF).Value.GetValueOrDefault();
+                            child.Field<DateItemField>(childDTF).End = child.Field<DateItemField>(childDTF).Start.Value.Add(minutes);
 
-							fieldId = GetFieldId("VC Administration|Content Curation |Entrepreneur Pre-Work Required");
+                            fieldId = GetFieldId("VC Administration|Content Curation |Entrepreneur Pre-Work Required");
 							var workMaster = master.Field<TextItemField>(fieldId);
 							if (workMaster.Value != null)
 							{
@@ -742,7 +752,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 Console.WriteLine($"{e.podioEvent.item_id} - Old Embed Link (original): {embed.OriginalUrl}");
                 var id = GetDriveId(embed.OriginalUrl, e);
                 Console.WriteLine($"{e.podioEvent.item_id} - ID that we pull from the URL: {id}");
-                File original = GetFileByTitle(ds, id,e);
+                File original = GetFileByTitle(ds, id, e);
                 if (original.Parents == null)
                     original.Parents = new List<string>();
                 Console.WriteLine($"{e.podioEvent.item_id} - ID from the file itself: {original.Id}, Name: {original.Name}");
