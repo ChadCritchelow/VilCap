@@ -564,11 +564,13 @@ namespace newVilcapCopyFileToGoogleDrive
 							fieldId = GetFieldId("VC Administration|Content Curation |Duration");
 							var durMaster = master.Field<DurationItemField>(fieldId);
 							context.Logger.LogLine($"Master Duration: {durMaster.Value.Value}");
-							if (durMaster.Status != null)
+							if (durMaster.Value!=null)
 							{
+								context.Logger.LogLine("Status was not null");
 								fieldId = GetFieldId("Workshop Modules|Duration");
 								var durChild = child.Field<DurationItemField>(fieldId);
-								durChild.Value = durMaster.Value;
+								durChild.Value.Value.Add(durMaster.Value.Value);
+								context.Logger.LogLine($"Child Duration: {durChild.Value.Value}");
 							}
 
 							var offsetMaster = master.Field<NumericItemField>(GetFieldId("VC Administration|Content Curation |Minute Offset"));
