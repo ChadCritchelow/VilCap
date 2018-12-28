@@ -51,6 +51,7 @@ namespace newVilcapCopyFileToGoogleDrive
 		Dictionary<string, string> fullNames;
 		RoutedPodioEvent ev;
 		string commentText=null;
+		GoogleIntegration google = new GoogleIntegration();
 		public int GetFieldId(string key)
 		{
 			var parts = key.Split('|');
@@ -66,6 +67,7 @@ namespace newVilcapCopyFileToGoogleDrive
 		{
 			return Regex.Replace(input, "<.*?>", String.Empty);
 		}
+		
 		public async Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
 		{
 			string lockValue;
@@ -119,19 +121,19 @@ namespace newVilcapCopyFileToGoogleDrive
 			switch (check.App.Name)
 			{
 				case "Admin":
-					
+
 					var TlStatusId = GetFieldId("Admin|Task List Status");
 					var startDateId = GetFieldId("Admin|Program Start Date");
 					context.Logger.LogLine($"Value checking for: {check.Field<CategoryItemField>(TlStatusId).Options.First().Text}");
 					if (check.Field<CategoryItemField>(TlStatusId).Options.Any())
 					{
-						
+
 						var revision = await podio.GetRevisionDifference(Convert.ToInt32(check.ItemId), check.CurrentRevision.Revision - 1, check.CurrentRevision.Revision);
 						var firstRevision = revision.First();
 						context.Logger.LogLine($"Last Revision field: {firstRevision.Label}");
 						if (firstRevision.FieldId == TlStatusId)
 						{
-							
+
 							lockValue = await bbc.LockFunction(functionName, check.ItemId.ToString());
 
 							try
@@ -152,15 +154,15 @@ namespace newVilcapCopyFileToGoogleDrive
 								context.Logger.LogLine("Got View");
 								op = new FilterOptions();
 								op.Filters = view.First().Filters;
-								if(check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "1")
+								if (check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "1")
 								{
 									context.Logger.LogLine("Grabbing items 1-42");
 									op.Offset = 0;
 									op.Limit = 30;
 									filter = await podio.FilterItems(21310276, op);
-									commentText = "Batch 1 finished";
+									commentText = "Batch 1 finished";									
 								}
-								else if(check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "2")
+								else if (check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "2")
 								{
 									context.Logger.LogLine("Grabbing items 43-84");
 									op.Offset = 30;
@@ -168,7 +170,7 @@ namespace newVilcapCopyFileToGoogleDrive
 									filter = await podio.FilterItems(21310276, op);
 									commentText = "Batch 2 finished";
 								}
-								else if(check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "3")
+								else if (check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "3")
 								{
 									context.Logger.LogLine("Grabbing items 85-126");
 									op.Offset = 60;
@@ -176,7 +178,7 @@ namespace newVilcapCopyFileToGoogleDrive
 									filter = await podio.FilterItems(21310276, op);
 									commentText = "Batch 3 finished";
 								}
-								else if(check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "4")
+								else if (check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "4")
 								{
 									context.Logger.LogLine("Grabbing items 127-168 with links");
 									op.Offset = 90;
@@ -184,7 +186,7 @@ namespace newVilcapCopyFileToGoogleDrive
 									filter = await podio.FilterItems(21310276, op);
 									commentText = "Batch 4 finished";
 								}
-								else if(check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "5")
+								else if (check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "5")
 								{
 									context.Logger.LogLine("Grabbing items 169-all with links");
 									op.Offset = 120;
@@ -216,81 +218,81 @@ namespace newVilcapCopyFileToGoogleDrive
 									context.Logger.LogLine($"On item #: {count}");
 									Item child = new Item();
 
-                                    //--- Assign Fields ---//	
-                                    fieldId = GetFieldId("VC Administration|Master Schedule|Task Name");
-                                    var nameMaster = masterItem.Field<TextItemField>(fieldId);
-                                    if (nameMaster.Value != null)
-                                    {
-                                        fieldId = GetFieldId("Task List|Title");
-                                        var nameChild = child.Field<TextItemField>(fieldId);
-                                        nameChild.Value = nameMaster.Value;
-                                    }
-                                    context.Logger.LogLine($"Added field:{nameMaster.Label}");
-                                    fieldId = GetFieldId("VC Administration|Master Schedule|Desciption");
-                                    var descrMaster = masterItem.Field<TextItemField>(fieldId);
-                                    if (descrMaster.Value != null)
-                                    {
-                                        fieldId = GetFieldId("Task List|Description");
-                                        var descrChild = child.Field<TextItemField>(fieldId);
-                                        descrChild.Value = StripHTML(descrMaster.Value);
-                                    }
-                                    context.Logger.LogLine($"Added field:{descrMaster.Label}");
-                                    fieldId = GetFieldId("VC Administration|Master Schedule|Phase");
-                                    var phaseMaster = masterItem.Field<CategoryItemField>(fieldId);
-                                    if (phaseMaster.Options.Any())
-                                    {
-                                        fieldId = GetFieldId("Task List|Phase");
-                                        var phaseChild = child.Field<CategoryItemField>(fieldId);
-                                        phaseChild.OptionText = phaseMaster.Options.First().Text;
-                                    }
-                                    context.Logger.LogLine($"Added field:{phaseMaster.Label}");
-                                    fieldId = GetFieldId("VC Administration|Master Schedule|ESO Member Role");
-                                    var esoMaster = masterItem.Field<CategoryItemField>(fieldId);
-                                    if (esoMaster.Options.Any())
-                                    {
-                                        fieldId = GetFieldId("Task List|ESO Member Role");
-                                        var esoChild = child.Field<CategoryItemField>(fieldId);
-                                        esoChild.OptionText = esoMaster.Options.First().Text;
-                                    }
-                                    context.Logger.LogLine($"Added field:{esoMaster.Label}");
-                                    fieldId = GetFieldId("VC Administration|Master Schedule|Project");
-                                    var projectMaster = masterItem.Field<CategoryItemField>(fieldId);
-                                    if (projectMaster.Options.Any())
-                                    {
-                                        fieldId = GetFieldId("Task List|Project");
-                                        var projectChild = child.Field<CategoryItemField>(fieldId);
-                                        projectChild.OptionText = projectMaster.Options.First().Text;
-                                    }
-                                    context.Logger.LogLine($"Added field:{projectMaster.Label}");
+									//--- Assign Fields ---//	
+									fieldId = GetFieldId("VC Administration|Master Schedule|Task Name");
+									var nameMaster = masterItem.Field<TextItemField>(fieldId);
+									if (nameMaster.Value != null)
+									{
+										fieldId = GetFieldId("Task List|Title");
+										var nameChild = child.Field<TextItemField>(fieldId);
+										nameChild.Value = nameMaster.Value;
+									}
+									context.Logger.LogLine($"Added field:{nameMaster.Label}");
+									fieldId = GetFieldId("VC Administration|Master Schedule|Desciption");
+									var descrMaster = masterItem.Field<TextItemField>(fieldId);
+									if (descrMaster.Value != null)
+									{
+										fieldId = GetFieldId("Task List|Description");
+										var descrChild = child.Field<TextItemField>(fieldId);
+										descrChild.Value = StripHTML(descrMaster.Value);
+									}
+									context.Logger.LogLine($"Added field:{descrMaster.Label}");
+									fieldId = GetFieldId("VC Administration|Master Schedule|Phase");
+									var phaseMaster = masterItem.Field<CategoryItemField>(fieldId);
+									if (phaseMaster.Options.Any())
+									{
+										fieldId = GetFieldId("Task List|Phase");
+										var phaseChild = child.Field<CategoryItemField>(fieldId);
+										phaseChild.OptionText = phaseMaster.Options.First().Text;
+									}
+									context.Logger.LogLine($"Added field:{phaseMaster.Label}");
+									fieldId = GetFieldId("VC Administration|Master Schedule|ESO Member Role");
+									var esoMaster = masterItem.Field<CategoryItemField>(fieldId);
+									if (esoMaster.Options.Any())
+									{
+										fieldId = GetFieldId("Task List|ESO Member Role");
+										var esoChild = child.Field<CategoryItemField>(fieldId);
+										esoChild.OptionText = esoMaster.Options.First().Text;
+									}
+									context.Logger.LogLine($"Added field:{esoMaster.Label}");
+									fieldId = GetFieldId("VC Administration|Master Schedule|Project");
+									var projectMaster = masterItem.Field<CategoryItemField>(fieldId);
+									if (projectMaster.Options.Any())
+									{
+										fieldId = GetFieldId("Task List|Project");
+										var projectChild = child.Field<CategoryItemField>(fieldId);
+										projectChild.OptionText = projectMaster.Options.First().Text;
+									}
+									context.Logger.LogLine($"Added field:{projectMaster.Label}");
 
-                                    fieldId = GetFieldId("VC Administration|Master Schedule|Base Workshop Association");
-                                    var wsMaster = masterItem.Field<CategoryItemField>(fieldId);
-                                    if (wsMaster.Options.Any())
-                                    {
-                                        fieldId = GetFieldId("Task List|WS Association");
-                                        var wsChild = child.Field<TextItemField>(fieldId);
-                                        wsChild.Value = wsMaster.Options.First().Text;
-                                        fieldId = GetFieldId("Task List|Parent WS");
-                                        var parentChild = child.Field<CategoryItemField>(fieldId);
-                                        parentChild.OptionText = wsMaster.Options.First().Text;
-                                    }
-                                    context.Logger.LogLine($"Added field:{wsMaster.Label}");
-                                    fieldId = GetFieldId("VC Administration|Master Schedule|Weeks Off-Set");
-                                    var offsetMaster = masterItem.Field<NumericItemField>(fieldId);
-                                    if (offsetMaster.Value.HasValue)
-                                    {
-                                        fieldId = GetFieldId("Task List|Week Offset");
-                                        var offsetChild = child.Field<NumericItemField>(fieldId);
-                                        offsetChild.Value = offsetMaster.Value;
-                                        fieldId = GetFieldId("Task List|Weeks Before WS");
-                                        var weeksChild = child.Field<NumericItemField>(fieldId);
-                                        weeksChild.Value = offsetMaster.Value;
-                                    }
-                                    context.Logger.LogLine($"Added field:{offsetMaster.Label}");
-                                    fieldId = GetFieldId("Task List|Completetion");
-                                    var comChild = child.Field<CategoryItemField>(fieldId);
-                                    comChild.OptionText = "Incomplete";
-                                    context.Logger.LogLine($"Added field: Completion");
+									fieldId = GetFieldId("VC Administration|Master Schedule|Base Workshop Association");
+									var wsMaster = masterItem.Field<CategoryItemField>(fieldId);
+									if (wsMaster.Options.Any())
+									{
+										fieldId = GetFieldId("Task List|WS Association");
+										var wsChild = child.Field<TextItemField>(fieldId);
+										wsChild.Value = wsMaster.Options.First().Text;
+										fieldId = GetFieldId("Task List|Parent WS");
+										var parentChild = child.Field<CategoryItemField>(fieldId);
+										parentChild.OptionText = wsMaster.Options.First().Text;
+									}
+									context.Logger.LogLine($"Added field:{wsMaster.Label}");
+									fieldId = GetFieldId("VC Administration|Master Schedule|Weeks Off-Set");
+									var offsetMaster = masterItem.Field<NumericItemField>(fieldId);
+									if (offsetMaster.Value.HasValue)
+									{
+										fieldId = GetFieldId("Task List|Week Offset");
+										var offsetChild = child.Field<NumericItemField>(fieldId);
+										offsetChild.Value = offsetMaster.Value;
+										fieldId = GetFieldId("Task List|Weeks Before WS");
+										var weeksChild = child.Field<NumericItemField>(fieldId);
+										weeksChild.Value = offsetMaster.Value;
+									}
+									context.Logger.LogLine($"Added field:{offsetMaster.Label}");
+									fieldId = GetFieldId("Task List|Completetion");
+									var comChild = child.Field<CategoryItemField>(fieldId);
+									comChild.OptionText = "Incomplete";
+									context.Logger.LogLine($"Added field: Completion");
 
 									fieldId = GetFieldId("VC Administration|Master Schedule|Duration (Days)");
 									var durMaster = masterItem.Field<NumericItemField>(fieldId);
@@ -316,35 +318,35 @@ namespace newVilcapCopyFileToGoogleDrive
 									var embedChild = child.Field<EmbedItemField>(fieldId);
 									List<Embed> embeds = new List<Embed>();
 									string parentFolderId = System.Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
-									var cloneFolderId = GetSubfolderId(service, podio, e, parentFolderId);//TODO:
+									var cloneFolderId = google.GetSubfolderId(service, podio, e, parentFolderId);//TODO:
 									foreach (var em in embedMaster.Embeds)
 									{
 										if (em.OriginalUrl.Contains(".google."))
 										{
-											await UpdateOneEmbed(service, em, embeds, cloneFolderId, podio, e);
+											await google.UpdateOneEmbed(service, em, embeds, cloneFolderId, podio, e);
 										}
-                                        //else          // Hold for 2.0 //
-                                        //{
-                                        //    await NonGDriveCopy(em, embeds, podio, e);
-                                        //}
-                                    }
-                                    foreach (var embed in embeds)
+										//else          // Hold for 2.0 //
+										//{
+										//    await NonGDriveCopy(em, embeds, podio, e);
+										//}
+									}
+									foreach (var embed in embeds)
 									{
 										embedChild.AddEmbed(embed.EmbedId);
 									}
 									context.Logger.LogLine($"Added field:{embedMaster.Label}");
 									var taskListAppId = GetFieldId("Task List");
-								    int waitSeconds = 5;
+									int waitSeconds = 5;
 									CallPodio:
 									try
 									{
 										await podio.CreateItem(child, taskListAppId, true);//child task list appId
 									}
-									catch(PodioUnavailableException ex)
+									catch (PodioUnavailableException ex)
 									{
 										context.Logger.LogLine($"{ex.Message}");
 										context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
-										for (int i=0;i<waitSeconds;i++)
+										for (int i = 0; i < waitSeconds; i++)
 										{
 											System.Threading.Thread.Sleep(1000);
 											context.Logger.LogLine(".");
@@ -355,7 +357,11 @@ namespace newVilcapCopyFileToGoogleDrive
 									context.Logger.LogLine($"Created item #{count}");
 								}
 								CommentService comm = new CommentService(podio);
-								await comm.AddCommentToObject("item", check.ItemId, commentText,hook:true);
+								if(check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "1")
+								{
+									await CreateExpendituresAndPreWSSurvs(context, podio, viewServ, check, e, service);
+								}
+								await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);
 							}
 							catch (Exception ex)
 							{
@@ -367,210 +373,9 @@ namespace newVilcapCopyFileToGoogleDrive
 								await bbc.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
 							}
 						}
-						else if (firstRevision.FieldId == startDateId)
-						{
-							lockValue = await bbc.LockFunction(functionName, check.ItemId.ToString());
-
-							try
-							{
-								if (string.IsNullOrEmpty(lockValue))
-								{
-									context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
-									return;
-								}
-								context.Logger.LogLine($"Lock Value: {lockValue}");
-								dynamic previous = firstRevision.From; // Prevents the function from running every time the date is changed 
-								context.Logger.LogLine("Attempting to log previous value");
-								context.Logger.LogLine(previous.value.status);
-								if (previous.value.status == null)
-								{
-									//--- Create Program Budget Template (Expendatures) ---//
-									viewServ = new ViewService(podio);
-									context.Logger.LogLine("Got View Service");
-									var views = await viewServ.GetViews(21481130); //VC Admin Master Schedule App
-								    var view = from v in views
-											   where v.Name == "Workshop Associations"
-											   select v;
-									context.Logger.LogLine("Got View");
-									op = new FilterOptions();
-									op.Filters = view.First().Filters;
-									op.Limit = 500;
-									filter = await podio.FilterItems(21481130, op);
-									foreach (var master in filter.Items)
-									{
-										Item child = new Item();
-
-										fieldId = GetFieldId("VC Administration|Expenditures Curation|Purpose");
-										var purposeMaster = master.Field<TextItemField>(fieldId);
-										if (purposeMaster.Value != null)
-										{
-											fieldId = GetFieldId("Expenditures|Purpose");
-											var purposeChild = child.Field<TextItemField>(fieldId);
-											purposeChild.Value = purposeMaster.Value;
-										}
-
-										fieldId = GetFieldId("VC Administration|Expenditures Curation|Workshop Associations");
-										var waMaster = master.Field<CategoryItemField>(fieldId);
-										if (waMaster.Options.Any())
-										{
-											fieldId = GetFieldId("Expenditures|Workshop Associations");
-											var waChild = child.Field<CategoryItemField>(fieldId);
-											waChild.OptionText = waMaster.Options.First().Text;
-										}
-
-										fieldId = GetFieldId("VC Administration|Expenditures Curation|Expense Type");
-										var expMaster = master.Field<CategoryItemField>(fieldId);
-										if (expMaster.Options.Any())
-										{
-											fieldId = GetFieldId("Expenditures|Task List");
-											var expChild = child.Field<CategoryItemField>(fieldId);
-											expChild.OptionText = expMaster.Options.First().Text;
-										}
-
-										fieldId = GetFieldId("VC Administration|Expenditures Curation|Amount");
-										var amountMaster = master.Field<MoneyItemField>(fieldId);
-										if (amountMaster.Value.HasValue)
-										{
-											fieldId = GetFieldId("Expenditures|Amount");
-											var amountChild = child.Field<MoneyItemField>(fieldId);
-											amountChild.Value = amountMaster.Value;
-										}
-										fieldId = GetFieldId("Admin|Program Manager");
-										var managerMaster = check.Field<ContactItemField>(fieldId);
-										if (managerMaster.Contacts.Any())
-										{
-											fieldId = GetFieldId("Expenditures|Spender");
-											var managerChild = child.Field<ContactItemField>(fieldId);
-											List<int> cs = new List<int>();
-											foreach (var contact in managerMaster.Contacts)
-											{
-												cs.Add(contact.ProfileId);
-												managerChild.ContactIds = cs;
-											}
-										}
-										fieldId = GetFieldId("Expenditures|Status");
-										var status = child.Field<CategoryItemField>(fieldId);
-										status.OptionText = "Template";
-										int waitSeconds = 5;
-										CallPodio:
-										try
-										{
-											await podio.CreateItem(child, GetFieldId($"Expenditures"), false);
-										}
-										catch (PodioUnavailableException ex)
-										{
-											context.Logger.LogLine($"{ex.Message}");
-											context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
-											for (int i = 0; i < waitSeconds; i++)
-											{
-												System.Threading.Thread.Sleep(1000);
-												context.Logger.LogLine(".");
-											}
-											waitSeconds = waitSeconds * 2;
-											goto CallPodio;
-										}
-										
-									}
-
-									//--- Create Pre-Workshop Surveys ---//
-									viewServ = new ViewService(podio);
-									context.Logger.LogLine("Got View Service");
-									views = await viewServ.GetViews(21389770); //VC Admin Master Schedule App
-									view = from v in views
-											   where v.Name == "PreWS"
-											   select v;
-									context.Logger.LogLine("Got View");
-									op = new FilterOptions();
-									op.Filters = view.First().Filters;
-									op.Limit = 500;
-									filter = await podio.FilterItems(21389770, op);
-
-									foreach (var master in filter.Items)
-									{
-										Item child = new Item();
-										fieldId = GetFieldId("VC Administration|Survey|Title");
-										var titleMaster = master.Field<TextItemField>(fieldId);
-										if (titleMaster.Value != null)
-										{
-											fieldId = GetFieldId("Survey|Title");
-											var titleChild = child.Field<TextItemField>(fieldId);
-											titleChild.Value = titleMaster.Value;
-										}
-
-										fieldId = GetFieldId("VC Administration|Survey|Notes");
-										var notesMaster = master.Field<TextItemField>(fieldId);
-										if (notesMaster.Value != null)
-										{
-											fieldId = GetFieldId("Survey|Notes");
-											var notesChild = child.Field<TextItemField>(fieldId);
-											notesChild.Value = StripHTML(notesMaster.Value);
-										}
-
-										fieldId = GetFieldId("VC Administration|Survey|Related Workshop");
-										var relMaster = master.Field<CategoryItemField>(fieldId);
-										if (relMaster.Options.Any())
-										{
-											fieldId = GetFieldId("Survey|Related Workshop");
-											var relChild = child.Field<CategoryItemField>(fieldId);
-											relChild.OptionText = relMaster.Options.First().Text;
-										}
-
-										fieldId = GetFieldId("VC Administration|Survey|Gdrive Survey");
-										var embedMaster = master.Field<EmbedItemField>(fieldId);
-										fieldId = GetFieldId("Surveys|Link to Survey");
-										var embedChild = child.Field<EmbedItemField>(fieldId);
-										List<Embed> embeds = new List<Embed>();
-										string parentFolderId = System.Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
-										var cloneFolderId = GetSubfolderId(service, podio, e, parentFolderId);
-										foreach (var em in embedMaster.Embeds)
-										{
-											if (em.OriginalUrl.Contains(".google."))
-											{
-												await UpdateOneEmbed(service, em, embeds, cloneFolderId, podio, e);
-											}
-                                            //else          // Hold for 2.0 //
-                                            //{
-                                            //    await NonGDriveCopy(em, embeds, podio, e);
-                                            //}
-                                        }
-                                        foreach (var embed in embeds)
-										{
-											embedChild.AddEmbed(embed.EmbedId);
-										}
-										int waitSeconds = 5;
-										CallPodio:
-										try
-										{
-											await podio.CreateItem(child, GetFieldId("Survey"), false);
-										}
-										catch (PodioUnavailableException ex)
-										{
-											context.Logger.LogLine($"{ex.Message}");
-											context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
-											for (int i = 0; i < waitSeconds; i++)
-											{
-												System.Threading.Thread.Sleep(1000);
-												context.Logger.LogLine(".");
-											}
-											waitSeconds = waitSeconds * 2;
-											goto CallPodio;
-										}
-										
-									}
-								}
-							}
-							catch(Exception ex)
-							{
-								throw ex;
-							}
-							finally
-							{
-								await bbc.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
-							}
-					}
 					}
 					break;
-
+			
 				case "Create Workshop":
 					//create workshops
 					lockValue = await bbc.LockFunction(functionName, check.ItemId.ToString());
@@ -687,12 +492,12 @@ namespace newVilcapCopyFileToGoogleDrive
 							var embedChild = child.Field<EmbedItemField>(fieldId);
 							List<Embed> embeds = new List<Embed>();
 							string parentFolderId = System.Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
-							var cloneFolderId = GetSubfolderId(service, podio, e, parentFolderId);
+							var cloneFolderId = google.GetSubfolderId(service, podio, e, parentFolderId);
 							foreach (var em in embedMaster.Embeds)
 							{
 								if (em.OriginalUrl.Contains(".google."))
 								{
-									await UpdateOneEmbed(service, em, embeds, cloneFolderId, podio, e);
+									await google.UpdateOneEmbed(service, em, embeds, cloneFolderId, podio, e);
 								}
 							}
 							foreach (var embed in embeds)
@@ -774,12 +579,12 @@ namespace newVilcapCopyFileToGoogleDrive
 								var embedChild = child.Field<EmbedItemField>(fieldId);
 								var embeds = new List<Embed>();
 								var parentFolderId = System.Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
-								var cloneFolderId = GetSubfolderId(service, podio, e, parentFolderId);
+								var cloneFolderId = google.GetSubfolderId(service, podio, e, parentFolderId);
 								foreach (var em in embedMaster.Embeds)
 								{
 									if (em.OriginalUrl.Contains(".google."))
 									{
-										await UpdateOneEmbed(service, em, embeds, cloneFolderId, podio, e);
+										await google.UpdateOneEmbed(service, em, embeds, cloneFolderId, podio, e);
 									}
 								}
 								foreach (var embed in embeds)
@@ -824,151 +629,7 @@ namespace newVilcapCopyFileToGoogleDrive
 	    }
 
 
-        private static string GetSubfolderId(DriveService ds, Podio podio, RoutedPodioEvent e, string parentFolder)
-        {
-            try
-            {
-                Console.WriteLine($"{e.podioEvent.item_id} - EnvID: {e.environmentId}");
-                FilesResource.ListRequest listReq = ds.Files.List();
-                listReq.Q = "name='" + e.environmentId + "'";
-                string folderId = "";
-
-                if (listReq.Execute().Files.Any())
-                {
-                    folderId = listReq.Execute().Files[0].Id;
-                }
-                else if (folderId == "")
-                {
-                    File folder = new File
-                    {
-                        Name = e.environmentId,
-                        MimeType = "application/vnd.google-apps.folder",
-                    };
-                    folder.Parents.Add(parentFolder);
-                    var request = ds.Files.Create(folder);
-                    request.Fields = "id";
-
-                    folderId = request.Execute().Id;
-                }
-                return folderId;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
-				return null;
-            }
-        }
-
-        public static async Task UpdateOneEmbed(DriveService ds, Embed embed, List<Embed> embeds, string subfolderId, Podio podio, RoutedPodioEvent e)
-        {
-            try
-            {
-                Console.WriteLine($"{e.podioEvent.item_id} - Old Embed Link (resolved): {embed.ResolvedUrl}");
-                Console.WriteLine($"{e.podioEvent.item_id} - Old Embed Link (original): {embed.OriginalUrl}");
-                var id = GetDriveId(embed.OriginalUrl, e);
-                Console.WriteLine($"{e.podioEvent.item_id} - ID that we pull from the URL: {id}");
-                File original = GetFileByTitle(ds, id, e);
-                if (original.Parents == null)
-                    original.Parents = new List<string>();
-                Console.WriteLine($"{e.podioEvent.item_id} - ID from the file itself: {original.Id}, Name: {original.Name}");
-                original.Parents.Clear();
-                original.Parents.Add(subfolderId);
-                original.Name = e.environmentId + " " + original.Name;
-
-                File clone = ds.Files.Copy(original, id).Execute();
-
-                await Task.Run(() =>
-                {
-                    Permission p = new Permission
-                    {
-                        Role = "writer",
-                        Type = "anyone"
-                    };
-                    new PermissionsResource.CreateRequest(ds, p, clone.Id).Execute();
-                });
-
-                await Task.Run(() =>
-                {
-                    PodioCore.Services.EmbedService embedServ = new EmbedService(podio);
-                    Console.WriteLine($"{e.podioEvent.item_id} - Adding embed thru service");
-
-                    Console.WriteLine($"{e.podioEvent.item_id} - CloneID: {clone.Id}");
-                    var req = ds.Files.Get(clone.Id);
-                    req.Fields = "webViewLink";
-                    clone = req.Execute();
-					//runs 130x approx
-					int waitSeconds = 5;
-					CallPodio:
-					Embed em;
-					try
-					{
-						em = embedServ.AddAnEmbed(clone.WebViewLink).Result;
-					}
-					catch (PodioUnavailableException ex)
-					{
-						Console.WriteLine($"{ex.Message}");
-						Console.WriteLine($"Trying again in {waitSeconds} seconds.");
-						for (int i = 0; i < waitSeconds; i++)
-						{
-							System.Threading.Thread.Sleep(1000);
-							Console.WriteLine(".");
-						}
-						waitSeconds = waitSeconds * 2;
-						goto CallPodio;
-					}
-					
-                    Console.WriteLine($"{e.podioEvent.item_id} - New Embed Link (resolved): {em.ResolvedUrl}");
-                    Console.WriteLine($"{e.podioEvent.item_id} - New Embed Link (original): {em.OriginalUrl}");
-                    Console.WriteLine($"{e.podioEvent.item_id} - New Embed added");
-                    Console.WriteLine($"{e.podioEvent.item_id} - WebViewLink: {clone.WebViewLink}");
-                    embeds.Add(em);
-                });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
-            }
-        }
-
-        public static string GetDriveId(string url,RoutedPodioEvent e)
-        {
-            try
-            {
-                Console.WriteLine($"{e.podioEvent.item_id} - Attempting to get the ID from URL: {url}");
-                string[] substr = url.Split(new char[] { '=', '/','?' });
-                foreach (string s in substr)
-                {
-                    if (s.Length == 44||s.Length==33)
-                    {
-                        Console.WriteLine($"{e.podioEvent.item_id} - Found ID: {s} from url: {url}");
-                        return s;
-                    }
-                }
-                Console.WriteLine($"{e.podioEvent.item_id} - Could not find ID for url: {url}");
-                return null;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
-				return null;
-            }
-        }
-
-        public static File GetFileByTitle(DriveService ds, string id,RoutedPodioEvent e)
-        {
-            try
-            {
-                var request = ds.Files.Get(id);
-                request.Fields = "parents, name";
-                var file = request.Execute();
-                return file;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
-				return null;
-            }
-        }
+       
 
         //public static async Task NonGDriveCopy(Embed embed, List<Embed> embeds, Podio podio, RoutedPodioEvent e)  // Hold for 2.0 //
         //{
