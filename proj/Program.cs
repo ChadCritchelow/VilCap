@@ -23,6 +23,7 @@ using System.Text.RegularExpressions;
 using System.Collections;
 using PodioCore.Utils;
 using PodioCore.Comments;
+using PodioCore.Exceptions;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
 
@@ -155,51 +156,58 @@ namespace newVilcapCopyFileToGoogleDrive
 								{
 									context.Logger.LogLine("Grabbing items 1-42");
 									op.Offset = 0;
-									op.Limit = 35;
+									op.Limit = 30;
 									filter = await podio.FilterItems(21310276, op);
 									commentText = "Batch 1 finished";
 								}
 								else if(check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "2")
 								{
 									context.Logger.LogLine("Grabbing items 43-84");
-									op.Offset = 35;
-									op.Limit = 35;
+									op.Offset = 30;
+									op.Limit = 30;
 									filter = await podio.FilterItems(21310276, op);
 									commentText = "Batch 2 finished";
 								}
 								else if(check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "3")
 								{
 									context.Logger.LogLine("Grabbing items 85-126");
-									op.Offset = 70;
-									op.Limit = 35;
+									op.Offset = 60;
+									op.Limit = 30;
 									filter = await podio.FilterItems(21310276, op);
 									commentText = "Batch 3 finished";
 								}
 								else if(check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "4")
 								{
 									context.Logger.LogLine("Grabbing items 127-168 with links");
-									op.Offset = 105;
-									op.Limit = 35;
+									op.Offset = 90;
+									op.Limit = 30;
 									filter = await podio.FilterItems(21310276, op);
 									commentText = "Batch 4 finished";
 								}
 								else if(check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "5")
 								{
 									context.Logger.LogLine("Grabbing items 169-all with links");
-									op.Offset = 140;
-									op.Limit = 35;
+									op.Offset = 120;
+									op.Limit = 30;
 									filter = await podio.FilterItems(21310276, op);
 									commentText = "Batch 5 finished";
+								}
+								else if (check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "6")
+								{
+									context.Logger.LogLine("Grabbing items 169-all with links");
+									op.Offset = 150;
+									op.Limit = 30;
+									filter = await podio.FilterItems(21310276, op);
+									commentText = "Batch 6 finished";
 								}
 								else
 								{
 									context.Logger.LogLine("Grabbing items 169-all with links");
-									op.Offset = 175;
-									op.Limit = 35;
+									op.Offset = 180;
+									op.Limit = 30;
 									filter = await podio.FilterItems(21310276, op);
-									commentText = "Batch 6 finished";
+									commentText = "Batch 7 finished";
 								}
-								
 								context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
 								int count = 0;
 								foreach (var masterItem in filter.Items)
@@ -326,8 +334,24 @@ namespace newVilcapCopyFileToGoogleDrive
 									}
 									context.Logger.LogLine($"Added field:{embedMaster.Label}");
 									var taskListAppId = GetFieldId("Task List");
-
-									await podio.CreateItem(child, taskListAppId, true);//child task list appId
+								    int waitSeconds = 5;
+									CallPodio:
+									try
+									{
+										await podio.CreateItem(child, taskListAppId, true);//child task list appId
+									}
+									catch(PodioUnavailableException ex)
+									{
+										context.Logger.LogLine($"{ex.Message}");
+										context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
+										for (int i=0;i<waitSeconds;i++)
+										{
+											System.Threading.Thread.Sleep(1000);
+											context.Logger.LogLine(".");
+										}
+										waitSeconds = waitSeconds * 2;
+										goto CallPodio;
+									}
 									context.Logger.LogLine($"Created item #{count}");
 								}
 								CommentService comm = new CommentService(podio);
@@ -427,8 +451,25 @@ namespace newVilcapCopyFileToGoogleDrive
 										fieldId = GetFieldId("Expenditures|Status");
 										var status = child.Field<CategoryItemField>(fieldId);
 										status.OptionText = "Template";
-
-										await podio.CreateItem(child, GetFieldId($"Expenditures"), false);
+										int waitSeconds = 5;
+										CallPodio:
+										try
+										{
+											await podio.CreateItem(child, GetFieldId($"Expenditures"), false);
+										}
+										catch (PodioUnavailableException ex)
+										{
+											context.Logger.LogLine($"{ex.Message}");
+											context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
+											for (int i = 0; i < waitSeconds; i++)
+											{
+												System.Threading.Thread.Sleep(1000);
+												context.Logger.LogLine(".");
+											}
+											waitSeconds = waitSeconds * 2;
+											goto CallPodio;
+										}
+										
 									}
 
 									//--- Create Pre-Workshop Surveys ---//
@@ -496,7 +537,25 @@ namespace newVilcapCopyFileToGoogleDrive
 										{
 											embedChild.AddEmbed(embed.EmbedId);
 										}
-										await podio.CreateItem(child, GetFieldId("Survey"), false);
+										int waitSeconds = 5;
+										CallPodio:
+										try
+										{
+											await podio.CreateItem(child, GetFieldId("Survey"), false);
+										}
+										catch (PodioUnavailableException ex)
+										{
+											context.Logger.LogLine($"{ex.Message}");
+											context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
+											for (int i = 0; i < waitSeconds; i++)
+											{
+												System.Threading.Thread.Sleep(1000);
+												context.Logger.LogLine(".");
+											}
+											waitSeconds = waitSeconds * 2;
+											goto CallPodio;
+										}
+										
 									}
 								}
 							}
@@ -641,7 +700,25 @@ namespace newVilcapCopyFileToGoogleDrive
 								embedChild.AddEmbed(embed.EmbedId);
 							}
 							//TODO: Add embed fields 
-							await podio.CreateItem(child, GetFieldId("Workshop Modules"), true);
+
+							int waitSeconds = 5;
+							CallPodio:
+							try
+							{
+								await podio.CreateItem(child, GetFieldId("Workshop Modules"), true);
+							}
+							catch (PodioUnavailableException ex)
+							{
+								context.Logger.LogLine($"{ex.Message}");
+								context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
+								for (int i = 0; i < waitSeconds; i++)
+								{
+									System.Threading.Thread.Sleep(1000);
+									context.Logger.LogLine(".");
+								}
+								waitSeconds = waitSeconds * 2;
+								goto CallPodio;
+							}							
 						}
 
 						// Create surveys //
@@ -710,7 +787,26 @@ namespace newVilcapCopyFileToGoogleDrive
 									embedChild.AddEmbed(embed.EmbedId);
 								}
 								//embed fields
-								await podio.CreateItem(child, GetFieldId("Surveys"), false);
+
+								int waitSeconds = 5;
+								CallPodio:
+								try
+								{
+									await podio.CreateItem(child, GetFieldId("Surveys"), false);
+								}
+								catch (PodioUnavailableException ex)
+								{
+									context.Logger.LogLine($"{ex.Message}");
+									context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
+									for (int i = 0; i < waitSeconds; i++)
+									{
+										System.Threading.Thread.Sleep(1000);
+										context.Logger.LogLine(".");
+									}
+									waitSeconds = waitSeconds * 2;
+									goto CallPodio;
+								}
+								
 							}
 						}
 					}
@@ -801,7 +897,26 @@ namespace newVilcapCopyFileToGoogleDrive
                     req.Fields = "webViewLink";
                     clone = req.Execute();
 					//runs 130x approx
-                    Embed em = embedServ.AddAnEmbed(clone.WebViewLink).Result;
+					int waitSeconds = 5;
+					CallPodio:
+					Embed em;
+					try
+					{
+						em = embedServ.AddAnEmbed(clone.WebViewLink).Result;
+					}
+					catch (PodioUnavailableException ex)
+					{
+						Console.WriteLine($"{ex.Message}");
+						Console.WriteLine($"Trying again in {waitSeconds} seconds.");
+						for (int i = 0; i < waitSeconds; i++)
+						{
+							System.Threading.Thread.Sleep(1000);
+							Console.WriteLine(".");
+						}
+						waitSeconds = waitSeconds * 2;
+						goto CallPodio;
+					}
+					
                     Console.WriteLine($"{e.podioEvent.item_id} - New Embed Link (resolved): {em.ResolvedUrl}");
                     Console.WriteLine($"{e.podioEvent.item_id} - New Embed Link (original): {em.OriginalUrl}");
                     Console.WriteLine($"{e.podioEvent.item_id} - New Embed added");
