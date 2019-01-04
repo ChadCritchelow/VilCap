@@ -8,7 +8,7 @@ namespace newVilcapCopyFileToGoogleDrive
 {
 	class NonGdriveLinks
 	{
-		public static async System.Threading.Tasks.Task NonGDriveCopy(Embed embed, List<Embed> embeds, Podio podio, RoutedPodioEvent e)  // Hold for 2.0 //
+		public async System.Threading.Tasks.Task NonGDriveCopy(Embed embed, List<Embed> embeds, Podio podio, RoutedPodioEvent e)  // Hold for 2.0 //
 		{
 			try
 			{
