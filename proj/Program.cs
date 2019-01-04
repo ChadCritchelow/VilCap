@@ -182,27 +182,5 @@ namespace newVilcapCopyFileToGoogleDrive
 			}
 			
 	    }
-
-
-       
-
-        //public static async Task NonGDriveCopy(Embed embed, List<Embed> embeds, Podio podio, RoutedPodioEvent e)  // Hold for 2.0 //
-        //{
-        //    try
-        //    {
-        //        Console.WriteLine($"{e.podioEvent.item_id} - Direct URL Embed Link (resolved): {embed.ResolvedUrl}");
-        //        Console.WriteLine($"{e.podioEvent.item_id} - Direct URL Embed Link (original): {embed.OriginalUrl}");
-        //        await Task.Run(() =>
-        //        {
-        //            embeds.Add(embed);
-        //        });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
-        //        throw ex;
-        //    }
-        //}
-
     }
 }
