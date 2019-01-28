@@ -86,9 +86,11 @@ namespace newVilcapCopyFileToGoogleDrive
 				{"theinnovationvillage" ,"The Innovation Village"},
 				{"universityofbritishcolumbia" ,"University of British Columbia"},
 				{"venturesplatform" ,"Ventures Platform"},
-				{"toolkittemplate" ,"VC Toolkit Template"}
+				{"toolkittemplate" ,"VC Toolkit Template"},
+                {"usfintech2019" , "US Fintech 2019" }
 
 			};
+
 			string serviceAcccount = System.Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
 			var cred = GoogleCredential.FromJson(serviceAcccount).CreateScoped(Scopes).UnderlyingCredential;
 			// Create Drive API service.
