@@ -32,12 +32,12 @@ namespace newVilcapCopyFileToGoogleDrive
 {
 
 
-	public class newVilcapCopyFileToGoogleDrive
-	{
+    public class newVilcapCopyFileToGoogleDrive
+    {
 		
-		static string[] Scopes = { DriveService.Scope.Drive };
-		static string ApplicationName = "BrickBridgeVilCap";
-		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
+        static string[] Scopes = { DriveService.Scope.Drive };
+        static string ApplicationName = "BrickBridgeVilCap";
+        static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
 		int fieldId = 0;
 		Dictionary<string, string> dictChild;
 		Dictionary<string, string> dictMaster;
@@ -87,9 +87,8 @@ namespace newVilcapCopyFileToGoogleDrive
 				{"universityofbritishcolumbia" ,"University of British Columbia"},
 				{"venturesplatform" ,"Ventures Platform"},
 				{"toolkittemplate" ,"VC Toolkit Template"},
-				{"vc1" , "US Fintech 2019" }
-
-			};
+                {"vc1" , "US Fintech 2019" }                
+            };
 
 			string serviceAcccount = System.Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
 			var cred = GoogleCredential.FromJson(serviceAcccount).CreateScoped(Scopes).UnderlyingCredential;
@@ -183,6 +182,6 @@ namespace newVilcapCopyFileToGoogleDrive
 					break;
 			}
 			
-		}
-	}
+	    }
+    }
 }
