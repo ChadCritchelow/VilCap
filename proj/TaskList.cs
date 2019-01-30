@@ -93,14 +93,18 @@ namespace newVilcapCopyFileToGoogleDrive
 				filter = await podio.FilterItems(21310276, op);
 				commentText = "Batch 6 finished";
 			}
-			else
-			{
+			else if (check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "7")
+            {
 				context.Logger.LogLine("Grabbing items 181-210 with links");
 				op.Offset = 180;
 				op.Limit = 30;
 				filter = await podio.FilterItems(21310276, op);
 				commentText = "Batch 7 finished";
 			}
+            else
+            {
+                context.Logger.LogLine("Grabbing nothing --- undefined input");
+            }
 			context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
 			int count = 0;
 			foreach (var masterItem in filter.Items)
