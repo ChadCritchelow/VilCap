@@ -47,7 +47,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			op.Filters = view.First().Filters;
 			if (check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "1")
 			{
-				context.Logger.LogLine("Grabbing items 1-42");
+				context.Logger.LogLine("Grabbing items 1-30");
 				op.Offset = 0;
 				op.Limit = 30;
 				filter = await podio.FilterItems(21310276, op);
@@ -55,7 +55,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			}
 			else if (check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "2")
 			{
-				context.Logger.LogLine("Grabbing items 43-84");
+				context.Logger.LogLine("Grabbing items 31-60");
 				op.Offset = 30;
 				op.Limit = 30;
 				filter = await podio.FilterItems(21310276, op);
@@ -63,7 +63,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			}
 			else if (check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "3")
 			{
-				context.Logger.LogLine("Grabbing items 85-126");
+				context.Logger.LogLine("Grabbing items 61-90");
 				op.Offset = 60;
 				op.Limit = 30;
 				filter = await podio.FilterItems(21310276, op);
@@ -71,7 +71,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			}
 			else if (check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "4")
 			{
-				context.Logger.LogLine("Grabbing items 127-168 with links");
+				context.Logger.LogLine("Grabbing items 91-120 with links");
 				op.Offset = 90;
 				op.Limit = 30;
 				filter = await podio.FilterItems(21310276, op);
@@ -79,7 +79,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			}
 			else if (check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "5")
 			{
-				context.Logger.LogLine("Grabbing items 169-all with links");
+				context.Logger.LogLine("Grabbing items 121-150 with links");
 				op.Offset = 120;
 				op.Limit = 30;
 				filter = await podio.FilterItems(21310276, op);
@@ -87,7 +87,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			}
 			else if (check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "6")
 			{
-				context.Logger.LogLine("Grabbing items 169-all with links");
+				context.Logger.LogLine("Grabbing items 151-180 with links");
 				op.Offset = 150;
 				op.Limit = 30;
 				filter = await podio.FilterItems(21310276, op);
@@ -95,7 +95,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			}
 			else
 			{
-				context.Logger.LogLine("Grabbing items 169-all with links");
+				context.Logger.LogLine("Grabbing items 181-210 with links");
 				op.Offset = 180;
 				op.Limit = 30;
 				filter = await podio.FilterItems(21310276, op);
@@ -216,11 +216,11 @@ namespace newVilcapCopyFileToGoogleDrive
 					{
 						await google.UpdateOneEmbed(service, em, embeds, cloneFolderId, podio, e);
 					}
-					else          // Hold for 2.0 //
-					{
-						NonGdriveLinks nonG = new NonGdriveLinks();
-						await nonG.NonGDriveCopy(em, embeds, podio, e);
-					}
+					//else          // Hold for 2.0 //
+					//{
+					//	NonGdriveLinks nonG = new NonGdriveLinks();
+					//	await nonG.NonGDriveCopy(em, embeds, podio, e);
+					//}
 				}
 				foreach (var embed in embeds)
 				{
