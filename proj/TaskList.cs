@@ -31,7 +31,7 @@ namespace newVilcapCopyFileToGoogleDrive
 		public async System.Threading.Tasks.Task CreateTaskLists(ILambdaContext context, Podio podio, Item check, RoutedPodioEvent e, DriveService service, GetIds ids, GoogleIntegration google,PreSurvAndExp pre)
 		{
 			string commentText;
-			var TlStatusId = ids.GetFieldId("Admin|Task List Status");
+			var TlStatusId = ids.GetFieldId("Admin|Hidden Status");
 			var startDateId = ids.GetFieldId("Admin|Program Start Date");
 			int fieldId = 0;
 
@@ -106,12 +106,12 @@ namespace newVilcapCopyFileToGoogleDrive
                 context.Logger.LogLine("Grabbing nothing --- undefined input");
             }
 			context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
-			int count = 0;
+			int count = (30 * (int)check.Field<CategoryItemField>(TlStatusId).Options.First().Text);
 			foreach (var masterItem in filter.Items)
 			{
-				count += 1;
 				context.Logger.LogLine($"On item #: {count}");
 				Item child = new Item();
+                count += 1;
 
 				//--- Assign Fields ---//	
 				fieldId = ids.GetFieldId("VC Administration|Master Schedule|Task Name");
