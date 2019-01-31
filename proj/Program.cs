@@ -112,7 +112,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			{
 				case "Admin":
 
-					var TlStatusId = ids.GetFieldId("Admin|Task List Status");
+					var TlStatusId = ids.GetFieldId("Admin|Hidden Status");
 					var startDateId = ids.GetFieldId("Admin|Program Start Date");
 					context.Logger.LogLine($"Value checking for: {check.Field<CategoryItemField>(TlStatusId).Options.First().Text}");
 					if (check.Field<CategoryItemField>(TlStatusId).Options.Any())
