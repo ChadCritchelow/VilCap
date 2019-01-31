@@ -104,14 +104,16 @@ namespace newVilcapCopyFileToGoogleDrive
             else
             {
                 context.Logger.LogLine("Grabbing nothing --- undefined input");
+                commentText = "";
             }
 			context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
-			int count = (30 * (int)check.Field<CategoryItemField>(TlStatusId).Options.First().Text);
+            int count = 0;
 			foreach (var masterItem in filter.Items)
 			{
+                count += 1;
 				context.Logger.LogLine($"On item #: {count}");
 				Item child = new Item();
-                count += 1;
+                
 
 				//--- Assign Fields ---//	
 				fieldId = ids.GetFieldId("VC Administration|Master Schedule|Task Name");
