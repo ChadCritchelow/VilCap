@@ -87,7 +87,8 @@ namespace newVilcapCopyFileToGoogleDrive
 				{"universityofbritishcolumbia" ,"University of British Columbia"},
 				{"venturesplatform" ,"Ventures Platform"},
 				{"toolkittemplate" ,"VC Toolkit Template"},
-                {"usfintech2019" , "US Fintech 2019" }                
+                {"usfintech2019" ,"US Fintech 2019" },
+                {"wepower" ,"WePower" }
             };
 
 			string serviceAcccount = System.Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
