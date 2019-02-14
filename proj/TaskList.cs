@@ -34,6 +34,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			var TlStatusId = ids.GetFieldId("Admin|Hidden Status");
 			var startDateId = ids.GetFieldId("Admin|Program Start Date");
             var packageId = ids.GetFieldId("Admin|Curriculum Package");
+            string packageName = check.Field<CategoryItemField>(packageId).Options.First().Text;
             int fieldId = 0;
 
 			context.Logger.LogLine("Satisfied conditions, Task List Function");
@@ -41,7 +42,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			context.Logger.LogLine("Got View Service");
 			var views = await viewServ.GetViews(21310276);//VC Admin Master Schedule App
             var view = from v in views
-                       where v.Name == check.Field<CategoryItemField>(packageId).Options.First().Text;
+                       where v.Name == packageName;
                        select v;
 			context.Logger.LogLine("Got View");
 			var op = new FilterOptions();
