@@ -74,6 +74,7 @@ namespace newVilcapCopyFileToGoogleDrive
 				{"anza" ,"Anza"},
 				{"bluemoon" ,"blueMoon"},
 				{"energygeneration" ,"Energy Generation"},
+                {"energygeneration2", "Energy Generation 2" },
 				{"entreprenarium" ,"Entreprenarium"},
 				{"etrilabs" ,"Etrilabs"},
 				{"globalentrepreneurshipnetwork" ,"Global Entrepreneurship Network (GEN) Freetown"},
@@ -116,6 +117,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
 					var TlStatusId = ids.GetFieldId("Admin|Hidden Status");
 					var startDateId = ids.GetFieldId("Admin|Program Start Date");
+                    var packageId = ids.GetFieldId("Admin|Curriculum Package");
 					context.Logger.LogLine($"Value checking for: {check.Field<CategoryItemField>(TlStatusId).Options.First().Text}");
 					if (check.Field<CategoryItemField>(TlStatusId).Options.Any())
 					{

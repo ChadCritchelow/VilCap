@@ -33,15 +33,16 @@ namespace newVilcapCopyFileToGoogleDrive
 			string commentText;
 			var TlStatusId = ids.GetFieldId("Admin|Hidden Status");
 			var startDateId = ids.GetFieldId("Admin|Program Start Date");
-			int fieldId = 0;
+            var packageId = ids.GetFieldId("Admin|Curriculum Package");
+            int fieldId = 0;
 
 			context.Logger.LogLine("Satisfied conditions, Task List Function");
 			var viewServ = new ViewService(podio);
 			context.Logger.LogLine("Got View Service");
 			var views = await viewServ.GetViews(21310276);//VC Admin Master Schedule App
-			var view = from v in views
-					   where v.Name == "Package"
-					   select v;
+            var view = from v in views
+                       where v.Name == check.Field<CategoryItemField>(packageId).Options.First().Text;
+                       select v;
 			context.Logger.LogLine("Got View");
 			var op = new FilterOptions();
 			op.Filters = view.First().Filters;

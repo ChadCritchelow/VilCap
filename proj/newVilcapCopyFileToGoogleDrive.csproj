@@ -8,9 +8,9 @@
   <ItemGroup>
     <PackageReference Include="PodioCore.Comments" Version="0.0.7" />
     <PackageReference Include="PodioCore.Items" Version="0.0.24" />
-    <PackageReference Include="Saasafras" Version="0.1.177" />
-    <PackageReference Include="Saasafras.Database" Version="0.1.25" />
-    <PackageReference Include="Google.Apis.Drive.v3" Version="1.36.1.1390" />
+    <PackageReference Include="Saasafras" Version="0.2.11" />
+    <PackageReference Include="Saasafras.Database" Version="0.1.29" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.38.0.1491" />
   </ItemGroup>
 
   <ItemGroup>

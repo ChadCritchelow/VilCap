@@ -41,7 +41,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			op.Filters = filterConditions;
 			var filter = await podio.FilterItems(21310273, op);
 
-			var baseDT = check.Field<DateItemField>(ids.GetFieldId("Create Workshop|Date")).Start;
+			//var baseDT = check.Field<DateItemField>(ids.GetFieldId("Create Workshop|Date")).Start;
 			int childDTF = ids.GetFieldId("Workshop Modules|Date");
 			int offsetF = ids.GetFieldId("Workshop Modules|Minute Offset");
 			int durationF = ids.GetFieldId("VC Administration|Content Curation |Duration");
