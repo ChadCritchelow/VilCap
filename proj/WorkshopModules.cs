@@ -139,11 +139,11 @@ namespace newVilcapCopyFileToGoogleDrive
 					{
 						await google.UpdateOneEmbed(service, em, embeds, cloneFolderId, podio, e);
 					}
-					//else          // Hold for 2.0 //
-					//{
-					//	NonGdriveLinks nonG = new NonGdriveLinks();
-					//	await nonG.NonGDriveCopy(em, embeds, podio, e);
-					//}
+					else          // Hold for 2.0 //
+					{
+						NonGdriveLinks nonG = new NonGdriveLinks();
+						await nonG.NonGDriveCopy(em, embeds, podio, e);
+					}
 				}
 				foreach (var embed in embeds)
 				{
