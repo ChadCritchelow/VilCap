@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Amazon.Lambda.Core;
 using Google.Apis.Drive.v3;
 using PodioCore;
@@ -8,20 +7,13 @@ using PodioCore.Exceptions;
 using PodioCore.Items;
 using PodioCore.Models;
 using PodioCore.Models.Request;
-using PodioCore.Services;
 using PodioCore.Utils.ItemFields;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using PodioCore.Utils;
-using PodioCore.Comments;
 
 namespace newVilcapCopyFileToGoogleDrive
 {
-	class WorkshopModules
+    class WorkshopModules
 	{
 		public static string StripHTML(string input)
 		{
@@ -41,7 +33,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			op.Filters = filterConditions;
 			var filter = await podio.FilterItems(21310273, op);
 
-			//var baseDT = check.Field<DateItemField>(ids.GetFieldId("Create Workshop|Date")).Start;
+			var baseDT = check.Field<DateItemField>(ids.GetFieldId("Create Workshop|Date")).Start;
 			int childDTF = ids.GetFieldId("Workshop Modules|Date");
 			int offsetF = ids.GetFieldId("Workshop Modules|Minute Offset");
 			int durationF = ids.GetFieldId("VC Administration|Content Curation |Duration");
