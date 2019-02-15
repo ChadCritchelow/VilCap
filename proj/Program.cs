@@ -35,7 +35,6 @@ namespace newVilcapCopyFileToGoogleDrive
 		RoutedPodioEvent ev;
 		string commentText=null;
 
-		
 		public static string StripHTML(string input)
 		{
 			return Regex.Replace(input, "<.*?>", String.Empty);
@@ -99,82 +98,119 @@ namespace newVilcapCopyFileToGoogleDrive
 			PreSurvAndExp pre = new PreSurvAndExp();
 			GetIds ids = new GetIds(dictChild,dictMaster,fullNames,e);
             WorkshopModules ws = new WorkshopModules();
+            WorkshopModules2 ws2 = new WorkshopModules2();
             Survey s = new Survey();
 
-            var revision = await podio.GetRevisionDifference(Convert.ToInt32(check.ItemId), check.CurrentRevision.Revision - 1, check.CurrentRevision.Revision);
-            var firstRevision = revision.First();
-            context.Logger.LogLine($"Last Revision field: {firstRevision.Label}");
-            var TlStatusId = ids.GetFieldId("Admin|Hidden Status");
-            var startDateId = ids.GetFieldId("Admin|Program Start Date");
-            var packageId = ids.GetFieldId("Admin|Curriculum Package");
-            var wsBatchId = ids.GetFieldId("Admin|WS Batch");
-
-            switch (firstRevision.Label)
+            switch (check.App.Name)
             {
 
-                case "WS Batch":
-                    context.Logger.LogLine($"Value checking for: 'WS Batch {check.Field<CategoryItemField>(wsBatchId).Options.First().Text}");
-                    if (check.Field<CategoryItemField>(wsBatchId).Options.Any())
+                case "Create Workshop": //create version1 workshops
+
+                    lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+                    try
                     {
-                        lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
-                        try
+                        if (string.IsNullOrEmpty(lockValue))
                         {
-                            if (string.IsNullOrEmpty(lockValue))
-                            {
-                                context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
-                                return;
-                            }
-                            context.Logger.LogLine($"Lock Value: {lockValue}");
-                            context.Logger.LogLine("Satisfied conditions, Workshop Function");
-                            WorkshopModules2 wm = new WorkshopModules2();
-                            await wm.CreateWorkshopModules2(context, podio, check, e, service, ids, google, pre);
+                            context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
+                            return;
                         }
-                        catch (Exception ex)
-                        {
-                            context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
-                                $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
-                        }
-                        finally
-                        {
-                            await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
-                        }
+                        context.Logger.LogLine($"Lock Value: {lockValue}");
+                        fieldId = ids.GetFieldId("Create Workshop|Workshop Type");
+                        var checkType = check.Field<CategoryItemField>(fieldId);
+
+                        await ws.CreateWorkShopModules(ids, check, podio, context, service, google, e, checkType);
+                        // Create surveys //
+                        await s.CreateSurveys(checkType, ids, podio, google, service, e, context);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+                    finally
+                    {
+                        await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
                     }
                     break;
 
-                case "Hidden Status":
-                    context.Logger.LogLine($"Value checking for: 'Task List {check.Field<CategoryItemField>(TlStatusId).Options.First().Text}");
-                    if (check.Field<CategoryItemField>(TlStatusId).Options.Any())
-                    {
-                        lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
-                        try
-                        {
-                            if (string.IsNullOrEmpty(lockValue))
-                            {
-                                context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
-                                return;
-                            }
-                            context.Logger.LogLine($"Lock Value: {lockValue}");
-                            context.Logger.LogLine("Satisfied conditions, Workshop Function");
-                            TaskList tl = new TaskList();
-                            await tl.CreateTaskLists(context, podio, check, e, service, ids, google, pre);
-                        }
-                        catch (Exception ex)
-                        {
-                            context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
-                                $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
-                        }
-                        finally
-                        {
-                            await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
-                        }
-                    }
-                    break;
 
-                default:
-                    context.Logger.LogLine($"Value checking for: 'WS Batch {check.Field<CategoryItemField>(wsBatchId).Options.First().Text}");
+
+                case "Admin": // create everything else
+
+                    var revision = await podio.GetRevisionDifference(Convert.ToInt32(check.ItemId), check.CurrentRevision.Revision - 1, check.CurrentRevision.Revision);
+                    var firstRevision = revision.First();
+                    context.Logger.LogLine($"Last Revision field: {firstRevision.Label}");
+                    var TlStatusId = ids.GetFieldId("Admin|Hidden Status");
+                    var startDateId = ids.GetFieldId("Admin|Program Start Date");
+                    var packageId = ids.GetFieldId("Admin|Curriculum Package");
+                    var wsBatchId = ids.GetFieldId("Admin|WS Batch");
+
+                    switch (firstRevision.Label)
+                    {
+
+                        case "WS Batch":
+                            context.Logger.LogLine($"Value checking for: 'WS Batch {check.Field<CategoryItemField>(wsBatchId).Options.First().Text}");
+                            if (check.Field<CategoryItemField>(wsBatchId).Options.Any())
+                            {
+                                lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+                                try
+                                {
+                                    if (string.IsNullOrEmpty(lockValue))
+                                    {
+                                        context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
+                                        return;
+                                    }
+                                    context.Logger.LogLine($"Lock Value: {lockValue}");
+                                    context.Logger.LogLine("Satisfied conditions, Workshop Function");
+                                    WorkshopModules2 wm = new WorkshopModules2();
+                                    await wm.CreateWorkshopModules2(context, podio, check, e, service, ids, google, pre);
+                                }
+                                catch (Exception ex)
+                                {
+                                    context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
+                                        $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
+                                }
+                                finally
+                                {
+                                    await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
+                                }
+                            }
+                            break;
+
+                        case "Hidden Status":
+                            context.Logger.LogLine($"Value checking for: 'Task List {check.Field<CategoryItemField>(TlStatusId).Options.First().Text}");
+                            if (check.Field<CategoryItemField>(TlStatusId).Options.Any())
+                            {
+                                lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+                                try
+                                {
+                                    if (string.IsNullOrEmpty(lockValue))
+                                    {
+                                        context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
+                                        return;
+                                    }
+                                    context.Logger.LogLine($"Lock Value: {lockValue}");
+                                    context.Logger.LogLine("Satisfied conditions, Workshop Function");
+                                    TaskList tl = new TaskList();
+                                    await tl.CreateTaskLists(context, podio, check, e, service, ids, google, pre);
+                                }
+                                catch (Exception ex)
+                                {
+                                    context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
+                                        $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
+                                }
+                                finally
+                                {
+                                    await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
+                                }
+                            }
+                            break;
+
+                        default:
+                            context.Logger.LogLine($"Value checking for: 'WS Batch {check.Field<CategoryItemField>(wsBatchId).Options.First().Text}");
+                            break;
+                    }
                     break;
             }
-
         }
     }
 }

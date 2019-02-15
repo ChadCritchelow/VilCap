@@ -37,11 +37,10 @@ namespace newVilcapCopyFileToGoogleDrive
 			context.Logger.LogLine("Got View Service");
 			var views = await viewServ.GetViews(21310276);//VC Admin Master Schedule App
             var view = from v in views
-                       where v.Name == packageName
+                       where v.Name == "Package" // ------------- >> where v.Name == packageName
                        select v;
 			context.Logger.LogLine($"Got View '{packageName}'");
             var op = new FilterOptions{ Filters = view.First().Filters };
-            //const int LIMIT = 30;
 
             if (check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "1")
 			{
