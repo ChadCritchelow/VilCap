@@ -6,7 +6,7 @@ namespace newVilcapCopyFileToGoogleDrive
 {
 	public class RoutedPodioEvent
 	{
-			public BrickBridge.Models.PodioEvent podioEvent { get; set; }
+			public Saasafras.Model.PodioEvent podioEvent { get; set; }
 			public string clientId { get; set; }
 			public string version { get; set; }
 			public string solutionId { get; set; }

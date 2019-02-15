@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Amazon.Lambda.Core;
 using Google.Apis.Drive.v3;
 using PodioCore;
@@ -10,18 +9,14 @@ using PodioCore.Models;
 using PodioCore.Models.Request;
 using PodioCore.Services;
 using PodioCore.Utils.ItemFields;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using PodioCore.Utils;
 using PodioCore.Comments;
 
 namespace newVilcapCopyFileToGoogleDrive
 {
-	class TaskList
+    class TaskList
 	{
 		PodioCollection<Item> filter;
 		public static string StripHTML(string input)
@@ -33,19 +28,21 @@ namespace newVilcapCopyFileToGoogleDrive
 			string commentText;
 			var TlStatusId = ids.GetFieldId("Admin|Hidden Status");
 			var startDateId = ids.GetFieldId("Admin|Program Start Date");
-			int fieldId = 0;
+            var packageId = ids.GetFieldId("Admin|Curriculum Package");
+            string packageName = check.Field<CategoryItemField>(packageId).Options.First().Text;
+            int fieldId = 0;
 
 			context.Logger.LogLine("Satisfied conditions, Task List Function");
 			var viewServ = new ViewService(podio);
 			context.Logger.LogLine("Got View Service");
 			var views = await viewServ.GetViews(21310276);//VC Admin Master Schedule App
-			var view = from v in views
-					   where v.Name == "Package"
-					   select v;
-			context.Logger.LogLine("Got View");
-			var op = new FilterOptions();
-			op.Filters = view.First().Filters;
-			if (check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "1")
+            var view = from v in views
+                       where v.Name == "Package" // ------------- >> where v.Name == packageName
+                       select v;
+			context.Logger.LogLine($"Got View '{packageName}'");
+            var op = new FilterOptions{ Filters = view.First().Filters };
+
+            if (check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "1")
 			{
 				context.Logger.LogLine("Grabbing items 1-30");
 				op.Offset = 0;
