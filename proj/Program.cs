@@ -80,7 +80,8 @@ namespace newVilcapCopyFileToGoogleDrive
 				{"toolkittemplate" ,"VC Toolkit Template"},
                 {"toolkittemplate2", "VC Toolkit Template 2" },
                 {"usfintech2019" ,"US Fintech 2019" },
-                {"wepower" ,"WePower" }
+                {"wepower" ,"WePower" },
+                {"middlegame ventures", "Middlegame Ventures" }
             };
 
 			string serviceAcccount = System.Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
