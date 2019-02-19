@@ -28,8 +28,8 @@ namespace newVilcapCopyFileToGoogleDrive
 			string commentText;
 			var TlStatusId = ids.GetFieldId("Admin|Hidden Status");
 			var startDateId = ids.GetFieldId("Admin|Program Start Date");
-            var packageId = ids.GetFieldId("Admin|Curriculum Package");
-            string packageName = check.Field<CategoryItemField>(packageId).Options.First().Text;
+            //var packageId = ids.GetFieldId("Admin|Curriculum Package");
+            //string packageName = check.Field<CategoryItemField>(packageId).Options.First().Text;
             int fieldId = 0;
 
 			context.Logger.LogLine("Satisfied conditions, Task List Function");
@@ -39,7 +39,7 @@ namespace newVilcapCopyFileToGoogleDrive
             var view = from v in views
                        where v.Name == "Package" // ------------- >> where v.Name == packageName
                        select v;
-			context.Logger.LogLine($"Got View '{packageName}'");
+			//context.Logger.LogLine($"Got View '{packageName}'");
             var op = new FilterOptions{ Filters = view.First().Filters };
 
             if (check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "1")
