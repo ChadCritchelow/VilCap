@@ -141,7 +141,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     context.Logger.LogLine($"Last Revision field: {firstRevision.Label}");
                     var TlStatusId = ids.GetFieldId("Admin|Hidden Status");
                     var startDateId = ids.GetFieldId("Admin|Program Start Date");
-                    var packageId = ids.GetFieldId("Admin|Curriculum Package");
+                   // var packageId = ids.GetFieldId("Admin|Curriculum Package");
                     var wsBatchId = ids.GetFieldId("Admin|WS Batch");
 
                     switch (firstRevision.Label)
