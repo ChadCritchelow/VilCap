@@ -32,7 +32,7 @@ namespace newVilcapCopyFileToGoogleDrive
 					File folder = new File
 					{
 						Name = e.environmentId,
-						MimeType = "application/vnd.google-apps.folder",
+						MimeType = "application/vnd.google-apps.folder"
 					};
 					folder.Parents.Add(parentFolder);
 					var request = ds.Files.Create(folder);

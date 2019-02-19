@@ -81,7 +81,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 {"toolkittemplate2", "VC Toolkit Template 2" },
                 {"usfintech2019" ,"US Fintech 2019" },
                 {"wepower" ,"WePower" },
-                {"middlegame ventures", "Middlegame Ventures" }
+                {"middlegameventures", "Middlegame Ventures" }
             };
 
 			string serviceAcccount = System.Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
@@ -104,7 +104,6 @@ namespace newVilcapCopyFileToGoogleDrive
 
             switch (check.App.Name)
             {
-
                 case "Create Workshop": //create version1 workshops
 
                     lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
