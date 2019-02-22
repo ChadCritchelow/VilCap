@@ -47,7 +47,7 @@ namespace newVilcapCopyFileToGoogleDrive
             op.Limit = 25;
             context.Logger.LogLine($"Limit: 25");
 
-            switch (check.Field<CategoryItemField>(batch).Options.First().Text)
+            switch (check.Field<CategoryItemField>(batch).Options.FirstOrDefault().Text)
             {
                 case "1":
                     context.Logger.LogLine("Grabbing items 1-25");
