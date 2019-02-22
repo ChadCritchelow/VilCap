@@ -139,7 +139,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     var revision = await podio.GetRevisionDifference(Convert.ToInt32(check.ItemId), check.CurrentRevision.Revision - 1, check.CurrentRevision.Revision);
                     var firstRevision = revision.First();
                     context.Logger.LogLine($"Last Revision field: {firstRevision.Label}");
-                    var TlStatusId = ids.GetFieldId("Admin|Hidden Status");
+                    
                     var startDateId = ids.GetFieldId("Admin|Program Start Date");
                    // var packageId = ids.GetFieldId("Admin|Curriculum Package");
                     var wsBatchId = ids.GetFieldId("Admin|WS Batch");
@@ -177,6 +177,7 @@ namespace newVilcapCopyFileToGoogleDrive
                             break;
 
                         case "Hidden Status":
+                            var TlStatusId = ids.GetFieldId("Admin|Hidden Status");
                             context.Logger.LogLine($"Value checking for: 'Task List {check.Field<CategoryItemField>(TlStatusId).Options.First().Text}");
                             if (check.Field<CategoryItemField>(TlStatusId).Options.Any())
                             {
