@@ -160,7 +160,7 @@ namespace newVilcapCopyFileToGoogleDrive
                                         return;
                                     }
                                     context.Logger.LogLine($"Lock Value: {lockValue}");
-                                    context.Logger.LogLine("Satisfied conditions, Workshop Function");
+                                    context.Logger.LogLine("Satisfied conditions, Workshop Function 2");
                                     WorkshopModules2 wm = new WorkshopModules2();
                                     await wm.CreateWorkshopModules2(context, podio, check, e, service, ids, google, pre);
                                 }
