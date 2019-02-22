@@ -50,25 +50,23 @@ namespace newVilcapCopyFileToGoogleDrive
                 case "1":
                     context.Logger.LogLine("Grabbing items 1-25");
                     op.Offset = 0;
-                    filter = await podio.FilterItems(21310276, op);
+                    filter = await podio.FilterItems(21310273, op);
                     commentText = "WS Batch 1 finished";
                     break;
                 case "2":
                     context.Logger.LogLine("Grabbing items 26-50");
                     op.Offset = 25;
-                    filter = await podio.FilterItems(21310276, op);
+                    filter = await podio.FilterItems(21310273, op);
                     commentText = "WS Batch 2 finished";
                     break;
                 case "3":
                     context.Logger.LogLine("Grabbing items 51-75");
                     op.Offset = 50;
-                    filter = await podio.FilterItems(21310276, op);
+                    filter = await podio.FilterItems(21310273, op);
                     commentText = "WS Batch 3 finished";
                     break;
                 default:
                     context.Logger.LogLine("ERROR Invalid Batch #");
-                    op.Offset = 50;
-                    filter = await podio.FilterItems(21310276, op);
                     commentText = "WS Batch # not recognized";
                     break;
             }
