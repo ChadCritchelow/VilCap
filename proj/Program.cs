@@ -142,12 +142,13 @@ namespace newVilcapCopyFileToGoogleDrive
                     
                    // var startDateId = ids.GetFieldId("Admin|Program Start Date");
                    // var packageId = ids.GetFieldId("Admin|Curriculum Package");
-                    var wsBatchId = ids.GetFieldId("Admin|WS Batch");
+                   // var wsBatchId = ids.GetFieldId("Admin|WS Batch");
 
                     switch (firstRevision.Label)
                     {
 
                         case "WS Batch":
+                            var wsBatchId = ids.GetFieldId("Admin|WS Batch");
                             context.Logger.LogLine($"Value checking for: 'WS Batch {check.Field<CategoryItemField>(wsBatchId).Options.First().Text}");
                             if (check.Field<CategoryItemField>(wsBatchId).Options.Any())
                             {
