@@ -208,7 +208,7 @@ namespace newVilcapCopyFileToGoogleDrive
                             break;
 
                         default:
-                            context.Logger.LogLine($"Value checking for: 'WS Batch {check.Field<CategoryItemField>(wsBatchId).Options.First().Text}");
+                            context.Logger.LogLine($"ERROR: Value '{firstRevision.Label}' not Recognized.");
                             break;
                     }
                     break;
