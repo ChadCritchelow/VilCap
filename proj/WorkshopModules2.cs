@@ -175,7 +175,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     DateTime childDateTimeEnd = childDateTimeStart.Add(durChild.Value.Value.Duration());
                     timeFromStart = timeFromStart.Add(durChild.Value.Value.Duration());
 
-                    fieldId = ids.GetFieldId("Workshop Modules|Time");
+                    fieldId = ids.GetFieldId("Workshop Modules|Date");
                     var childTime = child.Field<DateItemField>(fieldId);
                     childTime.Start = childDateTimeStart;
                     childTime.End = childDateTimeEnd;
