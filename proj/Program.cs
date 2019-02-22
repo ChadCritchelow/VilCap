@@ -140,7 +140,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     var firstRevision = revision.First();
                     context.Logger.LogLine($"Last Revision field: {firstRevision.Label}");
                     
-                    var startDateId = ids.GetFieldId("Admin|Program Start Date");
+                   // var startDateId = ids.GetFieldId("Admin|Program Start Date");
                    // var packageId = ids.GetFieldId("Admin|Curriculum Package");
                     var wsBatchId = ids.GetFieldId("Admin|WS Batch");
 
