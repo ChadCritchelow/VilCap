@@ -32,9 +32,12 @@ namespace newVilcapCopyFileToGoogleDrive
 					File folder = new File
 					{
 						Name = e.environmentId,
-						MimeType = "application/vnd.google-apps.folder"
+						MimeType = "application/vnd.google-apps.folder",
 					};
-					folder.Parents.Add(parentFolder);
+                    File F = new File();
+                    //F.Name = e.environmentId; // test
+                    //F.MimeType = "application/vnd.google-apps.folder"; // test
+                    folder.Parents.Add(parentFolder);
 					var request = ds.Files.Create(folder);
 					request.Fields = "id";
 
@@ -44,7 +47,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
+				Console.WriteLine($"ERROR: {e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
 				return null;
 			}
 		}

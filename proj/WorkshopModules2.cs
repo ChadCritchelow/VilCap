@@ -29,6 +29,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			var batchId = ids.GetFieldId("Admin|WS Batch");
             string batch = check.Field<CategoryItemField>(batchId).Options.First().Text;
             var startDateId = ids.GetFieldId("Admin|Program Start Date");
+            DateTime startDate = (DateTime)check.Field<DateItemField>(startDateId).StartDate;
             var packageId = ids.GetFieldId("Admin|Curriculum Package");
             string package = check.Field<CategoryItemField>(packageId).Options.First().Text;
             int fieldId = 0;
@@ -73,15 +74,24 @@ namespace newVilcapCopyFileToGoogleDrive
             }
            
 			context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
-            int count = 0;
+
             //int childDTF = ids.GetFieldId("Workshop Modules|Date");
             //int offsetF = ids.GetFieldId("Workshop Modules|Minute Offset");
             //int durationF = ids.GetFieldId("VC Administration|Content Curation |Duration");
+            int count = 0;
+            int day = -1;
+            TimeSpan timeFromStart = new TimeSpan(0);
             foreach (var master in filter.Items)
 			{
                 count += 1;
-				context.Logger.LogLine($"On item #: {count}");
-				Item child = new Item();
+                context.Logger.LogLine($"On item #: {count}");
+                Item child = new Item();
+                if (day == -1)
+                {
+                    fieldId = ids.GetFieldId("VC Administration|Content Curation |Workshop Day");
+                    var dayMaster = master.Field<CategoryItemField>(fieldId);
+                    Int32.TryParse(dayMaster.Options.First().Text.Split("Day ")[1], out day);
+                }
 
                 //--- Assign Fields ---//
                 fieldId = ids.GetFieldId("VC Administration|Content Curation |Workshop Detail Title");
@@ -102,17 +112,6 @@ namespace newVilcapCopyFileToGoogleDrive
                     descChild.Value = StripHTML(descMaster.Value);
                 }
 
-                fieldId = ids.GetFieldId("VC Administration|Content Curation |Duration");
-                var durMaster = master.Field<DurationItemField>(fieldId);
-                context.Logger.LogLine($"Master Duration: {durMaster.Value.Value}");
-                if (durMaster.Value != null)
-                {
-                    context.Logger.LogLine("Status was not null");
-                    fieldId = ids.GetFieldId("Workshop Modules|Duration");
-                    var durChild = child.Field<DurationItemField>(fieldId);
-                    durChild.Value = durMaster.Value.Value.Duration(); // durChild.Value.Value.Add(durMaster.Value.Value);? durChild.Value = durMaster.Value;?
-                    context.Logger.LogLine($"Child Duration: {durChild.Value.Value}");
-                }
                 var offsetMaster = master.Field<NumericItemField>(ids.GetFieldId("VC Administration|Content Curation |Minute Offset"));
                 if (offsetMaster.Value != null)
                 {
@@ -156,6 +155,32 @@ namespace newVilcapCopyFileToGoogleDrive
                     var mentChild = child.Field<TextItemField>(fieldId);
                     mentChild.Value = mentMaster.Value;
                 }
+
+                //** Date Calcs **//
+                
+                fieldId = ids.GetFieldId("VC Administration|Content Curation |Package Sequence");
+                var seqMaster = master.Field<CategoryItemField>(fieldId);
+                fieldId = ids.GetFieldId("VC Administration|Content Curation |Duration");
+                var durMaster = master.Field<DurationItemField>(fieldId);
+                context.Logger.LogLine($"Master Duration: {durMaster.Value.Value}");
+                if (durMaster.Value != null)
+                {
+                    context.Logger.LogLine("Status was not null");
+                    fieldId = ids.GetFieldId("Workshop Modules|Duration");
+                    var durChild = child.Field<DurationItemField>(fieldId);
+                    durChild.Value = durMaster.Value.Value.Duration(); // durChild.Value.Value.Add(durMaster.Value.Value);? durChild.Value = durMaster.Value;?
+                    context.Logger.LogLine($"Child Duration: {durChild.Value.Value}");
+
+                    DateTime childDateTimeStart = startDate.Add(timeFromStart);
+                    DateTime childDateTimeEnd = childDateTimeStart.Add(durChild.Value.Value.Duration());
+                    timeFromStart = timeFromStart.Add(durChild.Value.Value.Duration());
+
+                    fieldId = ids.GetFieldId("Workshop Modules|Time");
+                    var childTime = child.Field<DateItemField>(fieldId);
+                    childTime.Start = childDateTimeStart;
+                    childTime.End = childDateTimeEnd;
+                }
+                //****///
 
                 fieldId = ids.GetFieldId("VC Administration|Content Curation |GDrive File Name");
                 var embedMaster = master.Field<EmbedItemField>(fieldId);
