@@ -37,7 +37,7 @@ namespace newVilcapCopyFileToGoogleDrive
             context.Logger.LogLine($"Curriculum Batch '{batch}'");
 			var viewServ = new ViewService(podio);
 			context.Logger.LogLine("Got View Service");
-			var views = await viewServ.GetViews(21310276);//VC Admin Content Curation  App
+			var views = await viewServ.GetViews(21310273);//VC Admin Content Curation  App
             var view = from v in views
                        where v.Name == package
                        select v;
