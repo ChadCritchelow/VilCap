@@ -43,9 +43,11 @@ namespace newVilcapCopyFileToGoogleDrive
                        select v;
 			context.Logger.LogLine($"Got View '{package}'");
             var op = new FilterOptions{ Filters = view.First().Filters };
+            context.Logger.LogLine($"Made var '{op.ToString()}'");
             op.Limit = 25;
+            context.Logger.LogLine($"Limit: 25");
 
-            switch(check.Field<CategoryItemField>(batch).Options.First().Text)
+            switch (check.Field<CategoryItemField>(batch).Options.First().Text)
             {
                 case "1":
                     context.Logger.LogLine("Grabbing items 1-25");
