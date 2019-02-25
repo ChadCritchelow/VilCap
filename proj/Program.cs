@@ -149,9 +149,9 @@ namespace newVilcapCopyFileToGoogleDrive
 
                         case "WS Batch":
                             var wsBatchId = ids.GetFieldId("Admin|WS Batch");
-                            context.Logger.LogLine($"Value checking for: 'WS Batch {check.Field<CategoryItemField>(wsBatchId).Options.First().Text}");
                             if (check.Field<CategoryItemField>(wsBatchId).Options.Any())
                             {
+                                context.Logger.LogLine($"Value checking for: 'WS Batch {check.Field<CategoryItemField>(wsBatchId).Options.First().Text}'");
                                 lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
                                 try
                                 {

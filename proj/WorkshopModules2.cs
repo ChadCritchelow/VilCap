@@ -18,34 +18,50 @@ namespace newVilcapCopyFileToGoogleDrive
 {
     class WorkshopModules2
 	{
+
 		PodioCollection<Item> filter;
 		public static string StripHTML(string input)
 		{
 			return Regex.Replace(input, "<.*?>", String.Empty);
 		}
+
 		public async System.Threading.Tasks.Task CreateWorkshopModules2(ILambdaContext context, Podio podio, Item check, RoutedPodioEvent e, DriveService service, GetIds ids, GoogleIntegration google,PreSurvAndExp pre)
 		{
-			string commentText;
-			var batchId = ids.GetFieldId("Admin|WS Batch");
+
+            // Utility vars //
+
+			string commentText = "";
+            int fieldId = 0;
+            int count = 0;
+            int day = 0;
+            TimeSpan timeFromStart = new TimeSpan(0);
+
+            // Admin app values //
+
+            var batchId = ids.GetFieldId("Admin|WS Batch");
             string batch = check.Field<CategoryItemField>(batchId).Options.First().Text;
+
             var startDateId = ids.GetFieldId("Admin|Program Start Date");
             DateTime startDate = (DateTime)check.Field<DateItemField>(startDateId).StartDate;
+
             var packageId = ids.GetFieldId("Admin|Curriculum Package");
             string package = check.Field<CategoryItemField>(packageId).Options.First().Text;
-            int fieldId = 0;
-
             context.Logger.LogLine($"Curriculum Batch '{batch}'");
+
+            // Get Batch //
+
 			var viewServ = new ViewService(podio);
 			context.Logger.LogLine("Got View Service");
-			var views = await viewServ.GetViews(21310273);//VC Admin Content Curation  App
+			var views = await viewServ.GetViews(21310273); // VC Admin WS - Content Curation App
             var view = from v in views
                        where v.Name == package
                        select v;
 			context.Logger.LogLine($"Got View '{package}'");
+
             var op = new FilterOptions{ Filters = view.First().Filters };
-            context.Logger.LogLine($"Made var '{op.ToString()}'");
+            op.SortBy = "185391072"; // fieldId of Package Sequence (num) from Content Curation
+            op.SortDesc = false;
             op.Limit = 25;
-            context.Logger.LogLine($"Limit: 25");
 
             switch (batch)
             {
@@ -72,28 +88,33 @@ namespace newVilcapCopyFileToGoogleDrive
                     commentText = "WS Batch # not recognized";
                     break;
             }
-           
 			context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
 
-            //int childDTF = ids.GetFieldId("Workshop Modules|Date");
-            //int offsetF = ids.GetFieldId("Workshop Modules|Minute Offset");
-            //int durationF = ids.GetFieldId("VC Administration|Content Curation |Duration");
-            int count = 0;
-            int day = -1;
-            TimeSpan timeFromStart = new TimeSpan(0);
+            // Main Loop //
+
             foreach (var master in filter.Items)
 			{
+                // Setup //
+
                 count += 1;
                 context.Logger.LogLine($"On item #: {count}");
                 Item child = new Item();
-                if (day == -1)
+
+                // Check for new Day //
+
+                fieldId = ids.GetFieldId("VC Administration|Content Curation |Workshop Day");
+                var dayMaster = master.Field<CategoryItemField>(fieldId);
+                var dayMasterVal = 0;
+                Int32.TryParse(dayMaster.Options.First().Text.Split("Day ")[1], out dayMasterVal);
+
+                if(dayMasterVal != day)
                 {
-                    fieldId = ids.GetFieldId("VC Administration|Content Curation |Workshop Day");
-                    var dayMaster = master.Field<CategoryItemField>(fieldId);
-                    Int32.TryParse(dayMaster.Options.First().Text.Split("Day ")[1], out day);
+                    day = dayMasterVal;
+                    timeFromStart = TimeSpan.FromDays(day);
                 }
 
                 //--- Assign Fields ---//
+
                 fieldId = ids.GetFieldId("VC Administration|Content Curation |Workshop Detail Title");
                 var titleMaster = master.Field<TextItemField>(fieldId);
                 if (titleMaster.Value != null)
@@ -119,15 +140,6 @@ namespace newVilcapCopyFileToGoogleDrive
                     var offsetChild = child.Field<NumericItemField>(fieldId);
                     offsetChild.Value = offsetMaster.Value;
                 }
-                context.Logger.LogLine("Checking Date information [disabled]");
-                //double minutes = Convert.ToDouble(child.Field<NumericItemField>(offsetF).Value);
-                //context.Logger.LogLine($"Minutes: {minutes}");
-                //child.Field<DateItemField>(childDTF).Start = baseDT.Value.AddMinutes(minutes);
-                //context.Logger.LogLine($"Child Start Date: {child.Field<DateItemField>(childDTF).Start}");
-                //minutes = master.Field<DurationItemField>(durationF).Value.Value.TotalMinutes;
-                //context.Logger.LogLine($"New minutes: {minutes}");
-                //child.Field<DateItemField>(childDTF).End = child.Field<DateItemField>(childDTF).Start.Value.AddMinutes(minutes);
-                //context.Logger.LogLine($"Child date end: {child.Field<DateItemField>(childDTF).End}");
 
                 fieldId = ids.GetFieldId("VC Administration|Content Curation |Entrepreneur Pre-Work Required");
                 var workMaster = master.Field<TextItemField>(fieldId);
@@ -156,20 +168,19 @@ namespace newVilcapCopyFileToGoogleDrive
                     mentChild.Value = mentMaster.Value;
                 }
 
-                //** Date Calcs **//
-                
+                // Date Calcs //
+
                 fieldId = ids.GetFieldId("VC Administration|Content Curation |Package Sequence");
                 var seqMaster = master.Field<CategoryItemField>(fieldId);
+
                 fieldId = ids.GetFieldId("VC Administration|Content Curation |Duration");
                 var durMaster = master.Field<DurationItemField>(fieldId);
-                context.Logger.LogLine($"Master Duration: {durMaster.Value.Value}");
+
                 if (durMaster.Value != null)
                 {
-                    context.Logger.LogLine("Status was not null");
                     fieldId = ids.GetFieldId("Workshop Modules|Duration");
                     var durChild = child.Field<DurationItemField>(fieldId);
                     durChild.Value = durMaster.Value.Value.Duration(); // durChild.Value.Value.Add(durMaster.Value.Value);? durChild.Value = durMaster.Value;?
-                    context.Logger.LogLine($"Child Duration: {durChild.Value.Value}");
 
                     DateTime childDateTimeStart = startDate.Add(timeFromStart);
                     DateTime childDateTimeEnd = childDateTimeStart.Add(durChild.Value.Value.Duration());
@@ -180,15 +191,18 @@ namespace newVilcapCopyFileToGoogleDrive
                     childTime.Start = childDateTimeStart;
                     childTime.End = childDateTimeEnd;
                 }
-                //****///
+
+                // GDrive Integration //
 
                 fieldId = ids.GetFieldId("VC Administration|Content Curation |GDrive File Name");
                 var embedMaster = master.Field<EmbedItemField>(fieldId);
                 fieldId = ids.GetFieldId("Workshop Modules|Link to Material");
                 var embedChild = child.Field<EmbedItemField>(fieldId);
                 List<Embed> embeds = new List<Embed>();
+
 				string parentFolderId = System.Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
 				var cloneFolderId = google.GetSubfolderId(service, podio, e, parentFolderId);//TODO:
+
 				foreach (var em in embedMaster.Embeds)
 				{
 					if (em.OriginalUrl.Contains(".google."))
@@ -201,10 +215,12 @@ namespace newVilcapCopyFileToGoogleDrive
 					//	await nonG.NonGDriveCopy(em, embeds, podio, e);
 					//}
 				}
+
 				foreach (var embed in embeds)
 				{
 					embedChild.AddEmbed(embed.EmbedId);
 				}
+
 				context.Logger.LogLine($"Added field:{embedMaster.Label}");
 				var taskListAppId = ids.GetFieldId("Workshop Modules");
 				int waitSeconds = 5;
@@ -227,6 +243,9 @@ namespace newVilcapCopyFileToGoogleDrive
 				}
 				context.Logger.LogLine($"Created item #{count}");
 			}
+
+            // Comment on Client's Admin item && Add aux items //
+
 			CommentService comm = new CommentService(podio);
 			if (check.Field<CategoryItemField>(batchId).Options.First().Text == "1")
 			{
