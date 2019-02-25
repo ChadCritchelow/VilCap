@@ -110,7 +110,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 if(dayMasterVal != day)
                 {
                     day = dayMasterVal;
-                    timeFromStart = TimeSpan.FromDays(day);
+                    timeFromStart = TimeSpan.FromDays(day-1);
                 }
 
                 //--- Assign Fields ---//
