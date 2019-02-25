@@ -42,7 +42,7 @@ namespace newVilcapCopyFileToGoogleDrive
             string batch = check.Field<CategoryItemField>(batchId).Options.First().Text;
 
             var startDateId = ids.GetFieldId("Admin|Program Start Date");
-            DateTime startDate = (DateTime)check.Field<DateItemField>(startDateId).StartDate;
+            DateTime startDate = new DateTime(check.Field<DateItemField>(startDateId).StartDate.Value.Ticks);
 
             var packageId = ids.GetFieldId("Admin|Curriculum Package");
             string package = check.Field<CategoryItemField>(packageId).Options.First().Text;
