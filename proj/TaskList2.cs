@@ -32,7 +32,8 @@ namespace newVilcapCopyFileToGoogleDrive
             int fieldId = 0;
             int count = 0;
             var batch = check.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch")).Options.First().Text;
-            var tlPackageName = check.Field<CategoryItemField>(ids.GetFieldId("Admin|Task List Selection")).Options.First().Text;
+            var tlPackageId = ids.GetFieldId("Admin|Task List Selection");
+            var tlPackageName = check.Field<CategoryItemField>(tlPackageId).Options.First().Text;
             const int PARTITIONS = 5;
 
             // Get Timespans //
@@ -163,7 +164,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 Int32.TryParse(assignment.Options.First().Text, out assignmentVal);
                 assignmentVal--;
 
-                if (durMaster.Value.HasValue)
+                if (true)
                 {
                     fieldId = ids.GetFieldId("Task List|Duration (days)");
                     var durChild = child.Field<NumericItemField>(fieldId).Value.Value;
