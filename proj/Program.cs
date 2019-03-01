@@ -186,8 +186,8 @@ namespace newVilcapCopyFileToGoogleDrive
                                     }
                                     context.Logger.LogLine($"Lock Value: {lockValue}");
                                     context.Logger.LogLine("Satisfied conditions, TaskList2");
-                                    TaskList tl = new TaskList();
-                                    await tl.CreateTaskLists(context, podio, check, e, service, ids, google, pre);
+                                    TaskList2 tl2 = new TaskList2();
+                                    await tl2.CreateTaskLists(context, podio, check, e, service, ids, google, pre);
                                 }
                                 catch (Exception ex)
                                 {
