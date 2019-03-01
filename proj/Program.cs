@@ -104,7 +104,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
             switch (check.App.Name)
             {
-                case "Create Workshop": //create version1 workshops
+                case "Create Workshop": //create legacy workshops
 
                     lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
                     try
@@ -132,22 +132,16 @@ namespace newVilcapCopyFileToGoogleDrive
                     }
                     break;
 
-
-
-                case "Admin": // create everything else
+                case "Admin": // everything else
 
                     var revision = await podio.GetRevisionDifference(Convert.ToInt32(check.ItemId), check.CurrentRevision.Revision - 1, check.CurrentRevision.Revision);
                     var firstRevision = revision.First();
                     context.Logger.LogLine($"Last Revision field: {firstRevision.Label}");
-                    
-                   // var startDateId = ids.GetFieldId("Admin|Program Start Date");
-                   // var packageId = ids.GetFieldId("Admin|Curriculum Package");
-                   // var wsBatchId = ids.GetFieldId("Admin|WS Batch");
 
                     switch (firstRevision.Label)
                     {
 
-                        case "WS Batch":
+                        case "WS Batch": // Create Workshops
                             var wsBatchId = ids.GetFieldId("Admin|WS Batch");
                             if (check.Field<CategoryItemField>(wsBatchId).Options.Any())
                             {
@@ -161,7 +155,7 @@ namespace newVilcapCopyFileToGoogleDrive
                                         return;
                                     }
                                     context.Logger.LogLine($"Lock Value: {lockValue}");
-                                    context.Logger.LogLine("Satisfied conditions, Workshop Function 2");
+                                    context.Logger.LogLine("Satisfied conditions, WorkshopModules2");
                                     WorkshopModules2 wm = new WorkshopModules2();
                                     await wm.CreateWorkshopModules2(context, podio, check, e, service, ids, google, pre);
                                 }
@@ -177,9 +171,39 @@ namespace newVilcapCopyFileToGoogleDrive
                             }
                             break;
 
-                        case "Hidden Status":
+                        case "TL Batch": // Create Task List
+                            var tlBatchId = ids.GetFieldId("Admin|TL Batch");
+                            context.Logger.LogLine($"Value checking for: 'Task List {check.Field<CategoryItemField>(tlBatchId).Options.First().Text}'");
+                            if (check.Field<CategoryItemField>(tlBatchId).Options.Any())
+                            {
+                                lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+                                try
+                                {
+                                    if (string.IsNullOrEmpty(lockValue))
+                                    {
+                                        context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
+                                        return;
+                                    }
+                                    context.Logger.LogLine($"Lock Value: {lockValue}");
+                                    context.Logger.LogLine("Satisfied conditions, TaskList2");
+                                    TaskList tl = new TaskList();
+                                    await tl.CreateTaskLists(context, podio, check, e, service, ids, google, pre);
+                                }
+                                catch (Exception ex)
+                                {
+                                    context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
+                                        $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
+                                }
+                                finally
+                                {
+                                    await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
+                                }
+                            }
+                            break;
+
+                        case "Hidden Status": // Create Legacy task lists
                             var TlStatusId = ids.GetFieldId("Admin|Hidden Status");
-                            context.Logger.LogLine($"Value checking for: 'Task List {check.Field<CategoryItemField>(TlStatusId).Options.First().Text}");
+                            context.Logger.LogLine($"Value checking for: '(Legacy) Task List {check.Field<CategoryItemField>(TlStatusId).Options.First().Text}'");
                             if (check.Field<CategoryItemField>(TlStatusId).Options.Any())
                             {
                                 lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
@@ -191,7 +215,7 @@ namespace newVilcapCopyFileToGoogleDrive
                                         return;
                                     }
                                     context.Logger.LogLine($"Lock Value: {lockValue}");
-                                    context.Logger.LogLine("Satisfied conditions, Workshop Function");
+                                    context.Logger.LogLine("Satisfied conditions, TaskList");
                                     TaskList tl = new TaskList();
                                     await tl.CreateTaskLists(context, podio, check, e, service, ids, google, pre);
                                 }
