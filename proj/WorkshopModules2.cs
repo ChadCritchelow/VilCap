@@ -42,7 +42,7 @@ namespace newVilcapCopyFileToGoogleDrive
             string batch = check.Field<CategoryItemField>(batchId).Options.First().Text;
 
             var startDateId = ids.GetFieldId("Admin|Program Start Date");
-            DateTime startDate = new DateTime(check.Field<DateItemField>(startDateId).StartDate.Value.Ticks);
+            DateTime startDate = new DateTime(check.Field<DateItemField>(startDateId).Start.Value.Ticks);
 
             var packageId = ids.GetFieldId("Admin|Curriculum Package");
             string package = check.Field<CategoryItemField>(packageId).Options.First().Text;
@@ -185,7 +185,8 @@ namespace newVilcapCopyFileToGoogleDrive
                     var durChild = child.Field<DurationItemField>(fieldId);
                     durChild.Value = durMaster.Value.Value.Duration(); // durChild.Value.Value.Add(durMaster.Value.Value);? durChild.Value = durMaster.Value;?
 
-                    DateTime childDateTimeStart = startDate.Add(timeFromStart);
+                   // DateTime childDateTimeStart = startDate.Add(timeFromStart);
+                    DateTime childDateTimeStart = startDate.
                     DateTime childDateTimeEnd = childDateTimeStart.Add(durChild.Value.Value.Duration());
                     context.Logger.LogLine($"Trying to scheduling for {childDateTimeStart.ToString()} - {childDateTimeEnd.ToString()}");
                     timeFromStart = timeFromStart.Add(durChild.Value.Value.Duration());
