@@ -166,8 +166,6 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 if (true)
                 {
-                    fieldId = ids.GetFieldId("Task List|Duration (days)");
-                    var durChild = child.Field<NumericItemField>(fieldId).Value.Value;
                     fieldId = ids.GetFieldId("Task List|Date");
                     var date = child.Field<DateItemField>(fieldId);
 
