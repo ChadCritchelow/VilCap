@@ -185,8 +185,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     var durChild = child.Field<DurationItemField>(fieldId);
                     durChild.Value = durMaster.Value.Value.Duration(); // durChild.Value.Value.Add(durMaster.Value.Value);? durChild.Value = durMaster.Value;?
 
-                   // DateTime childDateTimeStart = startDate.Add(timeFromStart);
-                    DateTime childDateTimeStart = startDate.
+                    DateTime childDateTimeStart = startDate.Add(timeFromStart);
                     DateTime childDateTimeEnd = childDateTimeStart.Add(durChild.Value.Value.Duration());
                     context.Logger.LogLine($"Trying to scheduling for {childDateTimeStart.ToString()} - {childDateTimeEnd.ToString()}");
                     timeFromStart = timeFromStart.Add(durChild.Value.Value.Duration());
