@@ -93,7 +93,7 @@ namespace newVilcapCopyFileToGoogleDrive
             // Main Loop //
 
             foreach (var master in filter.Items)
-			{
+            {
                 // Setup //
 
                 count += 1;
@@ -104,13 +104,16 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 fieldId = ids.GetFieldId("VC Administration|Content Curation |Workshop Day");
                 var dayMaster = master.Field<CategoryItemField>(fieldId);
-                var dayMasterVal = 0;
-                Int32.TryParse(dayMaster.Options.First().Text.Split("Day ")[1], out dayMasterVal);
-
-                if(dayMasterVal != day)
+                if (dayMaster.Values.First != null)
                 {
-                    day = dayMasterVal;
-                    timeFromStart = TimeSpan.FromDays(day-1);
+                    int dayMasterVal = 0;
+                    Int32.TryParse(dayMaster.Options.First().Text.Split("Day ")[1], out dayMasterVal);
+
+                    if ((dayMasterVal != day) && (dayMasterVal != 0))
+                    {
+                        day = dayMasterVal;
+                        timeFromStart = TimeSpan.FromDays(day - 1);
+                    }
                 }
 
                 //--- Assign Fields ---//
