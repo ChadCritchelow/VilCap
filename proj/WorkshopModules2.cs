@@ -104,7 +104,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 fieldId = ids.GetFieldId("VC Administration|Content Curation |Workshop Day");
                 var dayMaster = master.Field<CategoryItemField>(fieldId);
-                if (dayMaster.Values.First != null)
+                if (dayMaster.Values != null)
                 {
                     int dayMasterVal = 0;
                     Int32.TryParse(dayMaster.Options.First().Text.Split("Day ")[1], out dayMasterVal);
