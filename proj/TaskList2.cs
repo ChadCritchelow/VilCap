@@ -58,6 +58,7 @@ namespace newVilcapCopyFileToGoogleDrive
             var view = from v in views
                        where v.Name == tlPackageName
                        select v;
+            context.Logger.LogLine($"Got View '{tlPackageName}'");
             var op = new FilterOptions{ Filters = view.First().Filters };
             op.Limit = 25;
 
