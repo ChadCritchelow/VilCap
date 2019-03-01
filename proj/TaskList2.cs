@@ -157,7 +157,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 // Date Calcs //
 
                 fieldId = ids.GetFieldId("VC Administration|Master Schedule|Duration (Days)");
-                var durMaster = master.Field<NumericItemField>(fieldId);
+                var durMaster = master.Field<NumericItemField>(fieldId).Value.Value;
                 fieldId = ids.GetFieldId("VC Administration|Master Schedule|Assignment Group");
                 var assignment = master.Field<CategoryItemField>(fieldId);
                 var assignmentVal = 0;
@@ -173,19 +173,19 @@ namespace newVilcapCopyFileToGoogleDrive
                     {
                         case "Program Design":
                             date.Start = programDeStart.Add(programDeTSpan * assignmentVal);
-                            date.End = date.Start.Value.AddDays(durChild);
+                            date.End = date.Start.Value.AddDays(durMaster);
                             break;
                         case "Recruitment Phase":
                             date.Start = recruitmeStart.Add(recruitmeTSpan * assignmentVal);
-                            date.End = date.Start.Value.AddDays(durChild);
+                            date.End = date.Start.Value.AddDays(durMaster);
                             break;
                         case "Recruitment":
                             date.Start = selectionStart.Add(selectionTSpan * assignmentVal);
-                            date.End = date.Start.Value.AddDays(durChild);
+                            date.End = date.Start.Value.AddDays(durMaster);
                             break;
                         case "Workshop Operations":
                             date.Start = workshopOStart.Add(workshopOTSpan * assignmentVal);
-                            date.End = date.Start.Value.AddDays(durChild);
+                            date.End = date.Start.Value.AddDays(durMaster);
                             break;
                         default:
                             break;
