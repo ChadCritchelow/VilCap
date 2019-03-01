@@ -184,12 +184,14 @@ namespace newVilcapCopyFileToGoogleDrive
 
                     DateTime childDateTimeStart = startDate.Add(timeFromStart);
                     DateTime childDateTimeEnd = childDateTimeStart.Add(durChild.Value.Value.Duration());
+                    context.Logger.LogLine($"Trying to scheduling for {childDateTimeStart.ToString()} - {childDateTimeEnd.ToString()}");
                     timeFromStart = timeFromStart.Add(durChild.Value.Value.Duration());
 
                     fieldId = ids.GetFieldId("Workshop Modules|Date");
                     var childTime = child.Field<DateItemField>(fieldId);
                     childTime.Start = childDateTimeStart;
                     childTime.End = childDateTimeEnd;
+                    context.Logger.LogLine($"Scheduled for {childTime.Start.ToString()} - {childTime.End.ToString()}");
                 }
 
                 // GDrive Integration //
