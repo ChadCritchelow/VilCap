@@ -169,7 +169,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     fieldId = ids.GetFieldId("Task List|Date");
                     var date = child.Field<DateItemField>(fieldId);
 
-                    switch (tlPackageName)
+                    switch (phaseMaster.Options.First().Text)
                     {
                         case "Program Design":
                             date.Start = programDeStart.Add(programDeTSpan * assignmentVal);
