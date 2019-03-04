@@ -40,16 +40,16 @@ namespace newVilcapCopyFileToGoogleDrive
 
             var programDeId = ids.GetFieldId("Admin|Program Design");
             var programDeStart = new DateTime(check.Field<DateItemField>(programDeId).Start.Value.Ticks);
-            var programDeTSpan = (check.Field<DateItemField>(programDeId).Start.Value - programDeStart) / PARTITIONS;
+            var programDeTSpan = (check.Field<DateItemField>(programDeId).End.Value - programDeStart) / PARTITIONS;
             var recruitmeId = ids.GetFieldId("Admin|Recruitment Phase");
             var recruitmeStart = new DateTime(check.Field<DateItemField>(recruitmeId).Start.Value.Ticks);
-            var recruitmeTSpan = (check.Field<DateItemField>(recruitmeId).Start.Value - recruitmeStart) / PARTITIONS;
+            var recruitmeTSpan = (check.Field<DateItemField>(recruitmeId).End.Value - recruitmeStart) / PARTITIONS;
             var selectionId = ids.GetFieldId("Admin|Selection");
             var selectionStart = new DateTime(check.Field<DateItemField>(selectionId).Start.Value.Ticks);
-            var selectionTSpan = (check.Field<DateItemField>(selectionId).Start.Value - selectionStart) / PARTITIONS;
+            var selectionTSpan = (check.Field<DateItemField>(selectionId).End.Value - selectionStart) / PARTITIONS;
             var workshopOId = ids.GetFieldId("Admin|Workshop Operations");
             var workshopOStart = new DateTime(check.Field<DateItemField>(workshopOId).Start.Value.Ticks);
-            var workshopOTSpan = (check.Field<DateItemField>(workshopOId).Start.Value - workshopOStart) / PARTITIONS;
+            var workshopOTSpan = (check.Field<DateItemField>(workshopOId).End.Value - workshopOStart) / PARTITIONS;
 
             // Get View //
 
@@ -168,7 +168,6 @@ namespace newVilcapCopyFileToGoogleDrive
                 {
                     fieldId = ids.GetFieldId("Task List|Date");
                     var date = child.Field<DateItemField>(fieldId);
-
                     switch (phaseMaster.Options.First().Text)
                     {
                         case "Program Design":
@@ -242,10 +241,6 @@ namespace newVilcapCopyFileToGoogleDrive
 			}
 
 			CommentService comm = new CommentService(podio);
-			if (check.Field<CategoryItemField>(batch).Options.First().Text == "1")
-			{
-				await pre.CreateExpendituresAndPreWSSurvs(context,podio,viewServ,check,e,service,ids,google);
-			}
 			await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);
 
 		}
