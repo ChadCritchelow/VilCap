@@ -78,7 +78,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
             Int32.TryParse(batch, out int batchNum);
             op.Offset = op.Limit * (batchNum - 1);
-            if(op.Offset > 0)
+            if(op.Offset >= 0)
             {
                 context.Logger.LogLine($"... Grabbing Items {op.Offset + 1}-{op.Offset + filter.Items.Count()} ...");
                 filter = await podio.FilterItems(MASTER_SCHEDULE_APP, op);
