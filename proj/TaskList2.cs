@@ -172,19 +172,19 @@ namespace newVilcapCopyFileToGoogleDrive
                     {
                         case "Program Design":
                             date.Start = programDeStart.Add(programDeTSpan * assignmentVal);
-                            date.End = date.Start.Value.AddDays(durMaster);
+                            date.End = date.Start.Value.AddDays(durMaster).Date;
                             break;
                         case "Recruitment Phase":
                             date.Start = recruitmeStart.Add(recruitmeTSpan * assignmentVal);
-                            date.End = date.Start.Value.AddDays(durMaster);
+                            date.End = date.Start.Value.AddDays(durMaster).Date;
                             break;
                         case "Recruitment":
                             date.Start = selectionStart.Add(selectionTSpan * assignmentVal);
-                            date.End = date.Start.Value.AddDays(durMaster);
+                            date.End = date.Start.Value.AddDays(durMaster).Date;
                             break;
                         case "Workshop Operations":
                             date.Start = workshopOStart.Add(workshopOTSpan * assignmentVal);
-                            date.End = date.Start.Value.AddDays(durMaster);
+                            date.End = date.Start.Value.AddDays(durMaster).Date;
                             break;
                         default:
                             break;
