@@ -86,7 +86,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     commentText = "TL Batch 3 finished";
                     break;
                 default:
-                    context.Logger.LogLine("ERROR Invalid Batch #");
+                    context.Logger.LogLine("ERROR: Invalid Batch #");
                     commentText = "TL Batch # not recognized";
                     break;
             }
@@ -240,6 +240,7 @@ namespace newVilcapCopyFileToGoogleDrive
 				}
 				context.Logger.LogLine($"Created item #{count}");
 			}
+
 			CommentService comm = new CommentService(podio);
 			if (check.Field<CategoryItemField>(batch).Options.First().Text == "1")
 			{
@@ -247,6 +248,6 @@ namespace newVilcapCopyFileToGoogleDrive
 			}
 			await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);
 
-				}
-			}
 		}
+	}
+}

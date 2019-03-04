@@ -49,14 +49,11 @@ namespace newVilcapCopyFileToGoogleDrive
 			context.Logger.LogLine("Getting Podio Instance");
 			Item check = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
 			context.Logger.LogLine($"Got item with ID: {check.ItemId}");
-			//BbcServiceClient bbc = new BbcServiceClient(System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
             SaasafrasClient saasafrasClient = new SaasafrasClient(System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
             context.Logger.LogLine("Getting BBC Client Instance");
 			dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
 			dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
 			context.Logger.LogLine("Got dictionary");
-			//FilterOptions op;
-			//PodioCollection<Item> filter;
 			var functionName = "newVilcapCopyFileToGoogleDrive";
 			fullNames = new Dictionary<string, string>()
 			{
@@ -232,7 +229,7 @@ namespace newVilcapCopyFileToGoogleDrive
                             break;
 
                         default:
-                            context.Logger.LogLine($"ERROR: Value '{firstRevision.Label}' not Recognized.");
+                            context.Logger.LogLine($"NO ACTION: Value '{firstRevision.Label}' not Recognized.");
                             break;
                     }
                     break;
