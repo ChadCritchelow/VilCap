@@ -28,69 +28,67 @@ namespace newVilcapCopyFileToGoogleDrive
 
             // Admin/Utility vars //
 
-			string commentText;
+            const int PARTITIONS = 5;
+            const int LIMIT = 25;
+            //const int MAX_BATCHES = 12;
+            const int MASTER_SCHEDULE_APP = 21310276;
+
+            string commentText;
             int fieldId = 0;
             int count = 0;
             var batch = check.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch")).Options.First().Text;
             var tlPackageId = ids.GetFieldId("Admin|Task List Selection");
             var tlPackageName = check.Field<CategoryItemField>(tlPackageId).Options.First().Text;
-            const int PARTITIONS = 5;
 
             // Get Timespans //
 
             var programDeId = ids.GetFieldId("Admin|Program Design");
             var programDeStart = new DateTime(check.Field<DateItemField>(programDeId).Start.Value.Ticks);
+            var programDeEnd = new DateTime(check.Field<DateItemField>(programDeId).End.Value.Ticks);
             var programDeTSpan = (check.Field<DateItemField>(programDeId).End.Value - programDeStart) / PARTITIONS;
+
             var recruitmeId = ids.GetFieldId("Admin|Recruitment Phase");
             var recruitmeStart = new DateTime(check.Field<DateItemField>(recruitmeId).Start.Value.Ticks);
+            var recruitmeEnd = new DateTime(check.Field<DateItemField>(recruitmeId).End.Value.Ticks);
             var recruitmeTSpan = (check.Field<DateItemField>(recruitmeId).End.Value - recruitmeStart) / PARTITIONS;
+
             var selectionId = ids.GetFieldId("Admin|Selection");
             var selectionStart = new DateTime(check.Field<DateItemField>(selectionId).Start.Value.Ticks);
+            var selectionEnd = new DateTime(check.Field<DateItemField>(selectionId).End.Value.Ticks);
             var selectionTSpan = (check.Field<DateItemField>(selectionId).End.Value - selectionStart) / PARTITIONS;
+
             var workshopOId = ids.GetFieldId("Admin|Workshop Operations");
             var workshopOStart = new DateTime(check.Field<DateItemField>(workshopOId).Start.Value.Ticks);
+            var workshopOEnd = new DateTime(check.Field<DateItemField>(workshopOId).End.Value.Ticks);
             var workshopOTSpan = (check.Field<DateItemField>(workshopOId).End.Value - workshopOStart) / PARTITIONS;
 
             // Get View //
 
             var viewServ = new ViewService(podio);
-			context.Logger.LogLine("Got View Service ...");
-			var views = await viewServ.GetViews(21310276); //VC Admin Master Schedule App
+			context.Logger.LogLine("... Got View Service ...");
+			var views = await viewServ.GetViews(MASTER_SCHEDULE_APP);
             var view = from v in views
                        where v.Name == tlPackageName
                        select v;
-            context.Logger.LogLine($"Got View '{tlPackageName}'");
+            context.Logger.LogLine($"... Got View '{tlPackageName}' ...");
             var op = new FilterOptions{ Filters = view.First().Filters };
-            op.Limit = 25;
+            op.Limit = LIMIT;
 
             // Get Batch //
 
-            switch (batch)
+            Int32.TryParse(batch, out int batchNum);
+            op.Offset = op.Limit * (batchNum - 1);
+            if(op.Offset > 0)
             {
-                case "1":
-                    context.Logger.LogLine("Grabbing items 1-25");
-                    op.Offset = 0;
-                    filter = await podio.FilterItems(21310276, op);
-                    commentText = "TL Batch 1 finished";
-                    break;
-                case "2":
-                    context.Logger.LogLine("Grabbing items 26-50");
-                    op.Offset = 25;
-                    filter = await podio.FilterItems(21310276, op);
-                    commentText = "TL Batch 2 finished";
-                    break;
-                case "3":
-                    context.Logger.LogLine("Grabbing items 51-75");
-                    op.Offset = 50;
-                    filter = await podio.FilterItems(21310276, op);
-                    commentText = "TL Batch 3 finished";
-                    break;
-                default:
-                    context.Logger.LogLine("ERROR: Invalid Batch #");
-                    commentText = "TL Batch # not recognized";
-                    break;
+                context.Logger.LogLine($"... Grabbing Items {op.Offset + 1}-{op.Offset + filter.Items.Count()} ...");
+                filter = await podio.FilterItems(MASTER_SCHEDULE_APP, op);
+                commentText = $"TL Batch {batch} finished";
             }
-            context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
+            else
+            {
+                context.Logger.LogLine("WARNING: No items found for batch!");
+                commentText = "TL Batch # not recognized";
+            }
 
             // Main Loop //
         
@@ -100,7 +98,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 // Setup //
 
                 count += 1;
-				context.Logger.LogLine($"On item #: {count}");
+				context.Logger.LogLine($"... On item #: {count} ...");
 				Item child = new Item();
 
 				//--- Assign Fields ---//	
@@ -160,36 +158,35 @@ namespace newVilcapCopyFileToGoogleDrive
                 var durMaster = master.Field<NumericItemField>(fieldId).Value.Value;
                 fieldId = ids.GetFieldId("VC Administration|Master Schedule|Assignment Group");
                 var assignment = master.Field<CategoryItemField>(fieldId);
-                var assignmentVal = 0;
-                Int32.TryParse(assignment.Options.First().Text, out assignmentVal);
+                Int32.TryParse(assignment.Options.First().Text, out int assignmentVal);
                 assignmentVal--;
 
-                if (true)
+                fieldId = ids.GetFieldId("Task List|Date");
+                var date = child.Field<DateItemField>(fieldId);
+                switch (phaseMaster.Options.First().Text)
                 {
-                    fieldId = ids.GetFieldId("Task List|Date");
-                    var date = child.Field<DateItemField>(fieldId);
-                    switch (phaseMaster.Options.First().Text)
-                    {
-                        case "Program Design":
-                            date.Start = programDeStart.Add(programDeTSpan * assignmentVal);
-                            date.End = date.Start.Value.AddDays(durMaster).Date;
-                            break;
-                        case "Recruitment Phase":
-                            date.Start = recruitmeStart.Add(recruitmeTSpan * assignmentVal);
-                            date.End = date.Start.Value.AddDays(durMaster).Date;
-                            break;
-                        case "Recruitment":
-                            date.Start = selectionStart.Add(selectionTSpan * assignmentVal);
-                            date.End = date.Start.Value.AddDays(durMaster).Date;
-                            break;
-                        case "Workshop Operations":
-                            date.Start = workshopOStart.Add(workshopOTSpan * assignmentVal);
-                            date.End = date.Start.Value.AddDays(durMaster).Date;
-                            break;
-                        default:
-                            break;
-                    }
-                    context.Logger.LogLine($"Scheduled for {date.Start.ToString()} - {date.End.ToString()}");
+                    case "Program Design":
+                        date.Start = programDeStart.Add(programDeTSpan * assignmentVal);
+                        date.End = date.Start.Value.AddDays(durMaster).Date;
+                        if (date.End.Value.CompareTo(programDeEnd) > 1) date.End = programDeEnd;
+                        break;
+                    case "Recruitment Phase":
+                        date.Start = recruitmeStart.Add(recruitmeTSpan * assignmentVal);
+                        date.End = date.Start.Value.AddDays(durMaster).Date;
+                        if (date.End.Value.CompareTo(recruitmeEnd) > 1) date.End = recruitmeEnd;
+                        break;
+                    case "Recruitment":
+                        date.Start = selectionStart.Add(selectionTSpan * assignmentVal);
+                        date.End = date.Start.Value.AddDays(durMaster).Date;
+                        if (date.End.Value.CompareTo(selectionEnd) > 1) date.End = selectionEnd;
+                        break;
+                    case "Workshop Operations":
+                        date.Start = workshopOStart.Add(workshopOTSpan * assignmentVal);
+                        date.End = date.Start.Value.AddDays(durMaster).Date;
+                        if (date.End.Value.CompareTo(workshopOEnd) > 1) date.End = workshopOEnd;
+                        break;
+                    default:
+                        break;
                 }
 
                 // GDrive Integration //
@@ -201,6 +198,7 @@ namespace newVilcapCopyFileToGoogleDrive
 				List<Embed> embeds = new List<Embed>();
 				string parentFolderId = System.Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
 				var cloneFolderId = google.GetSubfolderId(service, podio, e, parentFolderId);//TODO:
+
 				foreach (var em in embedMaster.Embeds)
 				{
 					if (em.OriginalUrl.Contains(".google."))
@@ -216,8 +214,9 @@ namespace newVilcapCopyFileToGoogleDrive
 				foreach (var embed in embeds)
 				{
 					embedChild.AddEmbed(embed.EmbedId);
-				}
-				context.Logger.LogLine($"Added field:{embedMaster.Label}");
+                    context.Logger.LogLine($"... Added field:{embedMaster.Label} ...");
+                }
+				
 				var taskListAppId = ids.GetFieldId("Task List");
 				int waitSeconds = 5;
 				CallPodio:
@@ -227,8 +226,7 @@ namespace newVilcapCopyFileToGoogleDrive
 				}
 				catch (PodioUnavailableException ex)
 				{
-					context.Logger.LogLine($"{ex.Message}");
-					context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
+					context.Logger.LogLine($"EXCEPTION '{ex.Message}'! Trying again in {waitSeconds} seconds ...");
 					for (int i = 0; i < waitSeconds; i++)
 					{
 						System.Threading.Thread.Sleep(1000);
@@ -237,7 +235,7 @@ namespace newVilcapCopyFileToGoogleDrive
 					waitSeconds = waitSeconds * 2;
 					goto CallPodio;
 				}
-				context.Logger.LogLine($"Created item #{count}");
+				context.Logger.LogLine($"... Created item #{count} ...");
 			}
 
 			CommentService comm = new CommentService(podio);
