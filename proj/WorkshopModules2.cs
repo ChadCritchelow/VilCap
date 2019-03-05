@@ -30,7 +30,11 @@ namespace newVilcapCopyFileToGoogleDrive
 
             // Utility vars //
 
-			string commentText = "";
+            const int LIMIT = 25;
+            const int MASTER_CONTENT_APP = 21310273;
+            const int MAX_BATCHES = 10;
+
+            string commentText = "";
             int fieldId = 0;
             int count = 0;
             int day = 0;
@@ -52,7 +56,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
 			var viewServ = new ViewService(podio);
 			context.Logger.LogLine("Got View Service");
-			var views = await viewServ.GetViews(21310273); // VC Admin WS - Content Curation App
+			var views = await viewServ.GetViews(MASTER_CONTENT_APP);
             var view = from v in views
                        where v.Name == package
                        select v;
@@ -63,33 +67,21 @@ namespace newVilcapCopyFileToGoogleDrive
             op.SortDesc = false;
             op.Limit = 25;
 
-            switch (batch)
+            Int32.TryParse(batch, out int batchNum);
+            if (0 <= batchNum && batchNum <= MAX_BATCHES)
             {
-                case "1":
-                    context.Logger.LogLine("Grabbing items 1-25");
-                    op.Offset = 0;
-                    filter = await podio.FilterItems(21310273, op);
-                    commentText = "WS Batch 1 finished";
-                    break;
-                case "2":
-                    context.Logger.LogLine("Grabbing items 26-50");
-                    op.Offset = 25;
-                    filter = await podio.FilterItems(21310273, op);
-                    commentText = "WS Batch 2 finished";
-                    break;
-                case "3":
-                    context.Logger.LogLine("Grabbing items 51-75");
-                    op.Offset = 50;
-                    filter = await podio.FilterItems(21310273, op);
-                    commentText = "WS Batch 3 finished";
-                    break;
-                default:
-                    context.Logger.LogLine("ERROR Invalid Batch #");
-                    commentText = "WS Batch # not recognized";
-                    break;
+                op.Offset = op.Limit * (batchNum - 1);
+                context.Logger.LogLine($"Grabbing Items {op.Offset.Value + 1}-{op.Offset.Value + LIMIT} ...");
+                filter = await podio.FilterItems(MASTER_CONTENT_APP, op);
+                context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
+                commentText = $"WS Batch {batch} finished";
             }
-			context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
-
+            else
+            {
+                context.Logger.LogLine("WARNING: No items found for batch!");
+                commentText = "WS Batch # not recognized";
+            }
+			
             // Main Loop //
 
             foreach (var master in filter.Items)

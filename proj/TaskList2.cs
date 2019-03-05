@@ -30,7 +30,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
             const int PARTITIONS = 5;
             const int LIMIT = 25;
-            //const int MAX_BATCHES = 12;
+            const int MAX_BATCHES = 10;
             const int MASTER_SCHEDULE_APP = 21310276;
 
             string commentText;
@@ -65,23 +65,24 @@ namespace newVilcapCopyFileToGoogleDrive
             // Get View //
 
             var viewServ = new ViewService(podio);
-			context.Logger.LogLine("... Got View Service ...");
+			context.Logger.LogLine("Got View Service ...");
 			var views = await viewServ.GetViews(MASTER_SCHEDULE_APP);
             var view = from v in views
                        where v.Name == tlPackageName
                        select v;
-            context.Logger.LogLine($"... Got View '{tlPackageName}' ...");
+            context.Logger.LogLine($"Got View '{tlPackageName}' ...");
             var op = new FilterOptions{ Filters = view.First().Filters };
             op.Limit = LIMIT;
 
             // Get Batch //
 
             Int32.TryParse(batch, out int batchNum);
-            op.Offset = op.Limit * (batchNum - 1);
-            if(op.Offset.Value >= 0)
+            if (0 <= batchNum && batchNum <= MAX_BATCHES)
             {
-                context.Logger.LogLine($"... Grabbing Items {op.Offset.Value + 1}-{op.Offset.Value + LIMIT} ...");
+                op.Offset = op.Limit * (batchNum - 1);
+                context.Logger.LogLine($"Grabbing Items {op.Offset.Value + 1}-{op.Offset.Value + LIMIT} ...");
                 filter = await podio.FilterItems(MASTER_SCHEDULE_APP, op);
+                context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
                 commentText = $"TL Batch {batch} finished";
             }
             else
@@ -98,7 +99,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 // Setup //
 
                 count += 1;
-				context.Logger.LogLine($"... On item #: {count} ...");
+				context.Logger.LogLine($"On item #{count} ...");
 				Item child = new Item();
 
 				//--- Assign Fields ---//	
@@ -235,7 +236,7 @@ namespace newVilcapCopyFileToGoogleDrive
 					waitSeconds = waitSeconds * 2;
 					goto CallPodio;
 				}
-				context.Logger.LogLine($"... Created item #{count} ...");
+				context.Logger.LogLine($"... Created item #{count}");
 			}
 
 			CommentService comm = new CommentService(podio);
