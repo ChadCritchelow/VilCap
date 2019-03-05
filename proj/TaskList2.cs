@@ -18,6 +18,7 @@ namespace newVilcapCopyFileToGoogleDrive
 {
     class TaskList2
 	{
+
 		PodioCollection<Item> filter;
 		public static string StripHTML(string input)
 		{
@@ -34,9 +35,11 @@ namespace newVilcapCopyFileToGoogleDrive
             const int MASTER_SCHEDULE_APP = 21310276;
 
             string commentText;
-            int fieldId = 0;
             int count = 0;
-            var batch = check.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch")).Options.First().Text;
+            int fieldId = 0;
+            int batchId = ids.GetFieldId("Admin|TL Batch");
+            var batch = check.Field<CategoryItemField>(batchId).Options.First().Text;
+            Int32.TryParse(batch, out int batchNum);
             var tlPackageId = ids.GetFieldId("Admin|Task List Selection");
             var tlPackageName = check.Field<CategoryItemField>(tlPackageId).Options.First().Text;
 
@@ -76,7 +79,6 @@ namespace newVilcapCopyFileToGoogleDrive
 
             // Get Batch //
 
-            Int32.TryParse(batch, out int batchNum);
             if (0 <= batchNum && batchNum <= MAX_BATCHES)
             {
                 op.Offset = op.Limit * (batchNum - 1);
@@ -241,7 +243,14 @@ namespace newVilcapCopyFileToGoogleDrive
 
 			CommentService comm = new CommentService(podio);
 			await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);
-
-		}
+            //Item updatedItem = new Item();
+            //updatedItem.Fields = check.Fields;
+            // updatedItem.Field<CategoryItemField>(batchId).Values.Clear();
+            check.Field<CategoryItemField>(batchId).Options.First().Text = $"{batchNum + 1}";
+            //ItemCreateUpdateRequest req = new ItemCreateUpdateRequest();
+            //req.Fields.
+            //check.
+            //await check.Fields.
+        }
 	}
 }

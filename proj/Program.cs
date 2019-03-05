@@ -168,6 +168,11 @@ namespace newVilcapCopyFileToGoogleDrive
                             }
                             break;
 
+                        //case "Deploy Task List":
+                        //    var deploy = ids.GetFieldId("Admin|Deploy Task List");
+                        //    if (check.Field<CategoryItemField>(deploy).Options.Any());
+                        //    break;
+
                         case "TL Batch": // Create Task List
                             var tlBatchId = ids.GetFieldId("Admin|TL Batch");
                             context.Logger.LogLine($"Value checking for: 'Task List {check.Field<CategoryItemField>(tlBatchId).Options.First().Text}'");
