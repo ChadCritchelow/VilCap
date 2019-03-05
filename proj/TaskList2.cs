@@ -241,16 +241,14 @@ namespace newVilcapCopyFileToGoogleDrive
 				context.Logger.LogLine($"... Created item #{count}");
 			}
 
+            // Update Admin Item for next Batch
+
 			CommentService comm = new CommentService(podio);
 			await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);
-            //Item updatedItem = new Item();
-            //updatedItem.Fields = check.Fields;
-            // updatedItem.Field<CategoryItemField>(batchId).Values.Clear();
+
             check.Field<CategoryItemField>(batchId).Options.First().Text = $"{batchNum + 1}";
-            //ItemCreateUpdateRequest req = new ItemCreateUpdateRequest();
-            //req.Fields.
-            //check.
-            //await check.Fields.
+            await podio.UpdateItem(check, hook: true);
+
         }
 	}
 }
