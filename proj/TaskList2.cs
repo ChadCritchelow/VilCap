@@ -80,7 +80,7 @@ namespace newVilcapCopyFileToGoogleDrive
             op.Offset = op.Limit * (batchNum - 1);
             if(op.Offset.Value >= 0)
             {
-                context.Logger.LogLine($"... Grabbing Items {op.Offset.Value + 1}-{op.Offset.Value + filter.Items.Count()} ...");
+                context.Logger.LogLine($"... Grabbing Items {op.Offset.Value + 1}-{op.Offset.Value + LIMIT} ...");
                 filter = await podio.FilterItems(MASTER_SCHEDULE_APP, op);
                 commentText = $"TL Batch {batch} finished";
             }
