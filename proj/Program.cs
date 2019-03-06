@@ -175,7 +175,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
                         case "TL Batch": // Create Task List
                             var tlBatchId = ids.GetFieldId("Admin|TL Batch");
-                            context.Logger.LogLine($"Value checking for: 'Task List {check.Field<CategoryItemField>(tlBatchId).Options.FirstOrDefault().ToString()}'");
+                            context.Logger.LogLine($"Value checking for: 'Task List {check.Field<CategoryItemField>(tlBatchId).Options.First().Text.ToStringOrNull()}'");
                             if (check.Field<CategoryItemField>(tlBatchId).Options.Any())
                             {
                                 lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
