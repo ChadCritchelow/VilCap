@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using PodioCore.Utils;
 using PodioCore.Comments;
+using static PodioCore.Utils.ItemFields.CategoryItemField;
 
 namespace newVilcapCopyFileToGoogleDrive
 {
@@ -246,8 +247,10 @@ namespace newVilcapCopyFileToGoogleDrive
 			CommentService comm = new CommentService(podio);
 			await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);
 
-            check.Field<CategoryItemField>(batchId).Options.First().Text = $"{batchNum + 1}";
-            await podio.UpdateItem(check, hook: true);
+            //check.Field<CategoryItemField>(batchId).Options.First().Text = $"{batchNum + 1}";   CANT BE SET DIRECTLY
+            context.Logger.LogLine("This batch option status: " + check.Field<CategoryItemField>(batchId).Options.FirstOrDefault(opt => opt.Text == $"{batchNum}").Status);
+            context.Logger.LogLine("Next batch option status: " + check.Field<CategoryItemField>(batchId).Options.FirstOrDefault(opt => opt.Text == $"{batchNum + 1}").Status);
+            //await podio.UpdateItem(check, hook: true);
 
         }
 	}
