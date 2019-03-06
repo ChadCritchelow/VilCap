@@ -86,12 +86,12 @@ namespace newVilcapCopyFileToGoogleDrive
                 context.Logger.LogLine($"Grabbing Items {op.Offset.Value + 1}-{op.Offset.Value + LIMIT} ...");
                 filter = await podio.FilterItems(MASTER_SCHEDULE_APP, op);
                 context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
-                commentText = $"TL Batch {batch} finished";
+                commentText = $"TL Batch {batch} finished.";
             }
             else
             {
                 context.Logger.LogLine("WARNING: No items found for batch!");
-                commentText = "TL Batch # not recognized";
+                commentText = "TL Batch # not recognized.";
             }
 
             // Main Loop //
@@ -244,14 +244,17 @@ namespace newVilcapCopyFileToGoogleDrive
 
             // Update Admin Item for next Batch
 
-			CommentService comm = new CommentService(podio);
-			await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);
-
+            CommentService comm = new CommentService(podio);
             if (count == LIMIT)
             {
                 check.Field<CategoryItemField>(batchId).OptionText = $"{batchNum + 1}";
-                await podio.UpdateItem(check, hook: true);
+                await podio.UpdateItem(check, hook: true);    
             }
+            else
+            {
+                commentText += " All Tasklist items added!";
+            }
+			await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);  
 
         }
 	}
