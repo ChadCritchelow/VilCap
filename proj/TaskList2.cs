@@ -248,8 +248,13 @@ namespace newVilcapCopyFileToGoogleDrive
 			await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);
 
             //check.Field<CategoryItemField>(batchId).Options.First().Text = $"{batchNum + 1}";   CANT BE SET DIRECTLY
-            context.Logger.LogLine("This batch option status: " + check.Field<CategoryItemField>(batchId).Options.FirstOrDefault(opt => opt.Text == $"{batchNum}").Status);
-            context.Logger.LogLine("Next batch option status: " + check.Field<CategoryItemField>(batchId).Options.FirstOrDefault(opt => opt.Text == $"{batchNum + 1}").Status);
+            context.Logger.LogLine("This batch option status: " + check.Field<CategoryItemField>(batchId).Options.FirstOrDefault(opt => opt.Text == $"{batchNum}").Status.ToStringOrNull());
+            check.Field<CategoryItemField>(batchId).Options.FirstOrDefault(opt => opt.Text == $"{batchNum}").Status = "";
+            context.Logger.LogLine("This batch option status: " + check.Field<CategoryItemField>(batchId).Options.FirstOrDefault(opt => opt.Text == $"{batchNum}").Status.ToStringOrNull());
+            
+            context.Logger.LogLine("Next batch option status: " + check.Field<CategoryItemField>(batchId).Options.FirstOrDefault(opt => opt.Text == $"{batchNum + 1}").Status.ToStringOrNull());
+            check.Field<CategoryItemField>(batchId).Options.FirstOrDefault(opt => opt.Text == $"{batchNum}").Status = "active";
+            context.Logger.LogLine("Next batch option status: " + check.Field<CategoryItemField>(batchId).Options.FirstOrDefault(opt => opt.Text == $"{batchNum + 1}").Status.ToStringOrNull());
             //await podio.UpdateItem(check, hook: true);
 
         }
