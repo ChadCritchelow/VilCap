@@ -175,7 +175,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
                         case "TL Batch": // Create Task List
                             var tlBatchId = ids.GetFieldId("Admin|TL Batch");
-                            context.Logger.LogLine($"Value checking for: 'Task List {check.Field<CategoryItemField>(tlBatchId).Options.First().Text}'");
+                            context.Logger.LogLine($"Value checking for: 'Task List {check.Field<CategoryItemField>(tlBatchId).Options.FirstOrDefault().Text}'");
                             if (check.Field<CategoryItemField>(tlBatchId).Options.Any())
                             {
                                 lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
@@ -205,7 +205,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
                         case "Hidden Status": // Create Legacy task lists
                             var TlStatusId = ids.GetFieldId("Admin|Hidden Status");
-                            context.Logger.LogLine($"Value checking for: '(Legacy) Task List {check.Field<CategoryItemField>(TlStatusId).Options.First().Text}'");
+                            context.Logger.LogLine($"Value checking for: '(Legacy) Task List {check.Field<CategoryItemField>(TlStatusId).Options.FirstOrDefault().Text}'");
                             if (check.Field<CategoryItemField>(TlStatusId).Options.Any())
                             {
                                 lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
