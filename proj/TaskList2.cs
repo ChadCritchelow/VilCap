@@ -44,27 +44,9 @@ namespace newVilcapCopyFileToGoogleDrive
             var tlPackageId = ids.GetFieldId("Admin|Task List Selection");
             var tlPackageName = check.Field<CategoryItemField>(tlPackageId).Options.First().Text;
 
-            // Get Timespans //
+            // Generate a rough calendar based on dates in the Admin app  //
 
-            var programDeId = ids.GetFieldId("Admin|Program Design");
-            var programDeStart = new DateTime(check.Field<DateItemField>(programDeId).Start.Value.Ticks);
-            var programDeEnd = new DateTime(check.Field<DateItemField>(programDeId).End.Value.Ticks);
-            var programDeTSpan = (check.Field<DateItemField>(programDeId).End.Value - programDeStart) / PARTITIONS;
-
-            var recruitmeId = ids.GetFieldId("Admin|Recruitment Phase");
-            var recruitmeStart = new DateTime(check.Field<DateItemField>(recruitmeId).Start.Value.Ticks);
-            var recruitmeEnd = new DateTime(check.Field<DateItemField>(recruitmeId).End.Value.Ticks);
-            var recruitmeTSpan = (check.Field<DateItemField>(recruitmeId).End.Value - recruitmeStart) / PARTITIONS;
-
-            var selectionId = ids.GetFieldId("Admin|Selection");
-            var selectionStart = new DateTime(check.Field<DateItemField>(selectionId).Start.Value.Ticks);
-            var selectionEnd = new DateTime(check.Field<DateItemField>(selectionId).End.Value.Ticks);
-            var selectionTSpan = (check.Field<DateItemField>(selectionId).End.Value - selectionStart) / PARTITIONS;
-
-            var workshopOId = ids.GetFieldId("Admin|Workshop Operations");
-            var workshopOStart = new DateTime(check.Field<DateItemField>(workshopOId).Start.Value.Ticks);
-            var workshopOEnd = new DateTime(check.Field<DateItemField>(workshopOId).End.Value.Ticks);
-            var workshopOTSpan = (check.Field<DateItemField>(workshopOId).End.Value - workshopOStart) / PARTITIONS;
+            Scheduler scheduler = new Scheduler(context, podio, check, e, ids, PARTITIONS);
 
             // Get View //
 
@@ -163,36 +145,11 @@ namespace newVilcapCopyFileToGoogleDrive
                 fieldId = ids.GetFieldId("VC Administration|Master Schedule|Assignment Group");
                 var assignment = master.Field<CategoryItemField>(fieldId);
                 Int32.TryParse(assignment.Options.First().Text, out int assignmentVal);
-                assignmentVal--;
-
                 fieldId = ids.GetFieldId("Task List|Date");
                 var date = child.Field<DateItemField>(fieldId);
-                switch (phaseMaster.Options.First().Text)
-                {
-                    case "Program Design":
-                        date.Start = programDeStart.Add(programDeTSpan * assignmentVal);
-                        date.End = date.Start.Value.AddDays(durMaster).Date;
-                        if (date.End.Value.CompareTo(programDeEnd) > 1) date.End = programDeEnd;
-                        break;
-                    case "Recruitment Phase":
-                        date.Start = recruitmeStart.Add(recruitmeTSpan * assignmentVal);
-                        date.End = date.Start.Value.AddDays(durMaster).Date;
-                        if (date.End.Value.CompareTo(recruitmeEnd) > 1) date.End = recruitmeEnd;
-                        break;
-                    case "Recruitment":
-                        date.Start = selectionStart.Add(selectionTSpan * assignmentVal);
-                        date.End = date.Start.Value.AddDays(durMaster).Date;
-                        if (date.End.Value.CompareTo(selectionEnd) > 1) date.End = selectionEnd;
-                        break;
-                    case "Workshop Operations":
-                        date.Start = workshopOStart.Add(workshopOTSpan * assignmentVal);
-                        date.End = date.Start.Value.AddDays(durMaster).Date;
-                        if (date.End.Value.CompareTo(workshopOEnd) > 1) date.End = workshopOEnd;
-                        break;
-                    default:
-                        break;
-                }
 
+                child = scheduler.SetDate(child, ids, phaseMaster.Options.First().Text, assignmentVal, durMaster);
+                
                 // GDrive Integration //
 
                 fieldId = ids.GetFieldId("VC Administration|Master Schedule|Gdrive Link");
