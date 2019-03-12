@@ -11,21 +11,14 @@ namespace newVilcapCopyFileToGoogleDrive
 
     class Scheduler
     {
-        DateTime programDeStart;
-        DateTime programDeEnd;
-        TimeSpan programDeTSpan;
 
-        DateTime recruitmeStart;
-        DateTime recruitmeEnd;
-        TimeSpan recruitmeTSpan;
+        // Public Vars (for clarity)
 
-        DateTime selectionStart;
-        DateTime selectionEnd;
-        TimeSpan selectionTSpan;
+        DateTime programDeStart, recruitmeStart, selectionStart, workshopOStart;
+        DateTime programDeEnd, recruitmeEnd, selectionEnd, workshopOEnd;
+        TimeSpan programDeTSpan, recruitmeTSpan, selectionTSpan, workshopOTSpan;
 
-        DateTime workshopOStart;
-        DateTime workshopOEnd;
-        TimeSpan workshopOTSpan;
+        // Store derived values from the {client WS}|Admin app 
 
         public Scheduler(ILambdaContext context, Podio podio, Item check, RoutedPodioEvent e, GetIds ids, int PARTITIONS)
         {
@@ -49,6 +42,8 @@ namespace newVilcapCopyFileToGoogleDrive
             workshopOEnd = new DateTime(check.Field<DateItemField>(workshopOId).End.Value.Ticks);
             workshopOTSpan = (check.Field<DateItemField>(workshopOId).End.Value - workshopOStart) / PARTITIONS;
         }
+
+        // Set real dates based on the item's abstract phase & duration
 
         public Item SetDate(Item child, GetIds ids, string phase, int assignmentVal, double durMaster)
         {
