@@ -48,7 +48,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
             Scheduler scheduler = new Scheduler(context, podio, check, e, ids, PARTITIONS);
 
-            // Get View //
+            // Get/Create View //
 
             var viewServ = new ViewService(podio);
 			context.Logger.LogLine("Got View Service ...");
@@ -56,18 +56,30 @@ namespace newVilcapCopyFileToGoogleDrive
             var view = from v in views
                        where v.Name == tlPackageName
                        select v;
-            context.Logger.LogLine($"Got View '{tlPackageName}' ...");
+
+            if (view.Any())
+            {
+                context.Logger.LogLine($"Got View '{tlPackageName}' ...");
+            }
+            else
+            {
+                context.Logger.LogLine($"Creating View '{tlPackageName}' ...");
+                var viewReq = new ViewCreateUpdateRequest();
+                viewReq.Name = $"AWS - {tlPackageName}";
+                viewReq.SortBy = "174999400"; // fieldId of "Title"
+                viewReq.Filters = new Dictionary<string, object>
+                {
+                    {"185003953" /*Curriculum package*/, tlPackageName }
+                };
+                var viewId = await viewServ.CreateView(MASTER_SCHEDULE_APP, viewReq);
+                view = from v in views
+                       where v.Name == viewReq.Name
+                       select v;
+                context.Logger.LogLine($"Got new View '{viewReq.Name}' ...");
+            }
+
             var op = new FilterOptions{ Filters = view.First().Filters };
             op.Limit = LIMIT;
-
-            // 2.0 Create View //
-
-            var viewServ2 = new ViewService(podio);
-            var viewReq = new ViewCreateUpdateRequest();
-            viewReq.Filters.Add("174999400", tlPackageName);
-            viewReq.Name = $"AWS - {tlPackageName}";
-            viewReq.SortBy = "174999400"; // fieldId of "Title"
-            var views2 = await viewServ2.CreateView(MASTER_SCHEDULE_APP, viewReq);
 
             // Get Batch //
 
