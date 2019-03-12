@@ -38,7 +38,7 @@ namespace newVilcapCopyFileToGoogleDrive
             string commentText;
             int count = 0;
             int fieldId = 0;
-            int batchId = ids.GetFieldId("Admin|TL Batch");
+            var batchId = ids.GetFieldId("Admin|TL Batch");
             var batch = check.Field<CategoryItemField>(batchId).Options.First().Text;
             Int32.TryParse(batch, out int batchNum);
             var tlPackageId = ids.GetFieldId("Admin|Task List Selection");
@@ -59,6 +59,15 @@ namespace newVilcapCopyFileToGoogleDrive
             context.Logger.LogLine($"Got View '{tlPackageName}' ...");
             var op = new FilterOptions{ Filters = view.First().Filters };
             op.Limit = LIMIT;
+
+            // 2.0 Create View //
+
+            var viewServ2 = new ViewService(podio);
+            var viewReq = new ViewCreateUpdateRequest();
+            viewReq.Filters.Add("174999400", tlPackageName);
+            viewReq.Name = $"AWS - {tlPackageName}";
+            viewReq.SortBy = "174999400"; // fieldId of "Title"
+            var views2 = await viewServ2.CreateView(MASTER_SCHEDULE_APP, viewReq);
 
             // Get Batch //
 
