@@ -225,7 +225,9 @@ namespace newVilcapCopyFileToGoogleDrive
             {
                 batchNum++;
                 check.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch")).OptionText = $"{ batchNum }";
-                await podio.UpdateItem(check, hook: true);    
+                //await podio.UpdateItem(check, hook: true);    
+                ItemService iserv = new ItemService(podio);
+                await iserv.UpdateItemFieldValues(check);
             }
             else
             {
