@@ -14,33 +14,33 @@ namespace newVilcapCopyFileToGoogleDrive
 
         // Public Vars (for clarity)
 
-        DateTime programDeStart, recruitmeStart, selectionStart, workshopOStart;
-        DateTime programDeEnd, recruitmeEnd, selectionEnd, workshopOEnd;
-        TimeSpan programDeTSpan, recruitmeTSpan, selectionTSpan, workshopOTSpan;
+        DateTime pStart, rStart, sStart, wStart;
+        DateTime pEnd, rEnd, sEnd, wEnd;
+        TimeSpan pTSpan, rTSpan, sTSpan, wTSpan;
 
         // Store derived values from the {client WS}|Admin app 
 
         public Scheduler(ILambdaContext context, Podio podio, Item check, RoutedPodioEvent e, GetIds ids, int PARTITIONS)
         {
-            var programDeId = ids.GetFieldId("Admin|Program Design");
-            programDeStart = new DateTime(check.Field<DateItemField>(programDeId).Start.Value.Ticks);
-            programDeEnd = new DateTime(check.Field<DateItemField>(programDeId).End.Value.Ticks);
-            programDeTSpan = (check.Field<DateItemField>(programDeId).End.Value - programDeStart) / PARTITIONS;
+            var pId = ids.GetFieldId("Admin|Program Design");
+            pStart = new DateTime(check.Field<DateItemField>(pId).Start.Value.Ticks);
+            pEnd = new DateTime(check.Field<DateItemField>(pId).End.Value.Ticks);
+            pTSpan = (check.Field<DateItemField>(pId).End.Value - pStart) / PARTITIONS;
 
-            var recruitmeId = ids.GetFieldId("Admin|Recruitment Phase");
-            recruitmeStart = new DateTime(check.Field<DateItemField>(recruitmeId).Start.Value.Ticks);
-            recruitmeEnd = new DateTime(check.Field<DateItemField>(recruitmeId).End.Value.Ticks);
-            recruitmeTSpan = (check.Field<DateItemField>(recruitmeId).End.Value - recruitmeStart) / PARTITIONS;
+            var rId = ids.GetFieldId("Admin|Recruitment");
+            rStart = new DateTime(check.Field<DateItemField>(rId).Start.Value.Ticks);
+            rEnd = new DateTime(check.Field<DateItemField>(rId).End.Value.Ticks);
+            rTSpan = (check.Field<DateItemField>(rId).End.Value - rStart) / PARTITIONS;
 
-            var selectionId = ids.GetFieldId("Admin|Selection");
-            selectionStart = new DateTime(check.Field<DateItemField>(selectionId).Start.Value.Ticks);
-            selectionEnd = new DateTime(check.Field<DateItemField>(selectionId).End.Value.Ticks);
-            selectionTSpan = (check.Field<DateItemField>(selectionId).End.Value - selectionStart) / PARTITIONS;
+            var sId = ids.GetFieldId("Admin|Selection");
+            sStart = new DateTime(check.Field<DateItemField>(sId).Start.Value.Ticks);
+            sEnd = new DateTime(check.Field<DateItemField>(sId).End.Value.Ticks);
+            sTSpan = (check.Field<DateItemField>(sId).End.Value - sStart) / PARTITIONS;
 
-            var workshopOId = ids.GetFieldId("Admin|Workshop Operations");
-            workshopOStart = new DateTime(check.Field<DateItemField>(workshopOId).Start.Value.Ticks);
-            workshopOEnd = new DateTime(check.Field<DateItemField>(workshopOId).End.Value.Ticks);
-            workshopOTSpan = (check.Field<DateItemField>(workshopOId).End.Value - workshopOStart) / PARTITIONS;
+            var wId = ids.GetFieldId("Admin|Workshop Operations");
+            wStart = new DateTime(check.Field<DateItemField>(wId).Start.Value.Ticks);
+            wEnd = new DateTime(check.Field<DateItemField>(wId).End.Value.Ticks);
+            wTSpan = (check.Field<DateItemField>(wId).End.Value - wStart) / PARTITIONS;
         }
 
         // Set real dates based on the item's abstract phase & duration
@@ -51,29 +51,34 @@ namespace newVilcapCopyFileToGoogleDrive
             switch (phase)
                 {
                     case "Program Design":
-                        date.Start = programDeStart.Add(programDeTSpan * (assignmentVal - 1));
+                        date.Start = pStart.Add(pTSpan * (assignmentVal - 1));
                         date.End = date.Start.Value.AddDays(durMaster).Date;
-                        if (date.End.Value.CompareTo(programDeEnd) > 0) date.End = programDeEnd;
+                        if (date.End.Value.CompareTo(pEnd) > 0) date.End = pEnd;
                         break;
-                    case "Recruitment Phase":
-                        date.Start = recruitmeStart.Add(recruitmeTSpan * (assignmentVal - 1));
+
+                    case "Recruitment":
+                        date.Start = rStart.Add(rTSpan * (assignmentVal - 1));
                         date.End = date.Start.Value.AddDays(durMaster).Date;
-                        if (date.End.Value.CompareTo(recruitmeEnd) > 0) date.End = recruitmeEnd;
+                        if (date.End.Value.CompareTo(rEnd) > 0) date.End = rEnd;
                         break;
+
                     case "Selection":
-                        date.Start = selectionStart.Add(selectionTSpan * (assignmentVal - 1));
+                        date.Start = sStart.Add(sTSpan * (assignmentVal - 1));
                         date.End = date.Start.Value.AddDays(durMaster).Date;
-                        if (date.End.Value.CompareTo(selectionEnd) > 0) date.End = selectionEnd;
+                        if (date.End.Value.CompareTo(sEnd) > 0) date.End = sEnd;
                         break;
+
                     case "Workshop Operations":
-                        date.Start = workshopOStart.Add(workshopOTSpan * (assignmentVal - 1));
+                        date.Start = wStart.Add(wTSpan * (assignmentVal - 1));
                         date.End = date.Start.Value.AddDays(durMaster).Date;
-                        if (date.End.Value.CompareTo(workshopOEnd) > 0) date.End = workshopOEnd;
+                        if (date.End.Value.CompareTo(wEnd) > 0) date.End = wEnd;
                         break;
+
                     default:
                         break;
                 }
             return child;
         }
+
     }
 }

@@ -191,12 +191,15 @@ namespace newVilcapCopyFileToGoogleDrive
 					//	await nonG.NonGDriveCopy(em, embeds, podio, e);
 					//}
 				}
+
 				foreach (var embed in embeds)
 				{
 					embedChild.AddEmbed(embed.EmbedId);
                     context.Logger.LogLine($"... Added field:{embedMaster.Label} ...");
                 }
 				
+                // Child Item Creation //
+
 				var taskListAppId = ids.GetFieldId("Task List");
 				int waitSeconds = 5;
 				CallPodio:
@@ -218,7 +221,7 @@ namespace newVilcapCopyFileToGoogleDrive
 				context.Logger.LogLine($"... Created item #{count}");
 			}
 
-            // Update Admin Item for next Batch
+            // Update Admin Item for next Batch //
 
             CommentService comm = new CommentService(podio);
             if (count == LIMIT)
