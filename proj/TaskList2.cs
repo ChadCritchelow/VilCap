@@ -223,9 +223,10 @@ namespace newVilcapCopyFileToGoogleDrive
             CommentService comm = new CommentService(podio);
             if (count == LIMIT)
             {
-                //batchNum++;
-                //check.Field<CategoryItemField>(batchId).OptionText = $"{ batchNum }";
-                //await podio.UpdateItem(check, hook: true);    
+                batchNum++;
+                batchId = ids.GetFieldId("Admin|TL Batch");
+                check.Field<CategoryItemField>(batchId).OptionText = $"{ batchNum }";
+                await podio.UpdateItem(check, hook: true);    
             }
             else
             {

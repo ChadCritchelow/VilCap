@@ -53,22 +53,22 @@ namespace newVilcapCopyFileToGoogleDrive
                     case "Program Design":
                         date.Start = programDeStart.Add(programDeTSpan * (assignmentVal - 1));
                         date.End = date.Start.Value.AddDays(durMaster).Date;
-                        if (date.End.Value.CompareTo(programDeEnd) > 1) date.End = programDeEnd;
+                        if (date.End.Value.CompareTo(programDeEnd) > 0) date.End = programDeEnd;
                         break;
                     case "Recruitment Phase":
                         date.Start = recruitmeStart.Add(recruitmeTSpan * (assignmentVal - 1));
                         date.End = date.Start.Value.AddDays(durMaster).Date;
-                        if (date.End.Value.CompareTo(recruitmeEnd) > 1) date.End = recruitmeEnd;
+                        if (date.End.Value.CompareTo(recruitmeEnd) > 0) date.End = recruitmeEnd;
                         break;
-                    case "Recruitment":
+                    case "Selection":
                         date.Start = selectionStart.Add(selectionTSpan * (assignmentVal - 1));
                         date.End = date.Start.Value.AddDays(durMaster).Date;
-                        if (date.End.Value.CompareTo(selectionEnd) > 1) date.End = selectionEnd;
+                        if (date.End.Value.CompareTo(selectionEnd) > 0) date.End = selectionEnd;
                         break;
                     case "Workshop Operations":
                         date.Start = workshopOStart.Add(workshopOTSpan * (assignmentVal - 1));
                         date.End = date.Start.Value.AddDays(durMaster).Date;
-                        if (date.End.Value.CompareTo(workshopOEnd) > 1) date.End = workshopOEnd;
+                        if (date.End.Value.CompareTo(workshopOEnd) > 0) date.End = workshopOEnd;
                         break;
                     default:
                         break;
