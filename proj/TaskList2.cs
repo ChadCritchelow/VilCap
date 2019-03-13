@@ -166,8 +166,6 @@ namespace newVilcapCopyFileToGoogleDrive
                 fieldId = ids.GetFieldId("VC Administration|Master Schedule|Assignment Group");
                 var assignment = master.Field<CategoryItemField>(fieldId);
                 Int32.TryParse(assignment.Options.First().Text, out int assignmentVal);
-                fieldId = ids.GetFieldId("Task List|Date");
-                var date = child.Field<DateItemField>(fieldId);
 
                 child = scheduler.SetDate(child, ids, phaseMaster.Options.First().Text, assignmentVal, durMaster);
                 
@@ -225,8 +223,9 @@ namespace newVilcapCopyFileToGoogleDrive
             CommentService comm = new CommentService(podio);
             if (count == LIMIT)
             {
-                check.Field<CategoryItemField>(batchId).OptionText = $"{batchNum + 1}";
-                await podio.UpdateItem(check, hook: true);    
+                //batchNum++;
+                //check.Field<CategoryItemField>(batchId).OptionText = $"{ batchNum }";
+                //await podio.UpdateItem(check, hook: true);    
             }
             else
             {
