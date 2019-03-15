@@ -37,6 +37,10 @@ namespace newVilcapCopyFileToGoogleDrive
             string commentText = "";
             int fieldId = 0;
             int count = 0;
+            var workshopAppId = ids.GetFieldId("Workshop Modules");
+            var tasklistAppId = ids.GetFieldId("Task List");
+            int waitSeconds = 5;
+
             int day = 0;
             TimeSpan timeFromStart = new TimeSpan(0);
             #endregion
@@ -230,6 +234,10 @@ namespace newVilcapCopyFileToGoogleDrive
                 var masterTasks = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task"));
                 foreach (var task in masterTasks.Items)
                 {
+                    Item taskClone = new Item();
+
+                    // Assign Fields //
+
                     var nameMaster = master.Field<TextItemField>(ids.GetFieldId("VC Administration|Master Schedule|Task Name"));
                     if (nameMaster.Value != null)
                     {
@@ -258,27 +266,46 @@ namespace newVilcapCopyFileToGoogleDrive
                         esoChild.OptionText = esoMaster.Options.First().Text;
                     }
 
-                    //var comChild = child.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion"));
-                    //comChild.OptionText = "Incomplete";
-
                     var depMaster = master.Field<TextItemField>(ids.GetFieldId("VC Administration|Master Schedule|Dependancy"));
                     if (depMaster.Value != null)
                     {
                         var depChild = child.Field<TextItemField>(ids.GetFieldId("Task List|Additional Dependencies"));
                         depChild.Value = depMaster.Value;
                     }
+                    //var comChild = child.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion"));
+                    //comChild.OptionText = "Incomplete";
+
+                    #region // Create Actual Task Item //
+
+                    CallPodioTasks:
+                    try
+                    {
+                        await podio.CreateItem(taskClone, tasklistAppId, true); //child Task List appId
+                    }
+                    catch (PodioUnavailableException ex)
+                    {
+                        context.Logger.LogLine($"{ex.Message}");
+                        context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
+                        for (int i = 0; i < waitSeconds; i++)
+                        {
+                            System.Threading.Thread.Sleep(1000);
+                            context.Logger.LogLine(".");
+                        }
+                        waitSeconds = waitSeconds * 2;
+                        goto CallPodioTasks;
+                    }
+                    context.Logger.LogLine($"Created Dependent Task");
+                    #endregion
 
                 }
                 #endregion
 
                 #region // Create Actual Podio Item //
 
-                var taskListAppId = ids.GetFieldId("Workshop Modules");
-				int waitSeconds = 5;
-				CallPodio:
+                CallPodio:
 				try
 				{
-					await podio.CreateItem(child, taskListAppId, true); //child Workshop Modules appId
+					await podio.CreateItem(child, workshopAppId, true); //child Workshop Modules appId
 				}
 				catch (PodioUnavailableException ex)
 				{
