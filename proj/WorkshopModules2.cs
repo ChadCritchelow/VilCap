@@ -227,7 +227,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 #region // Create Dependant Tasks //
 
-                var masterTasks = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependant Task"));
+                var masterTasks = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task"));
                 foreach (var task in masterTasks.Items)
                 {
                     var nameMaster = master.Field<TextItemField>(ids.GetFieldId("VC Administration|Master Schedule|Task Name"));
