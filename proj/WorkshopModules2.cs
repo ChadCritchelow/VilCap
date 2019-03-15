@@ -28,7 +28,7 @@ namespace newVilcapCopyFileToGoogleDrive
 		public async System.Threading.Tasks.Task CreateWorkshopModules2(ILambdaContext context, Podio podio, Item check, RoutedPodioEvent e, DriveService service, GetIds ids, GoogleIntegration google,PreSurvAndExp pre)
 		{
 
-            // Utility vars //
+            #region // Utility vars //
 
             const int LIMIT = 25;
             const int MASTER_CONTENT_APP = 21310273;
@@ -39,8 +39,9 @@ namespace newVilcapCopyFileToGoogleDrive
             int count = 0;
             int day = 0;
             TimeSpan timeFromStart = new TimeSpan(0);
+            #endregion
 
-            // Admin app values //
+            #region // Admin app values //
 
             var batchId = ids.GetFieldId("Admin|WS Batch");
             string batch = check.Field<CategoryItemField>(batchId).Options.First().Text;
@@ -51,10 +52,11 @@ namespace newVilcapCopyFileToGoogleDrive
             var packageId = ids.GetFieldId("Admin|Curriculum Package");
             string package = check.Field<CategoryItemField>(packageId).Options.First().Text;
             context.Logger.LogLine($"Curriculum Batch '{batch}'");
+            #endregion  
 
-            // Get Batch //
+            #region // Get Batch //
 
-			var viewServ = new ViewService(podio);
+            var viewServ = new ViewService(podio);
 			context.Logger.LogLine("Got View Service");
 			var views = await viewServ.GetViews(MASTER_CONTENT_APP);
             var view = from v in views
@@ -81,7 +83,8 @@ namespace newVilcapCopyFileToGoogleDrive
                 context.Logger.LogLine("WARNING: No items found for batch!");
                 commentText = "WS Batch # not recognized";
             }
-			
+            #endregion
+
             // Main Loop //
 
             foreach (var master in filter.Items)
@@ -108,7 +111,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     }
                 }
 
-                //--- Assign Fields ---//
+                #region // Assign Fields //
 
                 fieldId = ids.GetFieldId("VC Administration|Content Curation |Workshop Detail Title");
                 var titleMaster = master.Field<TextItemField>(fieldId);
@@ -162,8 +165,9 @@ namespace newVilcapCopyFileToGoogleDrive
                     var mentChild = child.Field<TextItemField>(fieldId);
                     mentChild.Value = mentMaster.Value;
                 }
+                #endregion
 
-                // Date Calcs //
+                #region // Date Calcs //
 
                 fieldId = ids.GetFieldId("VC Administration|Content Curation |Package Sequence");
                 var seqMaster = master.Field<CategoryItemField>(fieldId);
@@ -188,8 +192,9 @@ namespace newVilcapCopyFileToGoogleDrive
                     childTime.End = childDateTimeEnd;
                     context.Logger.LogLine($"Scheduled for {childTime.Start.ToString()} - {childTime.End.ToString()}");
                 }
+                #endregion
 
-                // GDrive Integration //
+                #region // GDrive Integration //
 
                 fieldId = ids.GetFieldId("VC Administration|Content Curation |GDrive File Name");
                 var embedMaster = master.Field<EmbedItemField>(fieldId);
@@ -217,9 +222,58 @@ namespace newVilcapCopyFileToGoogleDrive
 				{
 					embedChild.AddEmbed(embed.EmbedId);
 				}
+                context.Logger.LogLine($"Added field:{embedMaster.Label}");
+                #endregion
 
-				context.Logger.LogLine($"Added field:{embedMaster.Label}");
-				var taskListAppId = ids.GetFieldId("Workshop Modules");
+                #region // Create Dependant Tasks //
+
+                var masterTasks = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependant Task"));
+                foreach (var task in masterTasks.Items)
+                {
+                    var nameMaster = master.Field<TextItemField>(ids.GetFieldId("VC Administration|Master Schedule|Task Name"));
+                    if (nameMaster.Value != null)
+                    {
+                        var nameChild = child.Field<TextItemField>(ids.GetFieldId("Task List|Title"));
+                        nameChild.Value = nameMaster.Value;
+                    }
+
+                    var descrMaster = master.Field<TextItemField>(ids.GetFieldId("VC Administration|Master Schedule|Desciption"));
+                    if (descrMaster.Value != null)
+                    {
+                        var descrChild = child.Field<TextItemField>(ids.GetFieldId("Task List|Description"));
+                        descrChild.Value = StripHTML(descrMaster.Value);
+                    }
+
+                    var phaseMaster = master.Field<CategoryItemField>(ids.GetFieldId("VC Administration|Master Schedule|Phase"));
+                    if (phaseMaster.Options.Any())
+                    {
+                        var phaseChild = child.Field<CategoryItemField>(ids.GetFieldId("Task List|Phase"));
+                        phaseChild.OptionText = phaseMaster.Options.First().Text;
+                    }
+
+                    var esoMaster = master.Field<CategoryItemField>(ids.GetFieldId("VC Administration|Master Schedule|ESO Member Role"));
+                    if (esoMaster.Options.Any())
+                    {
+                        var esoChild = child.Field<CategoryItemField>(ids.GetFieldId("Task List|ESO Member Role"));
+                        esoChild.OptionText = esoMaster.Options.First().Text;
+                    }
+
+                    var comChild = child.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion"));
+                    comChild.OptionText = "Incomplete";
+
+                    var depMaster = master.Field<TextItemField>(ids.GetFieldId("VC Administration|Master Schedule|Dependancy"));
+                    if (depMaster.Value != null)
+                    {
+                        var depChild = child.Field<TextItemField>(ids.GetFieldId("Task List|Additional Dependencies"));
+                        depChild.Value = depMaster.Value;
+                    }
+
+                }
+                #endregion
+
+                #region // Create Actual Podio Item //
+
+                var taskListAppId = ids.GetFieldId("Workshop Modules");
 				int waitSeconds = 5;
 				CallPodio:
 				try
@@ -239,11 +293,13 @@ namespace newVilcapCopyFileToGoogleDrive
 					goto CallPodio;
 				}
 				context.Logger.LogLine($"Created item #{count}");
-			}
+                #endregion
+
+            }
 
             // Comment on Client's Admin item && Add aux items //
 
-			CommentService comm = new CommentService(podio);
+            CommentService comm = new CommentService(podio);
 			if (check.Field<CategoryItemField>(batchId).Options.First().Text == "1")
 			{
 				await pre.CreateExpendituresAndPreWSSurvs(context,podio,viewServ,check,e,service,ids,google);

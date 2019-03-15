@@ -13,7 +13,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using PodioCore.Utils;
 using PodioCore.Comments;
-using static PodioCore.Utils.ItemFields.CategoryItemField;
 
 namespace newVilcapCopyFileToGoogleDrive
 {
@@ -40,7 +39,7 @@ namespace newVilcapCopyFileToGoogleDrive
             int fieldId = 0;
             var batchId = ids.GetFieldId("Admin|TL Batch");
             var batch = check.Field<CategoryItemField>(batchId).Options.First().Text;
-            Int32.TryParse(batch, out int batchNum);
+            int.TryParse(batch, out int batchNum);
             var tlPackageId = ids.GetFieldId("Admin|Task List Selection");
             var tlPackageName = check.Field<CategoryItemField>(tlPackageId).Options.First().Text;
 
@@ -176,7 +175,7 @@ namespace newVilcapCopyFileToGoogleDrive
 				fieldId = ids.GetFieldId("Task List|Linked Files");
 				var embedChild = child.Field<EmbedItemField>(fieldId);
 				List<Embed> embeds = new List<Embed>();
-				string parentFolderId = System.Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
+				string parentFolderId = Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
 				var cloneFolderId = google.GetSubfolderId(service, podio, e, parentFolderId);//TODO:
 
 				foreach (var em in embedMaster.Embeds)
@@ -230,7 +229,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 check.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch")).OptionText = $"{ batchNum }";
                 //await podio.UpdateItem(check, hook: true);    
                 ItemService iserv = new ItemService(podio);
-                await iserv.UpdateItemFieldValues(check);
+                await iserv.UpdateItem(check);
             }
             else
             {
