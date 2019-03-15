@@ -258,8 +258,8 @@ namespace newVilcapCopyFileToGoogleDrive
                         esoChild.OptionText = esoMaster.Options.First().Text;
                     }
 
-                    var comChild = child.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion"));
-                    comChild.OptionText = "Incomplete";
+                    //var comChild = child.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion"));
+                    //comChild.OptionText = "Incomplete";
 
                     var depMaster = master.Field<TextItemField>(ids.GetFieldId("VC Administration|Master Schedule|Dependancy"));
                     if (depMaster.Value != null)
