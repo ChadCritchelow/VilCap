@@ -94,12 +94,11 @@ namespace newVilcapCopyFileToGoogleDrive
             foreach (var master in filter.Items)
             {
                 // Setup //
-
                 count += 1;
                 context.Logger.LogLine($"On item #: {count}");
                 Item child = new Item();
 
-                // Check for new Day //
+                #region // Check for new Day //
 
                 fieldId = ids.GetFieldId("VC Administration|Content Curation |Workshop Day");
                 var dayMaster = master.Field<CategoryItemField>(fieldId);
@@ -114,6 +113,7 @@ namespace newVilcapCopyFileToGoogleDrive
                         timeFromStart = TimeSpan.FromDays(day - 1);
                     }
                 }
+                #endregion
 
                 #region // Assign Fields //
 
@@ -169,6 +169,9 @@ namespace newVilcapCopyFileToGoogleDrive
                     var mentChild = child.Field<TextItemField>(fieldId);
                     mentChild.Value = mentMaster.Value;
                 }
+
+                var masterTasks = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task"));
+                var taskOffset = master.Field<DurationItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task Offset"));
                 #endregion
 
                 #region // Date Calcs //
@@ -229,58 +232,105 @@ namespace newVilcapCopyFileToGoogleDrive
                 context.Logger.LogLine($"Added field:{embedMaster.Label}");
                 #endregion
 
-                #region // Create Dependant Tasks //
+                // Create Dependent Tasks //
 
-                var masterTasks = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task"));
-                foreach (var task in masterTasks.Items)
+                foreach (var masterT in masterTasks.Items)
                 {
-                    Item taskClone = new Item();
+                    Item cloneT = new Item();
 
-                    // Assign Fields //
+                    #region // Assign Dep. Task Fields //
 
-                    var nameMaster = master.Field<TextItemField>(ids.GetFieldId("VC Administration|Master Schedule|Task Name"));
-                    if (nameMaster.Value != null)
+                    var nameMasterT = masterT.Field<TextItemField>(ids.GetFieldId("VC Administration|Master Schedule|Task Name"));
+                    if (nameMasterT.Value != null)
                     {
-                        var nameChild = child.Field<TextItemField>(ids.GetFieldId("Task List|Title"));
-                        nameChild.Value = nameMaster.Value;
+                        var nameCloneT = cloneT.Field<TextItemField>(ids.GetFieldId("Task List|Title"));
+                        nameCloneT.Value = nameMasterT.Value;
                     }
 
-                    var descrMaster = master.Field<TextItemField>(ids.GetFieldId("VC Administration|Master Schedule|Desciption"));
-                    if (descrMaster.Value != null)
+                    var descrMasterT = masterT.Field<TextItemField>(ids.GetFieldId("VC Administration|Master Schedule|Desciption"));
+                    if (descrMasterT.Value != null)
                     {
-                        var descrChild = child.Field<TextItemField>(ids.GetFieldId("Task List|Description"));
-                        descrChild.Value = StripHTML(descrMaster.Value);
+                        var descrCloneT = cloneT.Field<TextItemField>(ids.GetFieldId("Task List|Description"));
+                        descrCloneT.Value = StripHTML(descrMasterT.Value);
                     }
 
-                    var phaseMaster = master.Field<CategoryItemField>(ids.GetFieldId("VC Administration|Master Schedule|Phase"));
-                    if (phaseMaster.Options.Any())
+                    var priorityMasterT = masterT.Field<CategoryItemField>(ids.GetFieldId("VC Administration|Master Schedule|Priority"));
+                    if (priorityMasterT.Options.Any())
                     {
-                        var phaseChild = child.Field<CategoryItemField>(ids.GetFieldId("Task List|Phase"));
-                        phaseChild.OptionText = phaseMaster.Options.First().Text;
+                        var priorityCloneT = cloneT.Field<CategoryItemField>(ids.GetFieldId("Task List|Priority"));
+                        priorityCloneT.OptionText = priorityMasterT.Options.First().Text;
                     }
 
-                    var esoMaster = master.Field<CategoryItemField>(ids.GetFieldId("VC Administration|Master Schedule|ESO Member Role"));
-                    if (esoMaster.Options.Any())
+                    var phaseMasterT = masterT.Field<CategoryItemField>(ids.GetFieldId("VC Administration|Master Schedule|Phase"));
+                    if (phaseMasterT.Options.Any())
                     {
-                        var esoChild = child.Field<CategoryItemField>(ids.GetFieldId("Task List|ESO Member Role"));
-                        esoChild.OptionText = esoMaster.Options.First().Text;
+                        var phaseCloneT = cloneT.Field<CategoryItemField>(ids.GetFieldId("Task List|Phase"));
+                        phaseCloneT.OptionText = phaseMasterT.Options.First().Text;
                     }
 
-                    var depMaster = master.Field<TextItemField>(ids.GetFieldId("VC Administration|Master Schedule|Dependancy"));
-                    if (depMaster.Value != null)
+                    var esoMasterT = masterT.Field<CategoryItemField>(ids.GetFieldId("VC Administration|Master Schedule|ESO Member Role"));
+                    if (esoMasterT.Options.Any())
                     {
-                        var depChild = child.Field<TextItemField>(ids.GetFieldId("Task List|Additional Dependencies"));
-                        depChild.Value = depMaster.Value;
+                        var esoCloneT = cloneT.Field<CategoryItemField>(ids.GetFieldId("Task List|ESO Member Role"));
+                        esoCloneT.OptionText = esoMasterT.Options.First().Text;
                     }
+
+                    var depMasterT = masterT.Field<TextItemField>(ids.GetFieldId("VC Administration|Master Schedule|Dependancy"));
+                    if (depMasterT.Value != null)
+                    {
+                        var depCloneT = cloneT.Field<TextItemField>(ids.GetFieldId("Task List|Additional Dependencies"));
+                        depCloneT.Value = depMasterT.Value;
+                    }
+
                     //var comChild = child.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion"));
                     //comChild.OptionText = "Incomplete";
+                    #endregion
+
+                    #region // Dep. Task Date Calcs //
+
+                    var durationMasterT = masterT.Field<DurationItemField>(ids.GetFieldId("VC Administration|Master Schedule|Duration"));
+                    var dateCloneT = cloneT.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
+
+                    if (durationMasterT != null)
+                    {
+                        var taskStart = new DateTime(child.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date")).Start.Value.Ticks).Subtract(taskOffset.Value.GetValueOrDefault());
+                        dateCloneT.Start = taskStart.Date;
+                        var taskEnd = new DateTime(taskStart.Add(durationMasterT.Value.GetValueOrDefault()).Ticks);
+                        dateCloneT.End = taskEnd.Date;
+                    }
+                    #endregion
+
+                    #region // Dep. Task Gdrive Integration //
+                    // GDrive Integration //
+
+                    fieldId = ids.GetFieldId("VC Administration|Master Schedule|Gdrive Link");
+                    var embedMasterT = masterT.Field<EmbedItemField>(fieldId);
+                    fieldId = ids.GetFieldId("Task List|Linked Files");
+                    var embedChildT = cloneT.Field<EmbedItemField>(fieldId);
+                    List<Embed> embedsT = new List<Embed>();
+                    string parentFolderIdT = Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
+                    var cloneFolderIdT = google.GetSubfolderId(service, podio, e, parentFolderId);//TODO:
+
+                    foreach (var em in embedMasterT.Embeds)
+                    {
+                        if (em.OriginalUrl.Contains(".google."))
+                        {
+                            await google.UpdateOneEmbed(service, em, embeds, cloneFolderId, podio, e);
+                        }
+                        //else          // Hold for 2.0 //
+                        //{
+                        //	NonGdriveLinks nonG = new NonGdriveLinks();
+                        //	await nonG.NonGDriveCopy(em, embeds, podio, e);
+                        //}
+                    }
+                    #endregion
 
                     #region // Create Actual Task Item //
 
                     CallPodioTasks:
                     try
                     {
-                        await podio.CreateItem(taskClone, tasklistAppId, true); //child Task List appId
+                        await podio.CreateItem(cloneT, tasklistAppId, true); //child Task List appId
                     }
                     catch (PodioUnavailableException ex)
                     {
@@ -298,7 +348,6 @@ namespace newVilcapCopyFileToGoogleDrive
                     #endregion
 
                 }
-                #endregion
 
                 #region // Create Actual Podio Item //
 
@@ -324,7 +373,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
             }
 
-            // Comment on Client's Admin item && Add aux items //
+            #region // Comment on Client's Admin item && Add aux items //
 
             CommentService comm = new CommentService(podio);
 			if (check.Field<CategoryItemField>(batchId).Options.First().Text == "1")
@@ -332,8 +381,8 @@ namespace newVilcapCopyFileToGoogleDrive
 				await pre.CreateExpendituresAndPreWSSurvs(context,podio,viewServ,check,e,service,ids,google);
 			}
 			await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);
-
-		}
-	}
+            #endregion
+        }
+    }
 }
 
