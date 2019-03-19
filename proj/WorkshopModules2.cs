@@ -234,8 +234,9 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 // Create Dependent Tasks //
 
-                foreach (var masterT in masterTasks.Items)
+                foreach (var masterTask in masterTasks.Items)
                 {
+                    Item masterT = await podio.GetItem(masterTask.ItemId);
                     Item cloneT = new Item();
 
                     #region // Assign Dep. Task Fields //
