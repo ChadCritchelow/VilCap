@@ -240,11 +240,11 @@ namespace newVilcapCopyFileToGoogleDrive
 
                     #region // Assign Dep. Task Fields //
 
-                    var nameMasterT = masterT.Field<TextItemField>(ids.GetFieldId("VC Administration|Master Schedule|Task Name"));
-                    if (nameMasterT.Value != null)
+                    var nameMasterTValue = masterT.Field<TextItemField>(ids.GetFieldId("VC Administration|Master Schedule|Task Name")).Value;
+                    if (nameMasterTValue != null)
                     {
                         var nameCloneT = cloneT.Field<TextItemField>(ids.GetFieldId("Task List|Title"));
-                        nameCloneT.Value = nameMasterT.Value;
+                        nameCloneT.Value = nameMasterTValue;
                     }
 
                     var descrMasterT = masterT.Field<TextItemField>(ids.GetFieldId("VC Administration|Master Schedule|Desciption"));
@@ -315,7 +315,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     {
                         if (em.OriginalUrl.Contains(".google."))
                         {
-                            await google.UpdateOneEmbed(service, em, embeds, cloneFolderId, podio, e);
+                            await google.UpdateOneEmbed(service, em, embedsT, cloneFolderIdT, podio, e);
                         }
                         //else          // Hold for 2.0 //
                         //{
