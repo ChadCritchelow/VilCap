@@ -297,7 +297,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     var durationMasterT = masterT.Field<NumericItemField>(ids.GetFieldId("VC Administration|Master Schedule|Duration (Days)"));
                     var dateCloneT = cloneT.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
 
-                    if (durationMasterT != null)
+                    if (durationMasterT.Value != null)
                     {
                         var taskStart = new DateTime(child.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date")).Start.Value.Ticks).Subtract(taskOffset.Value.GetValueOrDefault());
                         dateCloneT.Start = taskStart.Date;
