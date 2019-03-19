@@ -170,6 +170,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     mentChild.Value = mentMaster.Value;
                 }
 
+                var childTasks = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Mentors Required"));
                 var masterTasks = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task"));
                 var taskOffset = master.Field<DurationItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task Offset"));
                 #endregion
@@ -336,7 +337,9 @@ namespace newVilcapCopyFileToGoogleDrive
                     CallPodioTasks:
                     try
                     {
-                        await podio.CreateItem(cloneT, tasklistAppId, true); //child Task List appId
+                        var newTaskid = await podio.CreateItem(cloneT, tasklistAppId, true); //child Task List appId
+                        context.Logger.LogLine($"Created Dependent Task");
+                        childTasks.Items.Append(cloneT);
                     }
                     catch (PodioUnavailableException ex)
                     {
@@ -350,7 +353,6 @@ namespace newVilcapCopyFileToGoogleDrive
                         waitSeconds = waitSeconds * 2;
                         goto CallPodioTasks;
                     }
-                    context.Logger.LogLine($"Created Dependent Task");
                     #endregion
 
                 }
