@@ -236,7 +236,10 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 foreach (var masterTask in masterTasks.Items)
                 {
-                    Item masterT = await podio.GetItem(masterTask.ItemId);
+                    Item masterT = new Item();
+                    context.Logger.LogLine("Creating empty master item");
+                    masterT = await podio.GetItem(masterTask.ItemId);
+                    context.Logger.LogLine("Got master item");
                     Item cloneT = new Item();
 
                     #region // Assign Dep. Task Fields //
@@ -286,6 +289,8 @@ namespace newVilcapCopyFileToGoogleDrive
                     //var comChild = child.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion"));
                     //comChild.OptionText = "Incomplete";
                     #endregion
+                    context.Logger.LogLine("Assigned basic Dep. Task fields.");
+
 
                     #region // Dep. Task Date Calcs //
 
