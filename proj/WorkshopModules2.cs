@@ -355,7 +355,8 @@ namespace newVilcapCopyFileToGoogleDrive
                         goto CallPodioTasks;
                     }
                     #endregion
-
+                    childTasks.Items.Append(cloneT);
+                    childTasks.Values.Append(cloneT.ItemId);
                 }
 
                 #region // Create Actual Podio Item //
