@@ -101,7 +101,8 @@ namespace newVilcapCopyFileToGoogleDrive
 
             switch (check.App.Name)
             {
-                case "Create Workshop": //create legacy workshops
+                case "Create Workshop": 
+                    #region // create legacy workshops //
 
                     lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
                     try
@@ -128,6 +129,7 @@ namespace newVilcapCopyFileToGoogleDrive
                         await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
                     }
                     break;
+                #endregion
 
                 case "Admin": // everything else
 
@@ -138,7 +140,8 @@ namespace newVilcapCopyFileToGoogleDrive
                     switch (firstRevision.Label)
                     {
 
-                        case "WS Batch": // Create Workshops
+                        case "WS Batch":
+                            #region // Create Workshops //
                             var wsBatchId = ids.GetFieldId("Admin|WS Batch");
                             if (check.Field<CategoryItemField>(wsBatchId).Options.Any())
                             {
@@ -167,13 +170,15 @@ namespace newVilcapCopyFileToGoogleDrive
                                 }
                             }
                             break;
+                        #endregion
 
                         //case "Deploy Task List":
                         //    var deploy = ids.GetFieldId("Admin|Deploy Task List");
                         //    if (check.Field<CategoryItemField>(deploy).Options.Any());
                         //    break;
 
-                        case "TL Batch": // Create Task List
+                        case "TL Batch":
+                            #region // Create Task List //
                             var tlBatchId = ids.GetFieldId("Admin|TL Batch");
                             context.Logger.LogLine($"Value checking for: 'Task List {check.Field<CategoryItemField>(tlBatchId).Options.First().Text.ToStringOrNull()}'");
                             if (check.Field<CategoryItemField>(tlBatchId).Options.Any())
@@ -202,8 +207,10 @@ namespace newVilcapCopyFileToGoogleDrive
                                 }
                             }
                             break;
+                        #endregion
 
-                        case "Hidden Status": // Create Legacy task lists
+                        case "Hidden Status":
+                            #region // Create Legacy task lists //
                             var TlStatusId = ids.GetFieldId("Admin|Hidden Status");
                             context.Logger.LogLine($"Value checking for: '(Legacy) Task List {check.Field<CategoryItemField>(TlStatusId).Options.FirstOrDefault().Text}'");
                             if (check.Field<CategoryItemField>(TlStatusId).Options.Any())
@@ -232,6 +239,7 @@ namespace newVilcapCopyFileToGoogleDrive
                                 }
                             }
                             break;
+                        #endregion
 
                         default:
                             context.Logger.LogLine($"NO ACTION: Value '{firstRevision.Label}' not Recognized.");

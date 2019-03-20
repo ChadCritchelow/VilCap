@@ -234,7 +234,6 @@ namespace newVilcapCopyFileToGoogleDrive
                 #endregion
 
                 // Create Dependent Tasks //
-
                 foreach (var masterTask in masterTasks.Items)
                 {
                     Item masterT = new Item();
@@ -337,11 +336,11 @@ namespace newVilcapCopyFileToGoogleDrive
                     CallPodioTasks:
                     try
                     {
-                        var newTaskid = await podio.CreateItem(cloneT, tasklistAppId, true); //child Task List appId
-                        
+                        cloneT.ItemId = await podio.CreateItem(cloneT, tasklistAppId, true); //child Task List appId
+
                         context.Logger.LogLine($"Created Dependent Task");
-                        childTasks.Values.Append(newTaskid);
                         childTasks.Items.Append(cloneT);
+                        childTasks.Values.Append(cloneT.ItemId);
                     }
                     catch (PodioUnavailableException ex)
                     {
