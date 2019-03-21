@@ -18,7 +18,7 @@ namespace newVilcapCopyFileToGoogleDrive
 		{
 			try
 			{
-				Console.WriteLine($"{e.podioEvent.item_id} - EnvID: {e.environmentId}");
+				//Console.WriteLine($"{e.podioEvent.item_id} - EnvID: {e.environmentId}");
 				FilesResource.ListRequest listReq = ds.Files.List();
 				listReq.Q = "name='" + e.environmentId + "'";
 				string folderId = "";
@@ -56,7 +56,7 @@ namespace newVilcapCopyFileToGoogleDrive
 		{
 			try
 			{
-				Console.WriteLine($"{e.podioEvent.item_id} - Old Embed Link (resolved): {embed.ResolvedUrl}");
+				//Console.WriteLine($"{e.podioEvent.item_id} - Old Embed Link (resolved): {embed.ResolvedUrl}");
 				var id = GetDriveId(embed.OriginalUrl, e);
 				File original = GetFileByTitle(ds, id, e);
 				if (original.Parents == null)
@@ -106,7 +106,7 @@ namespace newVilcapCopyFileToGoogleDrive
 						waitSeconds = waitSeconds * 2;
 						goto CallPodio;
 					}
-					Console.WriteLine($"{e.podioEvent.item_id} - WebViewLink: {clone.WebViewLink}");
+					//Console.WriteLine($"{e.podioEvent.item_id} - WebViewLink: {clone.WebViewLink}");
 					embeds.Add(em);
 				});
 			}
@@ -125,7 +125,7 @@ namespace newVilcapCopyFileToGoogleDrive
 				{
 					if (s.Length == 44 || s.Length == 33)
 					{
-						Console.WriteLine($"{e.podioEvent.item_id} - Found ID: {s} from url: {url}");
+						//Console.WriteLine($"{e.podioEvent.item_id} - Found ID: {s} from url: {url}");
 						return s;
 					}
 				}

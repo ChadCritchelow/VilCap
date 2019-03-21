@@ -358,12 +358,13 @@ namespace newVilcapCopyFileToGoogleDrive
                 }
 
                 #region // Create Actual Podio Item //
-
+                context.Logger.LogLine($"Calling Podio");
                 CallPodio:
 				try
 				{
-					await podio.CreateItem(child, workshopAppId, true); //child Workshop Modules appId
-				}
+                    context.Logger.LogLine($"Sending CreateItem Request");
+                    await podio.CreateItem(child, workshopAppId, true); //child Workshop Modules appId
+                }
 				catch (PodioUnavailableException ex)
 				{
 					context.Logger.LogLine($"{ex.Message}");
