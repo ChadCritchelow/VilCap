@@ -339,7 +339,7 @@ namespace newVilcapCopyFileToGoogleDrive
                         var newTaskId = await podio.CreateItem(cloneT, tasklistAppId, true); //child Task List appId
                         cloneT.ItemId = newTaskId;
                         childTasks.ItemId = newTaskId;
-                        context.Logger.LogLine($"newTaskId {newTaskId} - cloned itemId {cloneT.ItemId} - Items {childTasks.Items}");
+                        context.Logger.LogLine($"newTaskId {newTaskId} - cloned itemId {cloneT.ItemId} - Items {childTasks.Items.ToString()}");
                         context.Logger.LogLine($"Created Dependent Task"); 
                     }
                     catch (PodioUnavailableException ex)
