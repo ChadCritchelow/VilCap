@@ -1,5 +1,4 @@
 ﻿using System;
-using System;
 using System.Collections.Generic;
 using Amazon.Lambda.Core;
 using Google.Apis.Drive.v3;

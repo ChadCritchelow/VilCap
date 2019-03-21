@@ -57,13 +57,11 @@ namespace newVilcapCopyFileToGoogleDrive
 			try
 			{
 				Console.WriteLine($"{e.podioEvent.item_id} - Old Embed Link (resolved): {embed.ResolvedUrl}");
-				Console.WriteLine($"{e.podioEvent.item_id} - Old Embed Link (original): {embed.OriginalUrl}");
 				var id = GetDriveId(embed.OriginalUrl, e);
-				Console.WriteLine($"{e.podioEvent.item_id} - ID that we pull from the URL: {id}");
 				File original = GetFileByTitle(ds, id, e);
 				if (original.Parents == null)
 					original.Parents = new List<string>();
-				Console.WriteLine($"{e.podioEvent.item_id} - ID from the file itself: {original.Id}, Name: {original.Name}");
+				Console.WriteLine($"{e.podioEvent.item_id} -Old File ID: {original.Id}, Name: {original.Name}");
 				original.Parents.Clear();
 				original.Parents.Add(subfolderId);
 				original.Name = e.environmentId + " " + original.Name;
@@ -82,8 +80,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
 				await System.Threading.Tasks.Task.Run(() =>
 				{
-					PodioCore.Services.EmbedService embedServ = new EmbedService(podio);
-					Console.WriteLine($"{e.podioEvent.item_id} - Adding embed thru service");
+					PodioCore.Services.EmbedService embedServ = new EmbedService(podio);;
 
 					Console.WriteLine($"{e.podioEvent.item_id} - CloneID: {clone.Id}");
 					var req = ds.Files.Get(clone.Id);
@@ -109,10 +106,6 @@ namespace newVilcapCopyFileToGoogleDrive
 						waitSeconds = waitSeconds * 2;
 						goto CallPodio;
 					}
-
-					Console.WriteLine($"{e.podioEvent.item_id} - New Embed Link (resolved): {em.ResolvedUrl}");
-					Console.WriteLine($"{e.podioEvent.item_id} - New Embed Link (original): {em.OriginalUrl}");
-					Console.WriteLine($"{e.podioEvent.item_id} - New Embed added");
 					Console.WriteLine($"{e.podioEvent.item_id} - WebViewLink: {clone.WebViewLink}");
 					embeds.Add(em);
 				});
@@ -127,7 +120,6 @@ namespace newVilcapCopyFileToGoogleDrive
 		{
 			try
 			{
-				Console.WriteLine($"{e.podioEvent.item_id} - Attempting to get the ID from URL: {url}");
 				string[] substr = url.Split(new char[] { '=', '/', '?' });
 				foreach (string s in substr)
 				{
