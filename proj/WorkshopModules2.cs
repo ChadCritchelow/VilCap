@@ -169,8 +169,6 @@ namespace newVilcapCopyFileToGoogleDrive
                     var mentChild = child.Field<TextItemField>(fieldId);
                     mentChild.Value = mentMaster.Value;
                 }
-                var field = new AppItemField();
-                child.Fields.Add(field);
 
                 var childTasks = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Dependent Task"));
                 var masterTasks = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task"));
