@@ -149,7 +149,7 @@ namespace newVilcapCopyFileToGoogleDrive
                             {
                                 context.Logger.LogLine($"Running 'WS Batch {check.Field<CategoryItemField>(wsBatchId).Options.First().Text}'");
                                 int nextBatch = -1;
-                                await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
+                                //await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
                                 lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
                                 try
                                 {
@@ -168,8 +168,10 @@ namespace newVilcapCopyFileToGoogleDrive
                                         commentText = $"Batch #{wsBatchId} Completed";
                                         check.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch")).OptionText = $"{nextBatch}";
                                         await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
-                                        await podio.UpdateItem(check, hook: true); 
+                                        await podio.UpdateItem(check, hook: true);
+                                        break;
                                     }
+                                    await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
                                 }
 
                                 catch (Exception ex)
