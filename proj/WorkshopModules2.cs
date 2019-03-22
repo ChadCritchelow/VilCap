@@ -169,6 +169,8 @@ namespace newVilcapCopyFileToGoogleDrive
                     var mentChild = child.Field<TextItemField>(fieldId);
                     mentChild.Value = mentMaster.Value;
                 }
+                var field = new AppItemField();
+                child.Fields.Add(field);
 
                 var childTasks = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Mentors Required"));
                 var masterTasks = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task"));
@@ -233,32 +235,6 @@ namespace newVilcapCopyFileToGoogleDrive
                 context.Logger.LogLine($"Added field:{embedMaster.Label}");
                 #endregion
 
-                #region // Create WorkshopModule Podio Item //
-                context.Logger.LogLine($"Calling Podio");
-                CallPodio:
-                try
-                {
-                    context.Logger.LogLine($"Sending CreateItem Request");
-                    var CreateItemResult = await podio.CreateItem(child, workshopAppId, true);
-                    context.Logger.LogLine($"CreateItemResult={CreateItemResult}");
-                    child = await podio.GetItem(CreateItemResult); //child Workshop Modules appId
-                    context.Logger.LogLine($"child.itemid={child.ItemId}");
-                }
-                catch (PodioUnavailableException ex)
-                {
-                    context.Logger.LogLine($"{ex.Message}");
-                    context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
-                    for (int i = 0; i < waitSeconds; i++)
-                    {
-                        System.Threading.Thread.Sleep(1000);
-                        context.Logger.LogLine(".");
-                    }
-                    waitSeconds = waitSeconds * 2;
-                    goto CallPodio;
-                }
-                context.Logger.LogLine($"Created item #{count}");
-                #endregion
-
                 // Dependent Tasks Generation//
                 foreach (var masterTask in masterTasks.Items)
                 {
@@ -315,8 +291,6 @@ namespace newVilcapCopyFileToGoogleDrive
                     //var comChild = child.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion"));
                     //comChild.OptionText = "Incomplete";
                     #endregion
-                    context.Logger.LogLine("Assigned basic Dep. Task fields.");
-
 
                     #region // Dep. Task Date Calcs //
 
@@ -356,17 +330,16 @@ namespace newVilcapCopyFileToGoogleDrive
                     }
                     #endregion
 
-                    #region // Create Actual Task Item //
+                    #region // Create Dep. Task Item //
 
                     CallPodioTasks:
                     try
                     {
                         var newTaskId = await podio.CreateItem(cloneT, tasklistAppId, true); //child Task List appId
                         cloneT = await podio.GetItem(newTaskId);
-                        //childTasks.ItemId = newTaskId;
-                        childTasks.Values.Add(cloneT);
                         context.Logger.LogLine($"newTaskId ({newTaskId}) - cloned itemId ({cloneT.ItemId})");
-                        context.Logger.LogLine($"Created Dependent Task"); 
+                        context.Logger.LogLine($"Created Dependent Task");
+                        childTasks.Values.Add(cloneT);
                     }
                     catch (PodioUnavailableException ex)
                     {
@@ -383,8 +356,31 @@ namespace newVilcapCopyFileToGoogleDrive
                     #endregion
                 }
 
-                
-
+                #region // Create WorkshopModule Podio Item //
+                context.Logger.LogLine($"Calling Podio");
+                CallPodio:
+                try
+                {
+                    context.Logger.LogLine($"Sending CreateItem Request");
+                    var CreateItemResult = await podio.CreateItem(child, workshopAppId, true);
+                    context.Logger.LogLine($"CreateItemResult={CreateItemResult}");
+                    child = await podio.GetItem(CreateItemResult); //child Workshop Modules appId
+                    context.Logger.LogLine($"child.itemid={child.ItemId}");
+                }
+                catch (PodioUnavailableException ex)
+                {
+                    context.Logger.LogLine($"{ex.Message}");
+                    context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
+                    for (int i = 0; i < waitSeconds; i++)
+                    {
+                        System.Threading.Thread.Sleep(1000);
+                        context.Logger.LogLine(".");
+                    }
+                    waitSeconds = waitSeconds * 2;
+                    goto CallPodio;
+                }
+                context.Logger.LogLine($"Created item #{count}");
+                #endregion
             }
 
             #region // Comment on Client's Admin item && Add aux items //
