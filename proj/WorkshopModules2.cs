@@ -70,7 +70,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
             var op = new FilterOptions{ Filters = view.First().Filters };
             op.SortBy = "185391072"; // fieldId of Package Sequence (num) from Content Curation
-            op.SortDesc = false;
+            op.SortDesc = true;
             op.Limit = 25;
 
             Int32.TryParse(batch, out int batchNum);
