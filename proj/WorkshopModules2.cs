@@ -172,7 +172,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 var field = new AppItemField();
                 child.Fields.Add(field);
 
-                var childTasks = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Mentors Required"));
+                var childTasks = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Dependent Task"));
                 var masterTasks = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task"));
                 var taskOffset = master.Field<DurationItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task Offset"));
                 #endregion
@@ -240,7 +240,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 {
                     Item masterT = new Item();
                     context.Logger.LogLine("Creating empty master item");
-                    masterT = await podio.GetItem(masterTask.ItemId);
+                    masterT = await podio.GetFullItem(masterTask.ItemId);
                     context.Logger.LogLine("Got master item");
                     Item cloneT = new Item();
 
@@ -336,7 +336,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     try
                     {
                         var newTaskId = await podio.CreateItem(cloneT, tasklistAppId, true); //child Task List appId
-                        cloneT = await podio.GetItem(newTaskId);
+                        cloneT = await podio.GetFullItem(newTaskId);
                         context.Logger.LogLine($"newTaskId ({newTaskId}) - cloned itemId ({cloneT.ItemId})");
                         context.Logger.LogLine($"Created Dependent Task");
                     }
