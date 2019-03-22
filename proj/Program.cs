@@ -149,6 +149,7 @@ namespace newVilcapCopyFileToGoogleDrive
                             {
                                 context.Logger.LogLine($"Running 'WS Batch {check.Field<CategoryItemField>(wsBatchId).Options.First().Text}'");
                                 int nextBatch = -1;
+                                await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
                                 lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
                                 try
                                 {
