@@ -339,7 +339,6 @@ namespace newVilcapCopyFileToGoogleDrive
                         cloneT = await podio.GetItem(newTaskId);
                         context.Logger.LogLine($"newTaskId ({newTaskId}) - cloned itemId ({cloneT.ItemId})");
                         context.Logger.LogLine($"Created Dependent Task");
-                        childTasks.Values.Add(cloneT);
                     }
                     catch (PodioUnavailableException ex)
                     {
@@ -353,6 +352,8 @@ namespace newVilcapCopyFileToGoogleDrive
                         waitSeconds = waitSeconds * 2;
                         goto CallPodioTasks;
                     }
+                    childTasks.Values.Add(cloneT);
+                    context.Logger.LogLine($"childTasks values: {childTasks.Values.FirstOrDefault().ToString()}");
                     #endregion
                 }
 
@@ -363,9 +364,9 @@ namespace newVilcapCopyFileToGoogleDrive
                 {
                     context.Logger.LogLine($"Sending CreateItem Request");
                     var CreateItemResult = await podio.CreateItem(child, workshopAppId, true);
-                    context.Logger.LogLine($"CreateItemResult={CreateItemResult}");
-                    child = await podio.GetItem(CreateItemResult); //child Workshop Modules appId
-                    context.Logger.LogLine($"child.itemid={child.ItemId}");
+                    //context.Logger.LogLine($"CreateItemResult={CreateItemResult}");
+                    //child = await podio.GetItem(CreateItemResult); //child Workshop Modules appId
+                    //context.Logger.LogLine($"child.itemid={child.ItemId}");
                 }
                 catch (PodioUnavailableException ex)
                 {
