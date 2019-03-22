@@ -240,7 +240,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 {
                     Item masterT = new Item();
                     context.Logger.LogLine("Creating empty master item");
-                    masterT = await podio.GetFullItem(masterTask.ItemId);
+                    masterT = await podio.GetItem(masterTask.ItemId);
                     context.Logger.LogLine("Got master item");
                     Item cloneT = new Item();
 
@@ -336,9 +336,11 @@ namespace newVilcapCopyFileToGoogleDrive
                     try
                     {
                         var newTaskId = await podio.CreateItem(cloneT, tasklistAppId, true); //child Task List appId
-                        cloneT = await podio.GetFullItem(newTaskId);
+                        cloneT = await podio.GetItem(newTaskId);
                         context.Logger.LogLine($"newTaskId ({newTaskId}) - cloned itemId ({cloneT.ItemId})");
                         context.Logger.LogLine($"Created Dependent Task");
+                        childTasks.ItemId = cloneT.ItemId;
+                        context.Logger.LogLine($"childTasks values: {childTasks.Values.FirstOrDefault().ToString()}");
                     }
                     catch (PodioUnavailableException ex)
                     {
@@ -352,8 +354,6 @@ namespace newVilcapCopyFileToGoogleDrive
                         waitSeconds = waitSeconds * 2;
                         goto CallPodioTasks;
                     }
-                    childTasks.Values.Add(cloneT);
-                    context.Logger.LogLine($"childTasks values: {childTasks.Values.FirstOrDefault().ToString()}");
                     #endregion
                 }
 
