@@ -233,7 +233,33 @@ namespace newVilcapCopyFileToGoogleDrive
                 context.Logger.LogLine($"Added field:{embedMaster.Label}");
                 #endregion
 
-                // Create Dependent Tasks //
+                #region // Create WorkshopModule Podio Item //
+                context.Logger.LogLine($"Calling Podio");
+                CallPodio:
+                try
+                {
+                    context.Logger.LogLine($"Sending CreateItem Request");
+                    var CreateItemResult = await podio.CreateItem(child, workshopAppId, true);
+                    context.Logger.LogLine($"CreateItemResult={CreateItemResult}");
+                    child = await podio.GetItem(CreateItemResult); //child Workshop Modules appId
+                    context.Logger.LogLine($"child.itemid={child.ItemId}");
+                }
+                catch (PodioUnavailableException ex)
+                {
+                    context.Logger.LogLine($"{ex.Message}");
+                    context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
+                    for (int i = 0; i < waitSeconds; i++)
+                    {
+                        System.Threading.Thread.Sleep(1000);
+                        context.Logger.LogLine(".");
+                    }
+                    waitSeconds = waitSeconds * 2;
+                    goto CallPodio;
+                }
+                context.Logger.LogLine($"Created item #{count}");
+                #endregion
+
+                // Dependent Tasks Generation//
                 foreach (var masterTask in masterTasks.Items)
                 {
                     Item masterT = new Item();
@@ -307,7 +333,6 @@ namespace newVilcapCopyFileToGoogleDrive
                     #endregion
 
                     #region // Dep. Task Gdrive Integration //
-                    // GDrive Integration //
 
                     fieldId = ids.GetFieldId("VC Administration|Master Schedule|Gdrive Link");
                     var embedMasterT = masterT.Field<EmbedItemField>(fieldId);
@@ -358,28 +383,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     #endregion
                 }
 
-                #region // Create Actual Podio Item //
-                context.Logger.LogLine($"Calling Podio");
-                CallPodio:
-				try
-				{
-                    context.Logger.LogLine($"Sending CreateItem Request");
-                    await podio.CreateItem(child, workshopAppId, true); //child Workshop Modules appId
-                }
-				catch (PodioUnavailableException ex)
-				{
-					context.Logger.LogLine($"{ex.Message}");
-					context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
-					for (int i = 0; i < waitSeconds; i++)
-					{
-						System.Threading.Thread.Sleep(1000);
-						context.Logger.LogLine(".");
-					}
-					waitSeconds = waitSeconds * 2;
-					goto CallPodio;
-				}
-				context.Logger.LogLine($"Created item #{count}");
-                #endregion
+                
 
             }
 

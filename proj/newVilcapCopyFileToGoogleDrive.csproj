@@ -10,7 +10,7 @@
     <PackageReference Include="PodioCore.Items" Version="0.0.24" />
     <PackageReference Include="Saasafras" Version="0.2.14" />
     <PackageReference Include="Saasafras.Database" Version="0.1.29" />
-    <PackageReference Include="Google.Apis.Drive.v3" Version="1.38.0.1512" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.38.0.1533" />
     <PackageReference Include="Saasafras.Model" Version="0.1.10" />
   </ItemGroup>
 
