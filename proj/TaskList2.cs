@@ -233,7 +233,7 @@ namespace newVilcapCopyFileToGoogleDrive
             }
             else
             {
-                commentText += "All Tasklist items added!";
+                commentText += " All Tasklist items added!";
             }
 			await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true); 
 
