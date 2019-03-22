@@ -14,6 +14,7 @@ using PodioCore.Models.Request;
 using System.Text.RegularExpressions;
 using PodioCore.Utils;
 using Saasafras;
+using PodioCore.Comments;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
 
@@ -95,8 +96,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			GoogleIntegration google = new GoogleIntegration();
 			PreSurvAndExp pre = new PreSurvAndExp();
 			GetIds ids = new GetIds(dictChild,dictMaster,fullNames,e);
-            WorkshopModules ws = new WorkshopModules();
-            WorkshopModules2 ws2 = new WorkshopModules2();
+            CommentService comm = new CommentService(podio);
             Survey s = new Survey();
 
             switch (check.App.Name)
@@ -116,7 +116,9 @@ namespace newVilcapCopyFileToGoogleDrive
                         fieldId = ids.GetFieldId("Create Workshop|Workshop Type");
                         var checkType = check.Field<CategoryItemField>(fieldId);
 
+                        WorkshopModules ws = new WorkshopModules();
                         await ws.CreateWorkShopModules(ids, check, podio, context, service, google, e, checkType);
+
                         // Create surveys //
                         await s.CreateSurveys(checkType, ids, podio, google, service, e, context);
                     }
@@ -145,7 +147,8 @@ namespace newVilcapCopyFileToGoogleDrive
                             var wsBatchId = ids.GetFieldId("Admin|WS Batch");
                             if (check.Field<CategoryItemField>(wsBatchId).Options.Any())
                             {
-                                context.Logger.LogLine($"Value checking for: 'WS Batch {check.Field<CategoryItemField>(wsBatchId).Options.First().Text}'");
+                                context.Logger.LogLine($"Running 'WS Batch {check.Field<CategoryItemField>(wsBatchId).Options.First().Text}'");
+                                int nextBatch = -1;
                                 lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
                                 try
                                 {
@@ -155,17 +158,25 @@ namespace newVilcapCopyFileToGoogleDrive
                                         return;
                                     }
                                     context.Logger.LogLine($"Lock Value: {lockValue}");
-                                    context.Logger.LogLine("Satisfied conditions, WorkshopModules2");
+                                    
                                     WorkshopModules2 wm = new WorkshopModules2();
-                                    await wm.CreateWorkshopModules2(context, podio, check, e, service, ids, google, pre);
+                                    nextBatch = await wm.CreateWorkshopModules2(context, podio, check, e, service, ids, google, pre);
+                                    
+                                    if (nextBatch > 1)
+                                    {
+                                        commentText = $"Batch #{wsBatchId} Completed";
+                                        check.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch")).OptionText = $"{nextBatch}";
+                                        await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
+                                        await podio.UpdateItem(check, hook: true); 
+                                    }
                                 }
+
                                 catch (Exception ex)
                                 {
                                     context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
                                         $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
-                                }
-                                finally
-                                {
+                                    commentText = "Sorry, something went wrong. Please try again or contact the administrator.";
+                                    await comm.AddCommentToObject("item", check.ItemId, commentText, hook: false);
                                     await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
                                 }
                             }
@@ -193,8 +204,8 @@ namespace newVilcapCopyFileToGoogleDrive
                                     }
                                     context.Logger.LogLine($"Lock Value: {lockValue}");
                                     context.Logger.LogLine("Satisfied conditions, TaskList2");
-                                    TaskList2 tl2 = new TaskList2();
-                                    await tl2.CreateTaskLists(context, podio, check, e, service, ids, google, pre);
+                                    TaskList2 tl = new TaskList2();
+                                    await tl.CreateTaskLists(context, podio, check, e, service, ids, google, pre);
                                 }
                                 catch (Exception ex)
                                 {

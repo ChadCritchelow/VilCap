@@ -22,10 +22,10 @@ namespace newVilcapCopyFileToGoogleDrive
 		PodioCollection<Item> filter;
 		public static string StripHTML(string input)
 		{
-			return Regex.Replace(input, "<.*?>", String.Empty);
+			return Regex.Replace(input, "<.*?>", string.Empty);
 		}
 
-		public async System.Threading.Tasks.Task CreateWorkshopModules2(ILambdaContext context, Podio podio, Item check, RoutedPodioEvent e, DriveService service, GetIds ids, GoogleIntegration google,PreSurvAndExp pre)
+		public async System.Threading.Tasks.Task<int> CreateWorkshopModules2(ILambdaContext context, Podio podio, Item check, RoutedPodioEvent e, DriveService service, GetIds ids, GoogleIntegration google,PreSurvAndExp pre)
 		{
 
             #region // Utility vars //
@@ -40,6 +40,7 @@ namespace newVilcapCopyFileToGoogleDrive
             var workshopAppId = ids.GetFieldId("Workshop Modules");
             var tasklistAppId = ids.GetFieldId("Task List");
             int waitSeconds = 5;
+            int batchNum = -1;
 
             int day = 0;
             TimeSpan timeFromStart = new TimeSpan(0);
@@ -70,10 +71,10 @@ namespace newVilcapCopyFileToGoogleDrive
 
             var op = new FilterOptions{ Filters = view.First().Filters };
             op.SortBy = "185391072"; // fieldId of Package Sequence (num) from Content Curation
-            op.SortDesc = true;
-            op.Limit = 25;
+            op.SortDesc = false;
+            op.Limit = LIMIT;
 
-            Int32.TryParse(batch, out int batchNum);
+            Int32.TryParse(batch, out batchNum);
             if (0 <= batchNum && batchNum <= MAX_BATCHES)
             {
                 op.Offset = op.Limit * (batchNum - 1);
@@ -365,9 +366,6 @@ namespace newVilcapCopyFileToGoogleDrive
                     context.Logger.LogLine($"Sending CreateItem Request");
                     await podio.CreateItem(child, workshopAppId, true);
                     context.Logger.LogLine($"CreateItem Request Complete");
-                    //context.Logger.LogLine($"CreateItemResult={CreateItemResult}");
-                    //child = await podio.GetItem(CreateItemResult); //child Workshop Modules appId
-                    //context.Logger.LogLine($"child.itemid={child.ItemId}");
                 }
                 catch (PodioUnavailableException ex)
                 {
@@ -385,15 +383,19 @@ namespace newVilcapCopyFileToGoogleDrive
                 #endregion
             }
 
-            #region // Comment on Client's Admin item && Add aux items //
-
-            CommentService comm = new CommentService(podio);
+            // Comment on Client's Admin item && Add aux items //
 			if (check.Field<CategoryItemField>(batchId).Options.First().Text == "1")
 			{
 				await pre.CreateExpendituresAndPreWSSurvs(context,podio,viewServ,check,e,service,ids,google);
 			}
-			await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);
-            #endregion
+
+            // Return the next Batch #, or -1 if all Items have been completed
+            if (count == LIMIT)
+            {
+                return batchNum++;
+            }
+            return -1;
+
         }
     }
 }
