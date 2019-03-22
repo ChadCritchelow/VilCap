@@ -363,7 +363,10 @@ namespace newVilcapCopyFileToGoogleDrive
                 try
                 {
                     context.Logger.LogLine($"Sending CreateItem Request");
-                    var CreateItemResult = await podio.CreateItem(child, workshopAppId, true);
+                    context.Logger.LogLine($"child.ItemId={child.ItemId} & child.exId={child.ExternalId}");
+                    context.Logger.LogLine($"Sending CreateItem Request");
+                    await podio.CreateItem(child, workshopAppId, true);
+                    context.Logger.LogLine($"CreateItem Request Complete");
                     //context.Logger.LogLine($"CreateItemResult={CreateItemResult}");
                     //child = await podio.GetItem(CreateItemResult); //child Workshop Modules appId
                     //context.Logger.LogLine($"child.itemid={child.ItemId}");
