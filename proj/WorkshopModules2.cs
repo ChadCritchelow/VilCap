@@ -336,7 +336,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     try
                     {
                         var newTaskId = await podio.CreateItem(cloneT, tasklistAppId, true); //child Task List appId
-                        cloneT = await podio.GetItem(newTaskId);
+                        cloneT = await podio.GetFullItem(newTaskId);
                         context.Logger.LogLine($"newTaskId ({newTaskId}) - cloned itemId ({cloneT.ItemId}) - cloned exId ({cloneT.ExternalId})");
                         context.Logger.LogLine($"Created Dependent Task");
                         childTasks.ItemId = cloneT.ItemId;
