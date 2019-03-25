@@ -149,8 +149,8 @@ namespace newVilcapCopyFileToGoogleDrive
                             {
                                 context.Logger.LogLine($"Running 'WS Batch {check.Field<CategoryItemField>(wsBatchId).Options.First().Text}'");
                                 int nextBatch = -1;
-                                //await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
-                                lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+ ////////////////////////////////                               lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+
                                 try
                                 {
                                     if (string.IsNullOrEmpty(lockValue))
@@ -167,7 +167,7 @@ namespace newVilcapCopyFileToGoogleDrive
                                     {
                                         commentText = $"Batch #{wsBatchId} Completed";
                                         check.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch")).OptionText = $"{nextBatch}";
-                                        await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
+////////////////////////                                        await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
                                         await podio.UpdateItem(check, hook: true);
                                         break;
                                     }
@@ -183,7 +183,7 @@ namespace newVilcapCopyFileToGoogleDrive
                                 }
 
                                 finally {
-                                    await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
+////////////////////////                                    await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
                                 }
                             }
                             break;
