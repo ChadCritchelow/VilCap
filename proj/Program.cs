@@ -171,7 +171,6 @@ namespace newVilcapCopyFileToGoogleDrive
                                         await podio.UpdateItem(check, hook: true);
                                         break;
                                     }
-                                    await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
                                 }
 
                                 catch (Exception ex)
@@ -180,6 +179,10 @@ namespace newVilcapCopyFileToGoogleDrive
                                         $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
                                     commentText = "Sorry, something went wrong. Please try again or contact the administrator.";
                                     await comm.AddCommentToObject("item", check.ItemId, commentText, hook: false);
+                                    
+                                }
+
+                                finally {
                                     await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
                                 }
                             }
