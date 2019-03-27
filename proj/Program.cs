@@ -188,6 +188,44 @@ namespace newVilcapCopyFileToGoogleDrive
                             }
                             break;
                         #endregion
+                        case "Deploy Addons":
+                            #region // Deploy Addon Modules //
+                            var aoBatchId = ids.GetFieldId("Admin|Deploy Addons");
+                            if (check.Field<CategoryItemField>(aoBatchId).Options.Any())
+                            {
+                                context.Logger.LogLine($"Running 'WS Batch {check.Field<CategoryItemField>(aoBatchId).Options.First().Text}'");
+                                int nextBatch = -1;
+                                lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+
+                                try
+                                {
+                                    if (string.IsNullOrEmpty(lockValue))
+                                    {
+                                        context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
+                                        return;
+                                    }
+                                    context.Logger.LogLine($"Lock Value: {lockValue}");
+
+                                    Addons ao = new Addons();
+                                    nextBatch = await ao.CreateAddons(context, podio, check, e, service, ids, google, pre);
+                                    break;
+                                }
+
+                                catch (Exception ex)
+                                {
+                                    context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
+                                        $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
+                                    commentText = "Sorry, something went wrong. Please try again in 5 minutes or contact the administrator.";
+                                    await comm.AddCommentToObject("item", check.ItemId, commentText, hook: false);
+                                }
+
+                                finally
+                                {
+                                    await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
+                                }
+                            }
+                            break;
+                        #endregion
 
                         //case "Deploy Task List":
                         //    var deploy = ids.GetFieldId("Admin|Deploy Task List");
