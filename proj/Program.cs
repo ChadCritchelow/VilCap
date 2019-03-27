@@ -177,7 +177,7 @@ namespace newVilcapCopyFileToGoogleDrive
                                 {
                                     context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
                                         $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
-                                    commentText = "Sorry, something went wrong. Please try again or contact the administrator.";
+                                    commentText = "Sorry, something went wrong. Please try again in 5 minutes or contact the administrator.";
                                     await comm.AddCommentToObject("item", check.ItemId, commentText, hook: false);
                                     
                                 }
@@ -197,7 +197,15 @@ namespace newVilcapCopyFileToGoogleDrive
                         case "TL Batch":
                             #region // Create Task List //
                             var tlBatchId = ids.GetFieldId("Admin|TL Batch");
-                            context.Logger.LogLine($"Value checking for: 'Task List {check.Field<CategoryItemField>(tlBatchId).Options.First().Text.ToStringOrNull()}'");
+                            try
+                            {
+                                context.Logger.LogLine($"Value checking for: 'Task List {check.Field<CategoryItemField>(tlBatchId).Options.First().Text.ToStringOrNull()}'");
+                            }
+                            catch(Exception ex)
+                            {
+                                context.Logger.LogLine($"Exception when checking for batch: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
+                                        $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
+                            }
                             if (check.Field<CategoryItemField>(tlBatchId).Options.Any())
                             {
                                 lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
@@ -217,6 +225,8 @@ namespace newVilcapCopyFileToGoogleDrive
                                 {
                                     context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
                                         $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
+                                    commentText = "Sorry, something went wrong. Please try again in 5 minutes or contact the administrator.";
+                                    await comm.AddCommentToObject("item", check.ItemId, commentText, hook: false);
                                 }
                                 finally
                                 {

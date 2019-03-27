@@ -34,6 +34,7 @@ namespace newVilcapCopyFileToGoogleDrive
             const int MAX_BATCHES = 10;
             const int MASTER_SCHEDULE_APP = 21310276;
 
+            CommentService comm = new CommentService(podio);
             string commentText;
             int count = 0;
             int fieldId = 0;
@@ -68,7 +69,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 viewReq.SortBy = "174999400"; // fieldId of "Title"
                 viewReq.Filters = new Dictionary<string, object>
                 {
-                    {"185003953" /*Curriculum package*/, tlPackageName }
+                    {"185003953" /*Curriculum package*/, new string[] {tlPackageName} }
                 };
                 var viewId = await viewServ.CreateView(MASTER_SCHEDULE_APP, viewReq);
                 view = from v in views
@@ -222,7 +223,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
             // Update Admin Item for next Batch //
 
-            CommentService comm = new CommentService(podio);
+
             if (count == LIMIT)
             {
                 batchNum++;
