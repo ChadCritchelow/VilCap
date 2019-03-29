@@ -165,12 +165,12 @@ namespace newVilcapCopyFileToGoogleDrive
                                     
                                     if (nextBatch > 1)
                                     {
-                                        commentText = $"WS Batch {wsBatchId} Completed.";
+                                        commentText = $"WS Batch {nextBatch-1} Completed.";
                                         check.Field<CategoryItemField>(ids.GetFieldId("Admin|WS Batch")).OptionText = $"{nextBatch}";
                                         await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
                                         await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);
                                         //await podio.UpdateItem(check, hook: true);
-                                        break;
+                                        return;
                                     }
                                 }
 
