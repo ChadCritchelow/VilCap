@@ -67,9 +67,9 @@ namespace newVilcapCopyFileToGoogleDrive
                 var viewReq = new ViewCreateUpdateRequest();
                 viewReq.Name = $"AWS - {tlPackageName}";
                 viewReq.SortBy = "174999400"; // fieldId of "Title"
-                viewReq.Filters = new Dictionary<string, object>()
+                viewReq.Filters = new Dictionary<string, object>
                 {
-                    {"185003953" /*Curriculum Package field*/, new string[] { tlPackageName } }
+                    {"185003953" /*Curriculum Package field*/, tlPackageName }
                 };
                 var viewId = await viewServ.CreateView(MASTER_SCHEDULE_APP, viewReq);
                 view = from v in views
