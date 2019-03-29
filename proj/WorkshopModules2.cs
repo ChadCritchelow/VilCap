@@ -107,6 +107,8 @@ namespace newVilcapCopyFileToGoogleDrive
                 {
                     int dayMasterVal = 0;
                     Int32.TryParse(dayMaster.Options.First().Text.Split("Day ")[1], out dayMasterVal);
+                    var dayChild = child.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Day Number"));
+                    dayChild.OptionText = dayMaster.Options.First().Text;
 
                     if ((dayMasterVal != day) && (dayMasterVal != 0))
                     {
