@@ -30,7 +30,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
             #region // Utility vars //
 
-            const int LIMIT = 25;
+            const int LIMIT = 150;
             const int MASTER_CONTENT_APP = 21310273;
             const int MAX_BATCHES = 10;
 
@@ -136,14 +136,6 @@ namespace newVilcapCopyFileToGoogleDrive
                     fieldId = ids.GetFieldId("Workshop Modules|Description");
                     var descChild = child.Field<TextItemField>(fieldId);
                     descChild.Value = StripHTML(descMaster.Value);
-                }
-
-                var offsetMaster = master.Field<NumericItemField>(ids.GetFieldId("VC Administration|Content Curation |Minute Offset"));
-                if (offsetMaster.Value != null)
-                {
-                    fieldId = ids.GetFieldId("Workshop Modules|Minute Offset");
-                    var offsetChild = child.Field<NumericItemField>(fieldId);
-                    offsetChild.Value = offsetMaster.Value;
                 }
 
                 fieldId = ids.GetFieldId("VC Administration|Content Curation |Entrepreneur Pre-Work Required");
