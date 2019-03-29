@@ -396,7 +396,7 @@ namespace newVilcapCopyFileToGoogleDrive
             // Return the next Batch #, or -1 if all Items have been completed
             if (count == LIMIT)
             {
-                return batchNum++;
+                return ++batchNum;
             }
             return -1;
 
