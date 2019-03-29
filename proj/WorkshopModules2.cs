@@ -249,7 +249,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     if (nameMasterTValue != null)
                     {
                         var nameCloneT = cloneT.Field<TextItemField>(ids.GetFieldId("Task List|Title"));
-                        nameCloneT.Value = nameMasterTValue;
+                        nameCloneT.Value = $"{nameMasterTValue} ({titleMaster.Value})";
                     }
 
                     var descrMasterT = masterT.Field<TextItemField>(ids.GetFieldId("VC Administration|Master Schedule|Desciption"));
