@@ -179,7 +179,7 @@ namespace newVilcapCopyFileToGoogleDrive
                                     context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
                                         $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
                                     commentText = "Sorry, something went wrong. Please try again in 5 minutes or contact the administrator.";
-                                    await comm.AddCommentToObject("item", check.ItemId, commentText, hook: false);
+                                    await comm.AddCommentToObject("item", check.ItemId, $":loudspeaker: {commentText}", hook: false);
                                     
                                 }
 
@@ -217,7 +217,7 @@ namespace newVilcapCopyFileToGoogleDrive
                                     context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
                                         $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
                                     commentText = "Sorry, something went wrong. Please try again in 5 minutes or contact the administrator.";
-                                    await comm.AddCommentToObject("item", check.ItemId, commentText, hook: false);
+                                    await comm.AddCommentToObject("item", check.ItemId, $":loudspeaker: {commentText}", hook: false);
                                 }
 
                                 finally
@@ -265,7 +265,7 @@ namespace newVilcapCopyFileToGoogleDrive
                                     context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
                                         $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
                                     commentText = "Sorry, something went wrong. Please try again in 5 minutes or contact the administrator.";
-                                    await comm.AddCommentToObject("item", check.ItemId, commentText, hook: false);
+                                    await comm.AddCommentToObject("item", check.ItemId, $":loudspeaker: {commentText}", hook: false);
                                 }
                                 finally
                                 {
