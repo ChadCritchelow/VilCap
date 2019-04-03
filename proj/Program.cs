@@ -171,6 +171,10 @@ namespace newVilcapCopyFileToGoogleDrive
                                         await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);
                                         //await podio.UpdateItem(check, hook: true);
                                         return;
+                                    } else if (nextBatch == -1)
+                                    {
+                                        commentText = $":loudspeker: All WS Batches Completed!";
+                                        await comm.AddCommentToObject("item", check.ItemId, commentText, hook: false);
                                     }
                                 }
 
