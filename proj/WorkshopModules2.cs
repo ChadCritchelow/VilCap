@@ -30,9 +30,10 @@ namespace newVilcapCopyFileToGoogleDrive
 
             #region // Utility vars //
 
-            const int LIMIT = 150;
+            const int LIMIT = 30;
             const int MASTER_CONTENT_APP = 21310273;
-            const int MAX_BATCHES = 10;
+            const string SORT_ID_FIELD = "187555816"; // Local_Sorting; "185391072" = Package
+            const int MAX_BATCHES = 8;
 
             string commentText = "";
             int fieldId = 0;
@@ -57,6 +58,7 @@ namespace newVilcapCopyFileToGoogleDrive
             var packageId = ids.GetFieldId("Admin|Curriculum Package");
             string package = check.Field<CategoryItemField>(packageId).Options.First().Text;
             context.Logger.LogLine($"Curriculum Batch '{batch}'");
+
             #endregion  
 
             #region // Get Batch //
@@ -70,15 +72,17 @@ namespace newVilcapCopyFileToGoogleDrive
 			context.Logger.LogLine($"Got View '{package}'");
 
             var op = new FilterOptions{ Filters = view.First().Filters };
-            op.SortBy = "185391072"; // fieldId of Package Sequence (num) from Content Curation
+            context.Logger.LogLine($"Filter: ({op.Filters.ToStringOrNull()}) ");
+            op.SortBy = SORT_ID_FIELD; // fieldId of Package Sequence (num) from Content Curation
             op.SortDesc = false;
             op.Limit = LIMIT;
 
             Int32.TryParse(batch, out batchNum);
             if (0 <= batchNum && batchNum <= MAX_BATCHES)
             {
-                op.Offset = op.Limit * (batchNum - 1);
-                context.Logger.LogLine($"Grabbing Items {op.Offset.Value + 1}-{op.Offset.Value + LIMIT} ...");
+                op.Offset = op.Limit * (batchNum - 1); // 1. USING OFFSET & LIMIT 
+                context.Logger.LogLine($"Grabbing Items {op.Offset.Value + 1}-{op.Offset.Value + LIMIT} ..."); // 1. USING OFFSET & LIMIT
+
                 filter = await podio.FilterItems(MASTER_CONTENT_APP, op);
                 context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
                 commentText = $"WS Batch {batch} finished";
