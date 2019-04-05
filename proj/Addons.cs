@@ -160,6 +160,9 @@ namespace newVilcapCopyFileToGoogleDrive
                     mentChild.Value = mentMaster.Value;
                 }
 
+                var color = child.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Calendar Color"));
+                color.OptionText = "Addon";
+
                 var childTasks = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Dependent Task"));
                 var masterTasks = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task"));
                 var taskOffset = master.Field<DurationItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task Offset"));

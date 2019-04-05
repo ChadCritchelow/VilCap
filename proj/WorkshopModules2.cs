@@ -30,7 +30,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
             #region // Utility vars //
 
-            const int LIMIT = 10;
+            const int LIMIT = 20;
             const int MASTER_CONTENT_APP = 21310273;
             const string SORT_ID_FIELD = "187555816"; // Local_Sorting; "185391072" = Package
             const int MAX_BATCHES = 8;
@@ -72,7 +72,7 @@ namespace newVilcapCopyFileToGoogleDrive
                        select v;
 			context.Logger.LogLine($"Got View '{package}'");
 
-            var op = new FilterOptions{ Filters = view.First().Filters };
+            //var op = new FilterOptions{ Filters = view.First().Filters };
             var newView = view;
             newView.First().Filters.Append(Newtonsoft.Json.Linq.JToken.FromObject(
 
@@ -88,7 +88,8 @@ namespace newVilcapCopyFileToGoogleDrive
                 "]"
 
             ));
-                
+            var op = new FilterOptions{ Filters = newView.First().Filters };
+
             context.Logger.LogLine($"Filter: ({op.Filters.ToStringOrNull()}) ");
             op.SortBy = SORT_ID_FIELD; // fieldId of Package Sequence (num) from Content_Curation_
             op.SortDesc = false;
@@ -128,6 +129,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 {
                     int dayMasterVal = 0;
                     Int32.TryParse(dayMaster.Options.First().Text.Split("Day ")[1], out dayMasterVal);
+                    var color = child.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Calendar Color"));
                     var dayChild = child.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Day Number"));
                     dayChild.OptionText = dayMaster.Options.First().Text.Split(" ")[dayMaster.Options.First().Text.Split(" ").Length-1];
 
@@ -135,6 +137,11 @@ namespace newVilcapCopyFileToGoogleDrive
                     {
                         day = dayMasterVal;
                         timeFromStart = TimeSpan.FromDays(day - 1);
+                        color.OptionText = "Module";
+                    }
+                    else
+                    {
+                        color.OptionText = "Date Manager";
                     }
                 }
                 #endregion
@@ -185,6 +192,8 @@ namespace newVilcapCopyFileToGoogleDrive
                     var mentChild = child.Field<TextItemField>(fieldId);
                     mentChild.Value = mentMaster.Value;
                 }
+
+                
 
                 var childTasks = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Dependent Task"));
                 var masterTasks = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task"));
