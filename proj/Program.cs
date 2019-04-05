@@ -173,7 +173,7 @@ namespace newVilcapCopyFileToGoogleDrive
                                         return;
                                     } else if (nextBatch == -1)
                                     {
-                                        commentText = $":loudspeker: All WS Batches Completed!";
+                                        commentText = $":loudspeaker: All WS Batches Completed!";
                                         await comm.AddCommentToObject("item", check.ItemId, commentText, hook: false);
                                     }
                                 }

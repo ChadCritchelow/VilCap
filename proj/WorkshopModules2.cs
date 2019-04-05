@@ -30,7 +30,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
             #region // Utility vars //
 
-            const int LIMIT = 30;
+            const int LIMIT = 10;
             const int MASTER_CONTENT_APP = 21310273;
             const string SORT_ID_FIELD = "187555816"; // Local_Sorting; "185391072" = Package
             const int MAX_BATCHES = 8;
@@ -51,6 +51,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
             var batchId = ids.GetFieldId("Admin|WS Batch");
             string batch = check.Field<CategoryItemField>(batchId).Options.First().Text;
+            Int32.TryParse(batch, out batchNum);
 
             var startDateId = ids.GetFieldId("Admin|Program Start Date");
             DateTime startDate = new DateTime(check.Field<DateItemField>(startDateId).Start.Value.Ticks);
@@ -72,18 +73,34 @@ namespace newVilcapCopyFileToGoogleDrive
 			context.Logger.LogLine($"Got View '{package}'");
 
             var op = new FilterOptions{ Filters = view.First().Filters };
+            var newView = view;
+            newView.First().Filters.Append(Newtonsoft.Json.Linq.JToken.FromObject(
+
+                "[" +
+                "{ " +
+                $"\"values\":[{batchNum},{batchNum + 1}], " +
+                "\"key\": 184034632 " +
+                "}" +
+                //"{ " +
+                //"\"values\":[10], " +
+                //"\"key\": 184034632 " +
+                //"}" +
+                "]"
+
+            ));
+                
             context.Logger.LogLine($"Filter: ({op.Filters.ToStringOrNull()}) ");
-            op.SortBy = SORT_ID_FIELD; // fieldId of Package Sequence (num) from Content Curation
+            op.SortBy = SORT_ID_FIELD; // fieldId of Package Sequence (num) from Content_Curation_
             op.SortDesc = false;
             op.Limit = LIMIT;
 
-            Int32.TryParse(batch, out batchNum);
+            
             if (0 <= batchNum && batchNum <= MAX_BATCHES)
             {
                 op.Offset = op.Limit * (batchNum - 1); // 1. USING OFFSET & LIMIT 
                 context.Logger.LogLine($"Grabbing Items {op.Offset.Value + 1}-{op.Offset.Value + LIMIT} ..."); // 1. USING OFFSET & LIMIT
 
-                filter = await podio.FilterItems(MASTER_CONTENT_APP, op);
+                filter = await podio.FilterItems(MASTER_CONTENT_APP, op); 
                 context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
                 commentText = $"WS Batch {batch} finished";
             }
