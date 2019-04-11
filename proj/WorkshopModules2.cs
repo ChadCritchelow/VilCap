@@ -12,7 +12,6 @@ using PodioCore.Utils.ItemFields;
 using System.Linq;
 using System.Text.RegularExpressions;
 using PodioCore.Utils;
-using PodioCore.Comments;
 using Newtonsoft.Json.Linq;
 
 namespace newVilcapCopyFileToGoogleDrive
@@ -73,8 +72,7 @@ namespace newVilcapCopyFileToGoogleDrive
                        select v;
 			context.Logger.LogLine($"Got View '{package}'");
 
-            //View _view = new View();
-            //_view.Filters.
+
             //var op = new FilterOptions{ Filters = view.First().Filters };
             var newView = view;
                 var q = '"';
@@ -83,22 +81,9 @@ namespace newVilcapCopyFileToGoogleDrive
                 f1.Add(2);
                 JObject j1 = new JObject();
                 j1["values"] = f1;
-                j1["key"] = 184034632;
-            newView.First().Filters.Add(JToken.FromObject(j1));
+                j1["key"] = SORT_ID_FIELD;
+            newView.First().Filters.Append(JToken.FromObject(j1));
 
-                //Filter: ([
-                //{
-                //    "values": [
-                //        (batchNum),
-                //        (batchNum + 1)
-                //    ],
-                //    "key": 184034632
-                //}
-    
-            //"{ " +
-            //"\"values\":[10], " +
-            //"\"key\": 184034632 " +
-            //"}" +
             var op = new FilterOptions{ Filters = newView.First().Filters };
 
             context.Logger.LogLine($"Filter: ({op.Filters.ToStringOrNull()}) ");
