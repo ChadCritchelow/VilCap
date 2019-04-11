@@ -30,7 +30,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
             #region // Utility vars //
 
-            const int LIMIT = 20;
+            const int LIMIT = 30;
             const int MASTER_CONTENT_APP = 21310273;
             const string SORT_ID_FIELD = "187555816"; // Local_Sorting; "185391072" = Package
             const int MAX_BATCHES = 8;
