@@ -218,7 +218,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
                     DateTime childDateTimeStart = startDate.Add(timeFromStart);
                     DateTime childDateTimeEnd = childDateTimeStart.Add(durChild.Value.Value.Duration());
-                    context.Logger.LogLine($"Trying to scheduling for {childDateTimeStart.ToString()} - {childDateTimeEnd.ToString()}");
+                    //context.Logger.LogLine($"Scheduling for {childDateTimeStart.ToString()} - {childDateTimeEnd.ToString()}");
                     timeFromStart = timeFromStart.Add(durChild.Value.Value.Duration());
 
                     fieldId = ids.GetFieldId("Workshop Modules|Date");
@@ -257,7 +257,7 @@ namespace newVilcapCopyFileToGoogleDrive
 				{
 					embedChild.AddEmbed(embed.EmbedId);
 				}
-                context.Logger.LogLine($"Added field:{embedMaster.Label}");
+                //context.Logger.LogLine($"Added field:{embedMaster.Label}");
                 #endregion
 
                 // Dependent Tasks Generation//
@@ -389,11 +389,8 @@ namespace newVilcapCopyFileToGoogleDrive
                 CallPodio:
                 try
                 {
-                    context.Logger.LogLine($"Sending CreateItem Request");
                     context.Logger.LogLine($"child.ItemId={child.ItemId} & child.exId={child.ExternalId}");
-                    context.Logger.LogLine($"Sending CreateItem Request");
                     await podio.CreateItem(child, workshopAppId, true);
-                    context.Logger.LogLine($"CreateItem Request Complete");
                 }
                 catch (PodioUnavailableException ex)
                 {
