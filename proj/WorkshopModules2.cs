@@ -72,9 +72,11 @@ namespace newVilcapCopyFileToGoogleDrive
                        select v;
 			context.Logger.LogLine($"Got View '{package}'");
 
+            //View _view = new View();
+            //_view.Filters.
             //var op = new FilterOptions{ Filters = view.First().Filters };
             var newView = view;
-            newView.First().Filters.Append(Newtonsoft.Json.Linq.JToken.FromObject(
+            newView.First().Filters.Add(Newtonsoft.Json.Linq.JToken.FromObject(
 
                 "[" +
                 "{ " +
