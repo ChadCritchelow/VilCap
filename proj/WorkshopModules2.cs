@@ -76,18 +76,20 @@ namespace newVilcapCopyFileToGoogleDrive
             //_view.Filters.
             //var op = new FilterOptions{ Filters = view.First().Filters };
             var newView = view;
+            var q = '"';
             newView.First().Filters.Add(Newtonsoft.Json.Linq.JToken.FromObject(
 
                 "[" +
                 "{ " +
-                $"\"values\":[{batchNum},{batchNum + 1}], " +
-                "\"key\": 184034632 " +
+                $"{q}values{q}:[{batchNum},{batchNum + 1}], " +
+                $"{q}key{q}: 184034632 " +
                 "}" +
-                //"{ " +
-                //"\"values\":[10], " +
-                //"\"key\": 184034632 " +
-                //"}" +
                 "]"
+            //"{ " +
+            //"\"values\":[10], " +
+            //"\"key\": 184034632 " +
+            //"}" +
+
 
             ));
             var op = new FilterOptions{ Filters = newView.First().Filters };
