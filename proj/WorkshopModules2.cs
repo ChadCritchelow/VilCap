@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using PodioCore.Utils;
 using PodioCore.Comments;
+using Newtonsoft.Json.Linq;
 
 namespace newVilcapCopyFileToGoogleDrive
 {
@@ -76,22 +77,28 @@ namespace newVilcapCopyFileToGoogleDrive
             //_view.Filters.
             //var op = new FilterOptions{ Filters = view.First().Filters };
             var newView = view;
-            var q = '"';
-            newView.First().Filters.Add(Newtonsoft.Json.Linq.JToken.FromObject(
+                var q = '"';
+                JArray f1 = new JArray();
+                f1.Add(1);
+                f1.Add(2);
+                JObject j1 = new JObject();
+                j1["values"] = f1;
+                j1["key"] = 184034632;
+            newView.First().Filters.Add(JToken.FromObject(j1));
 
-                "[" +
-                "{ " +
-                $"{q}values{q}:[{batchNum},{batchNum + 1}], " +
-                $"{q}key{q}: 184034632 " +
-                "}" +
-                "]"
+                //Filter: ([
+                //{
+                //    "values": [
+                //        (batchNum),
+                //        (batchNum + 1)
+                //    ],
+                //    "key": 184034632
+                //}
+    
             //"{ " +
             //"\"values\":[10], " +
             //"\"key\": 184034632 " +
             //"}" +
-
-
-            ));
             var op = new FilterOptions{ Filters = newView.First().Filters };
 
             context.Logger.LogLine($"Filter: ({op.Filters.ToStringOrNull()}) ");
