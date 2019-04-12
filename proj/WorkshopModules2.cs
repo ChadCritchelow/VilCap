@@ -72,30 +72,24 @@ namespace newVilcapCopyFileToGoogleDrive
                        select v;
 			context.Logger.LogLine($"Got View '{package}'");
 
-
             //var op = new FilterOptions{ Filters = view.First().Filters };
             var newView = view;
-                var q = '"';
-                JArray f1 = new JArray();
-                f1.Add(1);
-                f1.Add(2);
-                JObject j1 = new JObject();
-                j1["values"] = f1;
-                j1["key"] = SORT_ID_FIELD;
-            newView.First().Filters.Append(JToken.FromObject(j1));
+                JObject j = new JObject();
+                j["key"] = SORT_ID_FIELD;
+                j["from"] = (float)batchNum;
+                j["to"] = ((float)batchNum + 1.99);       
+            newView.First().Filters.Append(JToken.FromObject(j));
 
             var op = new FilterOptions{ Filters = newView.First().Filters };
-
             context.Logger.LogLine($"Filter: ({op.Filters.ToStringOrNull()}) ");
             op.SortBy = SORT_ID_FIELD; // fieldId of Package Sequence (num) from Content_Curation_
             op.SortDesc = false;
             op.Limit = LIMIT;
-
-            
+   
             if (0 <= batchNum && batchNum <= MAX_BATCHES)
             {
-                op.Offset = op.Limit * (batchNum - 1); // 1. USING OFFSET & LIMIT 
-                context.Logger.LogLine($"Grabbing Items {op.Offset.Value + 1}-{op.Offset.Value + LIMIT} ..."); // 1. USING OFFSET & LIMIT
+                //op.Offset = op.Limit * (batchNum - 1); // 1. USING OFFSET & LIMIT 
+                //context.Logger.LogLine($"Grabbing Items {op.Offset.Value + 1}~{op.Offset.Value + LIMIT} ..."); // 1. USING OFFSET & LIMIT
 
                 filter = await podio.FilterItems(MASTER_CONTENT_APP, op); 
                 context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
