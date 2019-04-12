@@ -66,34 +66,35 @@ namespace newVilcapCopyFileToGoogleDrive
 			context.Logger.LogLine("Got View Service");
 
 
-            #region // Get Last Item for Offset Info //
+            //#region // Get Last Item for Offset Info //
 
-            var views = await viewServ.GetViews(check.App.AppId);
-            var view = from v in views
-                       where v.Name == "All Workshop Modules"
-                       select v;
-            var op = new FilterOptions
-            {
-                SortBy = "created_on",
-                SortDesc = true,
-                Limit = 1
-            };
-            filter = await podio.FilterItems(check.App.AppId, op);
-            var lastModule = filter.Items.First();
-            var lastModuleDate = lastModule.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
-            TimeSpan lastModuleOffset = lastModuleDate.End.Value - lastModuleDate.EndDate.Value;
-            #endregion
+            //var views = await viewServ.GetViews(check.App.AppId);
+            //var view = from v in views
+            //           where v.Name == "All Workshop Modules"
+            //           select v;
+            //var op = new FilterOptions
+            //{
+            //    SortBy = "created_on",
+            //    SortDesc = true,
+            //    Limit = 1
+            //};
+            //filter = await podio.FilterItems(check.App.AppId, op);
+            //var lastModule = filter.Items.First();
+            //var lastModuleDate = lastModule.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
+            //TimeSpan lastModuleOffset =
+            //    (lastModuleDate.End.Value - lastModuleDate.EndDate.Value);
+            //#endregion
 
 
             #region // Get Batch //
 
-            views = await viewServ.GetViews(MASTER_CONTENT_APP);
-                view = from v in views
-                       where v.Name == package
+            var views = await viewServ.GetViews(MASTER_CONTENT_APP);
+            var view = from v in views
+                       where v.Name == $"{package} Batch {batchNum}"
                        select v;
 			context.Logger.LogLine($"Got View '{package}'");
             
-            op = new FilterOptions { Filters = view.First().Filters };
+            var op = new FilterOptions { Filters = view.First().Filters };
             context.Logger.LogLine($"Filter: ({op.Filters.ToStringOrNull()}) ");
             op.SortBy = SORT_ID_FIELD; // fieldId of Package Sequence (num) from Content_Curation_
             op.SortDesc = false;
@@ -101,12 +102,12 @@ namespace newVilcapCopyFileToGoogleDrive
    
             if (0 <= batchNum && batchNum <= MAX_BATCHES)
             {
-                op.Offset = op.Limit * (batchNum - 1); // 1. USING OFFSET & LIMIT 
-                context.Logger.LogLine($"Grabbing Items {op.Offset.Value + 1}~{op.Offset.Value + LIMIT} ..."); // 1. USING OFFSET & LIMIT
+                //op.Offset = op.Limit * (batchNum - 1); // 1. USING OFFSET & LIMIT 
+                context.Logger.LogLine($"Grabbing Items 1-{filter.Items.Count()} ..."); // 1. USING OFFSET & LIMIT
 
                 filter = await podio.FilterItems(MASTER_CONTENT_APP, op); 
                 context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
-                commentText = $"WS Batch {batch} finished ( {filter.Items.Count()} )";
+                commentText = $"WS Batch {batch} finished ( {filter.Items.Count()} items)";
             }
             else
             {
