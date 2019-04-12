@@ -32,7 +32,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
             const int LIMIT = 30;
             const int MASTER_CONTENT_APP = 21310273;
-            const string SORT_ID_FIELD = "187555816"; // Local_Sorting; "185391072" = Package
+            const string SORT_ID_FIELD = "188139930"; // Local_Sorting;          "185391072" = Package
             const int MAX_BATCHES = 8;
 
             string commentText = "";
@@ -62,25 +62,38 @@ namespace newVilcapCopyFileToGoogleDrive
 
             #endregion  
 
-            #region // Get Batch //
-
             var viewServ = new ViewService(podio);
 			context.Logger.LogLine("Got View Service");
-			var views = await viewServ.GetViews(MASTER_CONTENT_APP);
+
+
+            #region // Get Last Item for Offset Info //
+
+            var views = await viewServ.GetViews(check.App.AppId);
             var view = from v in views
+                       where v.Name == "All Workshop Modules"
+                       select v;
+            var op = new FilterOptions
+            {
+                SortBy = "created_on",
+                SortDesc = true,
+                Limit = 1
+            };
+            filter = await podio.FilterItems(check.App.AppId, op);
+            var lastModule = filter.Items.First();
+            var lastModuleDate = lastModule.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
+            TimeSpan lastModuleOffset = lastModuleDate.End.Value - lastModuleDate.EndDate.Value;
+            #endregion
+
+
+            #region // Get Batch //
+
+            views = await viewServ.GetViews(MASTER_CONTENT_APP);
+                view = from v in views
                        where v.Name == package
                        select v;
 			context.Logger.LogLine($"Got View '{package}'");
-
-            //var op = new FilterOptions{ Filters = view.First().Filters };
-            var newView = view;
-                JObject j = new JObject();
-                j["key"] = SORT_ID_FIELD;
-                j["from"] = (float)batchNum;
-                j["to"] = ((float)batchNum + 1.99);       
-            newView.First().Filters.Append(JToken.FromObject(j));
-
-            var op = new FilterOptions{ Filters = newView.First().Filters };
+            
+            op = new FilterOptions { Filters = view.First().Filters };
             context.Logger.LogLine($"Filter: ({op.Filters.ToStringOrNull()}) ");
             op.SortBy = SORT_ID_FIELD; // fieldId of Package Sequence (num) from Content_Curation_
             op.SortDesc = false;
@@ -88,12 +101,12 @@ namespace newVilcapCopyFileToGoogleDrive
    
             if (0 <= batchNum && batchNum <= MAX_BATCHES)
             {
-                //op.Offset = op.Limit * (batchNum - 1); // 1. USING OFFSET & LIMIT 
-                //context.Logger.LogLine($"Grabbing Items {op.Offset.Value + 1}~{op.Offset.Value + LIMIT} ..."); // 1. USING OFFSET & LIMIT
+                op.Offset = op.Limit * (batchNum - 1); // 1. USING OFFSET & LIMIT 
+                context.Logger.LogLine($"Grabbing Items {op.Offset.Value + 1}~{op.Offset.Value + LIMIT} ..."); // 1. USING OFFSET & LIMIT
 
                 filter = await podio.FilterItems(MASTER_CONTENT_APP, op); 
                 context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
-                commentText = $"WS Batch {batch} finished";
+                commentText = $"WS Batch {batch} finished ( {filter.Items.Count()} )";
             }
             else
             {
@@ -123,7 +136,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     var dayChild = child.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Day Number"));
                     dayChild.OptionText = dayMaster.Options.First().Text.Split(" ")[dayMaster.Options.First().Text.Split(" ").Length-1];
 
-                    if ((dayMasterVal != day) && (dayMasterVal != 0))
+                    if ((dayMasterVal != day) && (dayMasterVal != 0)) // Not a new Day
                     {
                         day = dayMasterVal;
                         timeFromStart = TimeSpan.FromDays(day - 1);
