@@ -103,7 +103,7 @@ namespace newVilcapCopyFileToGoogleDrive
             if (0 <= batchNum && batchNum <= MAX_BATCHES)
             {
                 //op.Offset = op.Limit * (batchNum - 1); // 1. USING OFFSET & LIMIT 
-                context.Logger.LogLine($"Grabbing Items 1-{filter.Items.Count()} ..."); // 1. USING OFFSET & LIMIT
+                //context.Logger.LogLine($"Grabbing Items 1-{filter.Items.Count()} ..."); // 1. USING OFFSET & LIMIT
 
                 filter = await podio.FilterItems(MASTER_CONTENT_APP, op); 
                 context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
