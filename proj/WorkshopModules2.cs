@@ -66,26 +66,6 @@ namespace newVilcapCopyFileToGoogleDrive
 			context.Logger.LogLine("Got View Service");
 
 
-            //#region // Get Last Item for Offset Info //
-
-            //var views = await viewServ.GetViews(check.App.AppId);
-            //var view = from v in views
-            //           where v.Name == "All Workshop Modules"
-            //           select v;
-            //var op = new FilterOptions
-            //{
-            //    SortBy = "created_on",
-            //    SortDesc = true,
-            //    Limit = 1
-            //};
-            //filter = await podio.FilterItems(check.App.AppId, op);
-            //var lastModule = filter.Items.First();
-            //var lastModuleDate = lastModule.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
-            //TimeSpan lastModuleOffset =
-            //    (lastModuleDate.End.Value - lastModuleDate.EndDate.Value);
-            //#endregion
-
-
             #region // Get Batch //
 
             var views = await viewServ.GetViews(MASTER_CONTENT_APP);
@@ -116,6 +96,11 @@ namespace newVilcapCopyFileToGoogleDrive
             }
             #endregion
 
+            if(!filter.Items.Any())
+            {
+                return -1;
+            }
+
             // Main Loop //
 
             foreach (var master in filter.Items)
@@ -137,7 +122,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     var dayChild = child.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Day Number"));
                     dayChild.OptionText = dayMaster.Options.First().Text.Split(" ")[dayMaster.Options.First().Text.Split(" ").Length-1];
 
-                    if ((dayMasterVal != day) && (dayMasterVal != 0)) // Not a new Day
+                    if ((dayMasterVal != day) && (dayMasterVal != 0)) // ie. Not a new Day
                     {
                         day = dayMasterVal;
                         timeFromStart = TimeSpan.FromDays(day - 1);
