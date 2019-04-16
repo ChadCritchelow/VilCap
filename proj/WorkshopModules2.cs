@@ -34,6 +34,7 @@ namespace newVilcapCopyFileToGoogleDrive
             const int MASTER_CONTENT_APP = 21310273;
             const string SORT_ID_FIELD = "188139930"; // Local_Sorting;          "185391072" = Package
             const int MAX_BATCHES = 8;
+            int batchNum = -1;
 
             string commentText = "";
             int fieldId = 0;
@@ -41,7 +42,7 @@ namespace newVilcapCopyFileToGoogleDrive
             var workshopAppId = ids.GetFieldId("Workshop Modules");
             var tasklistAppId = ids.GetFieldId("Task List");
             int waitSeconds = 5;
-            int batchNum = -1;
+            
 
             int day = 0;
             TimeSpan timeFromStart = new TimeSpan(0);

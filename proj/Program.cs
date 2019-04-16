@@ -149,7 +149,7 @@ namespace newVilcapCopyFileToGoogleDrive
                             {
                                 context.Logger.LogLine($"Running 'WS Batch {check.Field<CategoryItemField>(wsBatchId).Options.First().Text}'");
                                 int nextBatch = -1;
-                               lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+                                lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
 
                                 try
                                 {
@@ -240,17 +240,10 @@ namespace newVilcapCopyFileToGoogleDrive
                         case "TL Batch":
                             #region // Create Task List //
                             var tlBatchId = ids.GetFieldId("Admin|TL Batch");
-                            try
-                            {
-                                context.Logger.LogLine($"Value checking for: 'Task List {check.Field<CategoryItemField>(tlBatchId).Options.First().Text.ToStringOrNull()}'");
-                            }
-                            catch(Exception ex)
-                            {
-                                context.Logger.LogLine($"Exception when checking for batch: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
-                                        $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
-                            }
                             if (check.Field<CategoryItemField>(tlBatchId).Options.Any())
                             {
+                                context.Logger.LogLine($"Running 'TL Batch {check.Field<CategoryItemField>(tlBatchId).Options.First().Text}'");
+                                int nextBatch = -1;
                                 lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
                                 try
                                 {
@@ -260,9 +253,24 @@ namespace newVilcapCopyFileToGoogleDrive
                                         return;
                                     }
                                     context.Logger.LogLine($"Lock Value: {lockValue}");
-                                    context.Logger.LogLine("Satisfied conditions, TaskList2");
+
                                     TaskList2 tl = new TaskList2();
-                                    await tl.CreateTaskLists(context, podio, check, e, service, ids, google, pre);
+                                    nextBatch = await tl.CreateTaskLists(context, podio, check, e, service, ids, google, pre);
+
+                                    if (nextBatch > 1)
+                                    {
+                                        commentText = $"TL Batch {nextBatch - 1} Completed.";
+                                        check.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch")).OptionText = $"{nextBatch}";
+                                        await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
+                                        await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);
+                                        //await podio.UpdateItem(check, hook: true);
+                                        return;
+                                    }
+                                    else if (nextBatch == -1)
+                                    {
+                                        commentText = $":loudspeaker: All TL Batches Completed!";
+                                        await comm.AddCommentToObject("item", check.ItemId, commentText, hook: false);
+                                    }
                                 }
                                 catch (Exception ex)
                                 {
