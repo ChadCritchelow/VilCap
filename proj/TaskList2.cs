@@ -162,7 +162,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 // Date Calcs //
 
                 fieldId = ids.GetFieldId("VC Administration|Master Schedule|Duration (Days)");
-                var durMaster = master.Field<NumericItemField>(fieldId).Value.GetValueOrDefault();
+                var durMaster = master.Field<NumericItemField>(fieldId).Value.GetValueOrDefault(0.0) ;
                 fieldId = ids.GetFieldId("VC Administration|Master Schedule|Assignment Group");
                 var assignment = master.Field<CategoryItemField>(fieldId);
                 Int32.TryParse(assignment.Options.First().Text, out int assignmentVal);
