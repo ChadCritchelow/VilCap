@@ -127,11 +127,11 @@ namespace newVilcapCopyFileToGoogleDrive
                     {
                         day = dayMasterVal;
                         timeFromStart = TimeSpan.FromDays(day - 1);
-                        color.OptionText = "Module";
+                        color.OptionText = "Date Manager";
                     }
                     else
                     {
-                        color.OptionText = "Date Manager";
+                        color.OptionText = "Module";
                     }
                 }
                 #endregion
