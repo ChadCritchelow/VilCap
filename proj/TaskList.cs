@@ -131,6 +131,7 @@ namespace newVilcapCopyFileToGoogleDrive
 					descrChild.Value = StripHTML(descrMaster.Value);
 				}
 				context.Logger.LogLine($"Added field:{descrMaster.Label}");
+
 				fieldId = ids.GetFieldId("VC Administration|Master Schedule|Phase");
 				var phaseMaster = masterItem.Field<CategoryItemField>(fieldId);
 				if (phaseMaster.Options.Any())
@@ -138,7 +139,11 @@ namespace newVilcapCopyFileToGoogleDrive
 					fieldId = ids.GetFieldId("Task List|Phase");
 					var phaseChild = child.Field<CategoryItemField>(fieldId);
 					phaseChild.OptionText = phaseMaster.Options.First().Text;
-				}
+                    if (phaseMaster.Options.First().Text == "Dependent Task") {
+                        continue;
+                    }
+                }  
+
 				context.Logger.LogLine($"Added field:{phaseMaster.Label}");
 				fieldId = ids.GetFieldId("VC Administration|Master Schedule|ESO Member Role");
 				var esoMaster = masterItem.Field<CategoryItemField>(fieldId);
