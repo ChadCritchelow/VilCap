@@ -24,7 +24,7 @@ namespace newVilcapCopyFileToGoogleDrive
 		{
 			return Regex.Replace(input, "<.*?>", String.Empty);
 		}
-		public async System.Threading.Tasks.Task CreateTaskLists(ILambdaContext context, Podio podio, Item check, RoutedPodioEvent e, DriveService service, GetIds ids, GoogleIntegration google,PreSurvAndExp pre)
+		public async System.Threading.Tasks.Task<int> CreateTaskLists(ILambdaContext context, Podio podio, Item check, RoutedPodioEvent e, DriveService service, GetIds ids, GoogleIntegration google,PreSurvAndExp pre)
 		{
 
             // Admin/Utility vars //
@@ -33,6 +33,7 @@ namespace newVilcapCopyFileToGoogleDrive
             const int LIMIT = 25;
             const int MAX_BATCHES = 10;
             const int MASTER_SCHEDULE_APP = 21310276;
+            int batchNum = -1;
 
             CommentService comm = new CommentService(podio);
             string commentText;
@@ -40,9 +41,10 @@ namespace newVilcapCopyFileToGoogleDrive
             int fieldId = 0;
             var batchId = ids.GetFieldId("Admin|TL Batch");
             var batch = check.Field<CategoryItemField>(batchId).Options.First().Text;
-            int.TryParse(batch, out int batchNum);
+            int.TryParse(batch, out batchNum);
             var tlPackageId = ids.GetFieldId("Admin|Task List Selection");
             var tlPackageName = check.Field<CategoryItemField>(tlPackageId).Options.First().Text;
+
 
             // Generate a rough calendar based on dates in the Admin app  //
 
@@ -162,11 +164,15 @@ namespace newVilcapCopyFileToGoogleDrive
                 // Date Calcs //
 
                 fieldId = ids.GetFieldId("VC Administration|Master Schedule|Duration (Days)");
-                var durMaster = master.Field<NumericItemField>(fieldId).Value.Value;
+                var durMaster = master.Field<NumericItemField>(fieldId).Value.GetValueOrDefault(0.0);
                 fieldId = ids.GetFieldId("VC Administration|Master Schedule|Assignment Group");
                 var assignment = master.Field<CategoryItemField>(fieldId);
-                Int32.TryParse(assignment.Options.First().Text, out int assignmentVal);
 
+                if (!assignment.Options.Any())
+                {
+                    continue;
+                }
+                Int32.TryParse(assignment.Options.First().Text, out int assignmentVal);
                 child = scheduler.SetDate(child, ids, phaseMaster.Options.First().Text, assignmentVal, durMaster);
                 
                 // GDrive Integration //
@@ -226,17 +232,17 @@ namespace newVilcapCopyFileToGoogleDrive
 
             if (count == LIMIT)
             {
-                batchNum++;
-                check.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch")).OptionText = $"{ batchNum }";
+                return ++batchNum;
+                //check.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch")).OptionText = $"{ batchNum }";
                 //await podio.UpdateItem(check, hook: true);    
-                ItemService iserv = new ItemService(podio);
-                await iserv.UpdateItem(check);
+                //ItemService iserv = new ItemService(podio);
+                //await iserv.UpdateItem(check);
             }
             else
             {
                 commentText += " All Tasklist items added!";
+                return -1;
             }
-			await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true); 
 
         }
 	}

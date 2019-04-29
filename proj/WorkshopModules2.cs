@@ -32,8 +32,9 @@ namespace newVilcapCopyFileToGoogleDrive
 
             const int LIMIT = 30;
             const int MASTER_CONTENT_APP = 21310273;
-            const string SORT_ID_FIELD = "187555816"; // Local_Sorting; "185391072" = Package
+            const string SORT_ID_FIELD = "188139930"; // Local_Sorting;          "185391072" = Package
             const int MAX_BATCHES = 8;
+            int batchNum = -1;
 
             string commentText = "";
             int fieldId = 0;
@@ -41,7 +42,7 @@ namespace newVilcapCopyFileToGoogleDrive
             var workshopAppId = ids.GetFieldId("Workshop Modules");
             var tasklistAppId = ids.GetFieldId("Task List");
             int waitSeconds = 5;
-            int batchNum = -1;
+            
 
             int day = 0;
             TimeSpan timeFromStart = new TimeSpan(0);
@@ -62,25 +63,19 @@ namespace newVilcapCopyFileToGoogleDrive
 
             #endregion  
 
-            #region // Get Batch //
-
             var viewServ = new ViewService(podio);
 			context.Logger.LogLine("Got View Service");
-			var views = await viewServ.GetViews(MASTER_CONTENT_APP);
+
+
+            #region // Get Batch //
+
+            var views = await viewServ.GetViews(MASTER_CONTENT_APP);
             var view = from v in views
-                       where v.Name == package
+                       where v.Name == $"{package} Batch {batchNum}"
                        select v;
 			context.Logger.LogLine($"Got View '{package}'");
-
-            //var op = new FilterOptions{ Filters = view.First().Filters };
-            var newView = view;
-                JObject j = new JObject();
-                j["key"] = SORT_ID_FIELD;
-                j["from"] = (float)batchNum;
-                j["to"] = ((float)batchNum + 1.99);       
-            newView.First().Filters.Append(JToken.FromObject(j));
-
-            var op = new FilterOptions{ Filters = newView.First().Filters };
+            
+            var op = new FilterOptions { Filters = view.First().Filters };
             context.Logger.LogLine($"Filter: ({op.Filters.ToStringOrNull()}) ");
             op.SortBy = SORT_ID_FIELD; // fieldId of Package Sequence (num) from Content_Curation_
             op.SortDesc = false;
@@ -89,11 +84,11 @@ namespace newVilcapCopyFileToGoogleDrive
             if (0 <= batchNum && batchNum <= MAX_BATCHES)
             {
                 //op.Offset = op.Limit * (batchNum - 1); // 1. USING OFFSET & LIMIT 
-                //context.Logger.LogLine($"Grabbing Items {op.Offset.Value + 1}~{op.Offset.Value + LIMIT} ..."); // 1. USING OFFSET & LIMIT
+                //context.Logger.LogLine($"Grabbing Items 1-{filter.Items.Count()} ..."); // 1. USING OFFSET & LIMIT
 
                 filter = await podio.FilterItems(MASTER_CONTENT_APP, op); 
                 context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
-                commentText = $"WS Batch {batch} finished";
+                commentText = $"WS Batch {batch} finished ( {filter.Items.Count()} items)";
             }
             else
             {
@@ -101,6 +96,11 @@ namespace newVilcapCopyFileToGoogleDrive
                 commentText = "WS Batch # not recognized";
             }
             #endregion
+
+            if(!filter.Items.Any())
+            {
+                return -1;
+            }
 
             // Main Loop //
 
@@ -123,15 +123,15 @@ namespace newVilcapCopyFileToGoogleDrive
                     var dayChild = child.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Day Number"));
                     dayChild.OptionText = dayMaster.Options.First().Text.Split(" ")[dayMaster.Options.First().Text.Split(" ").Length-1];
 
-                    if ((dayMasterVal != day) && (dayMasterVal != 0))
+                    if ((dayMasterVal != day) && (dayMasterVal != 0)) // ie. Not a new Day
                     {
                         day = dayMasterVal;
                         timeFromStart = TimeSpan.FromDays(day - 1);
-                        color.OptionText = "Module";
+                        color.OptionText = "Date Manager";
                     }
                     else
                     {
-                        color.OptionText = "Date Manager";
+                        color.OptionText = "Module";
                     }
                 }
                 #endregion
@@ -403,7 +403,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			}
 
             // Return the next Batch #, or -1 if all Items have been completed
-            if (count == LIMIT)
+            if (count != 0)
             {
                 return ++batchNum;
             }
