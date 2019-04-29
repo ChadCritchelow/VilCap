@@ -8,6 +8,7 @@ using System.Text;
 using System.Linq;
 using PodioCore.Items;
 using PodioCore.Services;
+using PodioCore.Models.Request;
 
 namespace newVilcapCopyFileToGoogleDrive
 {
@@ -19,8 +20,21 @@ namespace newVilcapCopyFileToGoogleDrive
 			//TODO: would love to get rid of search service.. run options by John
 			SearchService searchServ = new SearchService(podio);
 
-			var items =await searchServ.SearchInApp(ids.GetFieldId("Admin"),"vilcapadmin");//TODO: verify this thing works
-			Item AdminOptionToCheck =await podio.GetItem(items.First().Id);
+			var fieldIdToSearch = ids.GetFieldId("Applications");
+			var filterValue = "vilcapadmin";
+			var filter = new Dictionary<int, object>
+							{
+								{ fieldIdToSearch, filterValue }
+							};
+			FilterOptions newOptions = new FilterOptions
+			{
+				Filters = filter,
+				Offset = 500
+			};
+			context.Logger.LogLine("Checking for duplicates");
+
+			var items = await podio.FilterItems(ids.GetFieldId("Admin"), newOptions);
+			Item AdminOptionToCheck =await podio.GetItem(items.Items.First().ItemId);
 			Item CheckScheduleItem = check;
 			Item UpdateScheduleItem = new Item() { ItemId = check.ItemId };
 			List<int> contactids = new List<int>();
