@@ -69,7 +69,6 @@ namespace newVilcapCopyFileToGoogleDrive
 				ApplicationName = ApplicationName,
 			});
 			context.Logger.LogLine("Established google connection");
-			//TODO: Address date calc
 			context.Logger.LogLine($"App: {check.App.Name}");
 
 			GoogleIntegration google = new GoogleIntegration();
@@ -78,230 +77,163 @@ namespace newVilcapCopyFileToGoogleDrive
             CommentService comm = new CommentService(podio);
             Survey s = new Survey();
 
-            switch (check.App.Name)
+            // Main Process //
+
+            var revision = await podio.GetRevisionDifference(Convert.ToInt32(check.ItemId), check.CurrentRevision.Revision - 1, check.CurrentRevision.Revision);
+            var firstRevision = revision.First();
+            context.Logger.LogLine($"Last Revision field: {firstRevision.Label}");
+
+            switch (firstRevision.Label)
             {
-                case "Create Workshop": 
-                    #region // create legacy workshops //
 
-                    lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
-                    try
+                case "WS Batch":
+                    #region // Create Workshops //
+                    var wsBatchId = ids.GetFieldId("Admin|WS Batch");
+                    if (check.Field<CategoryItemField>(wsBatchId).Options.Any())
                     {
-                        if (string.IsNullOrEmpty(lockValue))
+                        context.Logger.LogLine($"Running 'WS Batch {check.Field<CategoryItemField>(wsBatchId).Options.First().Text}'");
+                        int nextBatch = -1;
+                        lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+
+                        try
                         {
-                            context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
-                            return;
+                            if (string.IsNullOrEmpty(lockValue))
+                            {
+                                context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
+                                return;
+                            }
+                            context.Logger.LogLine($"Lock Value: {lockValue}");
+                                    
+                            WorkshopModules2 wm = new WorkshopModules2();
+                            nextBatch = await wm.CreateWorkshopModules2(context, podio, check, e, service, ids, google, pre);
+                                    
+                            if (nextBatch > 1)
+                            {
+                                commentText = $"WS Batch {nextBatch-1} Completed.";
+                                check.Field<CategoryItemField>(ids.GetFieldId("Admin|WS Batch")).OptionText = $"{nextBatch}";
+                                await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
+                                await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);
+                                //await podio.UpdateItem(check, hook: true);
+                                return;
+                            } else if (nextBatch == -1)
+                            {
+                                commentText = $":loudspeaker: All WS Batches Completed!";
+                                await comm.AddCommentToObject("item", check.ItemId, commentText, hook: false);
+                            }
                         }
-                        context.Logger.LogLine($"Lock Value: {lockValue}");
-                        fieldId = ids.GetFieldId("Create Workshop|Workshop Type");
-                        var checkType = check.Field<CategoryItemField>(fieldId);
 
-                        WorkshopModules ws = new WorkshopModules();
-                        await ws.CreateWorkShopModules(ids, check, podio, context, service, google, e, checkType);
+                        catch (Exception ex)
+                        {
+                            context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
+                                $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
+                            commentText = "Sorry, something went wrong. Please try again in 5 minutes or contact the administrator.";
+                            await comm.AddCommentToObject("item", check.ItemId, $":loudspeaker: {commentText}", hook: false);
+                                    
+                        }
 
-                        // Create surveys //
-                        await s.CreateSurveys(checkType, ids, podio, google, service, e, context);
-                    }
-                    catch (Exception ex)
-                    {
-                        throw ex;
-                    }
-                    finally
-                    {
-                        await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
+                        finally {
+                            await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
+                        }
                     }
                     break;
                 #endregion
 
-                case "Admin": // everything else
-
-                    var revision = await podio.GetRevisionDifference(Convert.ToInt32(check.ItemId), check.CurrentRevision.Revision - 1, check.CurrentRevision.Revision);
-                    var firstRevision = revision.First();
-                    context.Logger.LogLine($"Last Revision field: {firstRevision.Label}");
-
-                    switch (firstRevision.Label)
+                case "Deploy Addons":
+                    #region // Deploy Addon Modules //
+                    var aoBatchId = ids.GetFieldId("Admin|Deploy Addons");
+                    if (check.Field<CategoryItemField>(aoBatchId).Options.Any())
                     {
+                        context.Logger.LogLine($"Running 'WS Batch {check.Field<CategoryItemField>(aoBatchId).Options.First().Text}'");
+                        int nextBatch = -1;
+                        lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
 
-                        case "WS Batch":
-                            #region // Create Workshops //
-                            var wsBatchId = ids.GetFieldId("Admin|WS Batch");
-                            if (check.Field<CategoryItemField>(wsBatchId).Options.Any())
+                        try
+                        {
+                            if (string.IsNullOrEmpty(lockValue))
                             {
-                                context.Logger.LogLine($"Running 'WS Batch {check.Field<CategoryItemField>(wsBatchId).Options.First().Text}'");
-                                int nextBatch = -1;
-                                lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
-
-                                try
-                                {
-                                    if (string.IsNullOrEmpty(lockValue))
-                                    {
-                                        context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
-                                        return;
-                                    }
-                                    context.Logger.LogLine($"Lock Value: {lockValue}");
-                                    
-                                    WorkshopModules2 wm = new WorkshopModules2();
-                                    nextBatch = await wm.CreateWorkshopModules2(context, podio, check, e, service, ids, google, pre);
-                                    
-                                    if (nextBatch > 1)
-                                    {
-                                        commentText = $"WS Batch {nextBatch-1} Completed.";
-                                        check.Field<CategoryItemField>(ids.GetFieldId("Admin|WS Batch")).OptionText = $"{nextBatch}";
-                                        await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
-                                        await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);
-                                        //await podio.UpdateItem(check, hook: true);
-                                        return;
-                                    } else if (nextBatch == -1)
-                                    {
-                                        commentText = $":loudspeaker: All WS Batches Completed!";
-                                        await comm.AddCommentToObject("item", check.ItemId, commentText, hook: false);
-                                    }
-                                }
-
-                                catch (Exception ex)
-                                {
-                                    context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
-                                        $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
-                                    commentText = "Sorry, something went wrong. Please try again in 5 minutes or contact the administrator.";
-                                    await comm.AddCommentToObject("item", check.ItemId, $":loudspeaker: {commentText}", hook: false);
-                                    
-                                }
-
-                                finally {
-                                    await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
-                                }
+                                context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
+                                return;
                             }
+                            context.Logger.LogLine($"Lock Value: {lockValue}");
+
+                            Addons ao = new Addons();
+                            nextBatch = await ao.CreateAddons(context, podio, check, e, service, ids, google, pre);
                             break;
-                        #endregion
-                        case "Deploy Addons":
-                            #region // Deploy Addon Modules //
-                            var aoBatchId = ids.GetFieldId("Admin|Deploy Addons");
-                            if (check.Field<CategoryItemField>(aoBatchId).Options.Any())
-                            {
-                                context.Logger.LogLine($"Running 'WS Batch {check.Field<CategoryItemField>(aoBatchId).Options.First().Text}'");
-                                int nextBatch = -1;
-                                lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+                        }
 
-                                try
-                                {
-                                    if (string.IsNullOrEmpty(lockValue))
-                                    {
-                                        context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
-                                        return;
-                                    }
-                                    context.Logger.LogLine($"Lock Value: {lockValue}");
+                        catch (Exception ex)
+                        {
+                            context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
+                                $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
+                            commentText = "Sorry, something went wrong. Please try again in 5 minutes or contact the administrator.";
+                            await comm.AddCommentToObject("item", check.ItemId, $":loudspeaker: {commentText}", hook: false);
+                        }
 
-                                    Addons ao = new Addons();
-                                    nextBatch = await ao.CreateAddons(context, podio, check, e, service, ids, google, pre);
-                                    break;
-                                }
-
-                                catch (Exception ex)
-                                {
-                                    context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
-                                        $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
-                                    commentText = "Sorry, something went wrong. Please try again in 5 minutes or contact the administrator.";
-                                    await comm.AddCommentToObject("item", check.ItemId, $":loudspeaker: {commentText}", hook: false);
-                                }
-
-                                finally
-                                {
-                                    await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
-                                }
-                            }
-                            break;
-                        #endregion
-
-                        //case "Deploy Task List":
-                        //    var deploy = ids.GetFieldId("Admin|Deploy Task List");
-                        //    if (check.Field<CategoryItemField>(deploy).Options.Any());
-                        //    break;
-
-                        case "TL Batch":
-                            #region // Create Task List //
-                            var tlBatchId = ids.GetFieldId("Admin|TL Batch");
-                            if (check.Field<CategoryItemField>(tlBatchId).Options.Any())
-                            {
-                                context.Logger.LogLine($"Running 'TL Batch {check.Field<CategoryItemField>(tlBatchId).Options.First().Text}'");
-                                int nextBatch = -1;
-                                lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
-                                try
-                                {
-                                    if (string.IsNullOrEmpty(lockValue))
-                                    {
-                                        context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
-                                        return;
-                                    }
-                                    context.Logger.LogLine($"Lock Value: {lockValue}");
-
-                                    TaskList2 tl = new TaskList2();
-                                    nextBatch = await tl.CreateTaskLists(context, podio, check, e, service, ids, google, pre);
-
-                                    if (nextBatch > 1)
-                                    {
-                                        commentText = $"TL Batch {nextBatch - 1} Completed.";
-                                        check.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch")).OptionText = $"{nextBatch}";
-                                        await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
-                                        await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);
-                                        //await podio.UpdateItem(check, hook: true);
-                                        return;
-                                    }
-                                    else if (nextBatch == -1)
-                                    {
-                                        commentText = $":loudspeaker: All TL Batches Completed!";
-                                        await comm.AddCommentToObject("item", check.ItemId, commentText, hook: false);
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
-                                        $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
-                                    commentText = "Sorry, something went wrong. Please try again in 5 minutes or contact the administrator.";
-                                    await comm.AddCommentToObject("item", check.ItemId, $":loudspeaker: {commentText}", hook: false);
-                                }
-                                finally
-                                {
-                                    await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
-                                }
-                            }
-                            break;
-                        #endregion
-
-                        case "Hidden Status":
-                            #region // Create Legacy task lists //
-                            var TlStatusId = ids.GetFieldId("Admin|Hidden Status");
-                            context.Logger.LogLine($"Value checking for: '(Legacy) Task List {check.Field<CategoryItemField>(TlStatusId).Options.FirstOrDefault().Text}'");
-                            if (check.Field<CategoryItemField>(TlStatusId).Options.Any())
-                            {
-                                lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
-                                try
-                                {
-                                    if (string.IsNullOrEmpty(lockValue))
-                                    {
-                                        context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
-                                        return;
-                                    }
-                                    context.Logger.LogLine($"Lock Value: {lockValue}");
-                                    context.Logger.LogLine("Satisfied conditions, TaskList");
-                                    TaskList tl = new TaskList();
-                                    await tl.CreateTaskLists(context, podio, check, e, service, ids, google, pre);
-                                }
-                                catch (Exception ex)
-                                {
-                                    context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
-                                        $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
-                                }
-                                finally
-                                {
-                                    await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
-                                }
-                            }
-                            break;
-                        #endregion
-
-                        default:
-                            context.Logger.LogLine($"NO ACTION: Value '{firstRevision.Label}' not Recognized.");
-                            break;
+                        finally
+                        {
+                            await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
+                        }
                     }
+                    break;
+                #endregion
+
+                //case "Deploy Task List":
+                //    var deploy = ids.GetFieldId("Admin|Deploy Task List");
+                //    if (check.Field<CategoryItemField>(deploy).Options.Any());
+                //    break;
+
+                case "TL Batch":
+                    #region // Create Task List //
+                    var tlBatchId = ids.GetFieldId("Admin|TL Batch");
+                    if (check.Field<CategoryItemField>(tlBatchId).Options.Any())
+                    {
+                        context.Logger.LogLine($"Running 'TL Batch {check.Field<CategoryItemField>(tlBatchId).Options.First().Text}'");
+                        int nextBatch = -1;
+                        lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+                        try
+                        {
+                            if (string.IsNullOrEmpty(lockValue))
+                            {
+                                context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
+                                return;
+                            }
+                            context.Logger.LogLine($"Lock Value: {lockValue}");
+
+                            TaskList2 tl = new TaskList2();
+                            nextBatch = await tl.CreateTaskLists(context, podio, check, e, service, ids, google, pre);
+
+                            if (nextBatch > 1)
+                            {
+                                commentText = $"TL Batch {nextBatch - 1} Completed.";
+                                check.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch")).OptionText = $"{nextBatch}";
+                                await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
+                                await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);
+                                //await podio.UpdateItem(check, hook: true);
+                                return;
+                            }
+                            else if (nextBatch == -1)
+                            {
+                                commentText = $":loudspeaker: All TL Batches Completed!";
+                                await comm.AddCommentToObject("item", check.ItemId, commentText, hook: false);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
+                                $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
+                            commentText = "Sorry, something went wrong. Please try again in 5 minutes or contact the administrator.";
+                            await comm.AddCommentToObject("item", check.ItemId, $":loudspeaker: {commentText}", hook: false);
+                        }
+                        finally
+                        {
+                            await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
+                        }
+                    }
+                    break;
+                #endregion
+
+                default:
+                    context.Logger.LogLine($"NO ACTION: Value '{firstRevision.Label}' not Recognized.");
                     break;
             }
         }
