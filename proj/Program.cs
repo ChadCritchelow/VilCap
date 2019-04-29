@@ -78,6 +78,7 @@ namespace newVilcapCopyFileToGoogleDrive
 				{"toolkittemplate" ,"VC Toolkit Template"},
                 {"toolkittemplate2", "VC Toolkit Template 2" },
                 {"usfintech2019" ,"US Fintech 2019" },
+                {"useducation2019", "US Education 2019" },
                 {"wepowerenvironment" ,"WePower" },
                 {"middlegameventures", "Middlegame Ventures" }
             };
