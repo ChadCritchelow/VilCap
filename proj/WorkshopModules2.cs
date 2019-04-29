@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Amazon.Lambda.Core;
+﻿using Amazon.Lambda.Core;
 using Google.Apis.Drive.v3;
 using PodioCore;
 using PodioCore.Exceptions;
@@ -8,11 +6,12 @@ using PodioCore.Items;
 using PodioCore.Models;
 using PodioCore.Models.Request;
 using PodioCore.Services;
+using PodioCore.Utils;
 using PodioCore.Utils.ItemFields;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using PodioCore.Utils;
-using Newtonsoft.Json.Linq;
 
 namespace newVilcapCopyFileToGoogleDrive
 {
@@ -188,6 +187,9 @@ namespace newVilcapCopyFileToGoogleDrive
                 var childTasks = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Dependent Task"));
                 var masterTasks = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task"));
                 var taskOffset = master.Field<DurationItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task Offset"));
+                var masterMats = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Auxillary Materials")); // PLACEHOLDER
+                var childMats = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Auxillary Materials")); // PLACEHOLDER
+                
                 #endregion
 
                 #region // Date Calcs //
@@ -372,8 +374,14 @@ namespace newVilcapCopyFileToGoogleDrive
                     #endregion
                 }
 
-                #region // Create WorkshopModule Podio Item //
-                context.Logger.LogLine($"Calling Podio");
+                // Aux Material Generation//
+                foreach (var masterMat in masterMats.Items)
+                {
+                    await AuxMats.CreateAuxMats(context, podio, check, e, service, ids, google, masterMat);      
+                }
+
+             #region // Create WorkshopModule Podio Item //
+                    context.Logger.LogLine($"Calling Podio");
                 CallPodio:
                 try
                 {
