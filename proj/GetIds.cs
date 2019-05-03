@@ -5,24 +5,25 @@ using System.Text;
 
 namespace newVilcapCopyFileToGoogleDrive
 {
-    class GetIds
+    public class GetIds
 	{
 		Dictionary<string, string> dictChild;
 		Dictionary<string, string> dictMaster;
 		Dictionary<string, string> fullNames;
 		RoutedPodioEvent ev;
 
-
 		public GetIds(
 			Dictionary<string, string> _dictChild,
 			Dictionary<string, string> _dictMaster,
-			Dictionary<string, string> _fullNames,
 			RoutedPodioEvent _ev)
 		{
 			dictChild = _dictChild;
 			dictMaster = _dictMaster;
-			fullNames = _fullNames;
-			ev = _ev;
+            fullNames = new Dictionary<string, string>()
+            {
+                {"toolkittemplate3", "VC Toolkit Template 3" }
+            };
+            ev = _ev;
 		}
 		public int GetFieldId(string key)
 		{

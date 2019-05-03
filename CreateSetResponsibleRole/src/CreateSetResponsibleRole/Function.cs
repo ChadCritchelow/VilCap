@@ -12,6 +12,7 @@ using newVilcapCopyFileToGoogleDrive;
 using Saasafras;
 using System.Text.RegularExpressions;
 using PodioCore.Models.Request;
+using PodioCore.Services;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
@@ -39,25 +40,39 @@ namespace CreateSetResponsibleRole
 			lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
 			try
 			{
-				if (string.IsNullOrEmpty(lockValue))
-				{
-					context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
-					return;
-				}
-				var fieldIdToSearch = ids.GetFieldId("Applications");
-				var filterValue = "vilcapadmin";
-				var filter = new Dictionary<int, object>
-							{
-								{ fieldIdToSearch, filterValue }
-							};
-				FilterOptions newOptions = new FilterOptions
-				{
-					Filters = filter,
-					Offset = 500
-				};
-				context.Logger.LogLine("Checking for duplicates");
+                if (string.IsNullOrEmpty(lockValue))
+                {
+                    context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
+                    return;
+                }
+                //when an item is updated im applications:
+                var revision = await podio.GetRevisionDifference
+                    (
+                    Convert.ToInt32(check.ItemId),
+                    check.CurrentRevision.Revision - 1,
+                    check.CurrentRevision.Revision
+                    );
+                var firstRevision = revision.First();
+                var completionStatus = check.Field<CategoryItemField>(ids.GetFieldId("Applications|Complete This Application"));
+                if (firstRevision.FieldId == completionStatus.FieldId)
+                {
+                    if (completionStatus.Options.Any() && completionStatus.Options.First().Text == "Submit")
+                    {
+                        SearchService searchServ = new SearchService(podio);
 
-				var items = await podio.FilterItems(ids.GetFieldId("Admin"), newOptions);
+                        var fieldIdToSearch = ids.GetFieldId("Applications");
+                        var filterValue = "vilcapadmin";
+                        var filter = new Dictionary<int, object>
+                            {
+                                { fieldIdToSearch, filterValue }
+                            };
+                        FilterOptions newOptions = new FilterOptions
+                        {
+                            Filters = filter,
+                            Offset = 500
+                        };
+                        context.Logger.LogLine("Checking for duplicates");
+                        var items = await podio.FilterItems(ids.GetFieldId("Admin"), newOptions);
 				Item AdminOptionToCheck = await podio.GetItem(items.Items.First().ItemId);
 				Item CheckScheduleItem = check;
 				Item UpdateScheduleItem = new Item() { ItemId = check.ItemId };
