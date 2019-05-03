@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using PodioCore.Items;
+using PodioCore.Services;
 
 namespace newVilcapCopyFileToGoogleDrive
 {
@@ -14,6 +15,7 @@ namespace newVilcapCopyFileToGoogleDrive
 	{
 		public async System.Threading.Tasks.Task SetTasksToComplete(Item check, ILambdaContext context, Podio podio, GetIds ids)
 		{
+			TaskService serv = new TaskService(podio);
 			var revision = await podio.GetRevisionDifference
 				(
 				Convert.ToInt32(check.ItemId), 
@@ -29,7 +31,7 @@ namespace newVilcapCopyFileToGoogleDrive
 					//mark item tasks as complete
 					foreach(var task in check.Tasks)
 					{
-						task.Status = "Completed";//Maybe????
+						await serv.CompleteTask(int.Parse(task.TaskId));
 						//send to podio?
 					}
 				}

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using PodioCore.Items;
+using PodioCore.Services;
 
 namespace newVilcapCopyFileToGoogleDrive
 {
@@ -15,12 +16,24 @@ namespace newVilcapCopyFileToGoogleDrive
 		public async System.Threading.Tasks.Task _ShareWithCommittee(Item check, ILambdaContext context, Podio podio, GetIds ids)
 		{
 			//When an item is created in Diligence and Selection:
-			var email = check.Field<EmailItemField>(ids.GetFieldId("Diligence and Selection|Shared Email"));
-			var sharedBy = "toolkit@vilcap.com";
-			var message = "Please rate this application";
+			var e = check.Field<EmailItemField>(ids.GetFieldId("Diligence and Selection|Shared Email"));
+			var m = "Please rate this application";
+			var email = e;
 			Item updateMe = new Item() { ItemId = check.ItemId };
 			updateMe.Field<CategoryItemField>(ids.GetFieldId("Diligence and Selection|Status")).OptionText = "Not Scored";
 			await podio.UpdateItem(updateMe, true);
+			GrantService serv = new GrantService(podio);
+			//Send email
+			
+
+			List<Ref> people = new List<Ref>();
+			Ref person = new Ref();
+			person.Type = "mail";
+			person.Id = email;
+			people.Add(person);
+			var message = m;
+
+			await serv.CreateGrant("item", check.ItemId, people, "rate", message);
 		}
 	}
 }

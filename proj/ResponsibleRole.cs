@@ -18,7 +18,6 @@ namespace newVilcapCopyFileToGoogleDrive
 		{
 			//When Item is created in Task List:
 			//TODO: would love to get rid of search service.. run options by John
-			SearchService searchServ = new SearchService(podio);
 
 			var fieldIdToSearch = ids.GetFieldId("Applications");
 			var filterValue = "vilcapadmin";

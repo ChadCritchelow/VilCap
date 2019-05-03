@@ -31,11 +31,6 @@ namespace newVilcapCopyFileToGoogleDrive
 					companyProfile.Field<CategoryItemField>(ids.GetFieldId("Selection Process *")).OptionText = "New Application";
 					companyProfile.Field<AppItemField>(ids.GetFieldId("Application")).ItemId = check.ItemId;
 					await podio.CreateItem(companyProfile, ids.GetFieldId("Company Profiles"), true);
-
-
-
-
-
 				}
 			}
 		}

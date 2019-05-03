@@ -21,8 +21,6 @@ namespace newVilcapCopyFileToGoogleDrive
 										where r.App.Name == "Company Profiles"
 										select r;
 			GrantService serv = new GrantService(podio);
-
-			Contact contact = new Contact();
 			foreach (var reference in refFromCompanyProfile)
 			{
 				var item = await podio.GetItem(reference.Items.First().ItemId);

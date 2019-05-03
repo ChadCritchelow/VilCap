@@ -35,15 +35,24 @@ namespace newVilcapCopyFileToGoogleDrive
 			var items = await podio.FilterItems(ids.GetFieldId("Admin"), newOptions);
 			Item AdminOptionToCheck = await podio.GetItem(items.Items.First().ItemId);
 
+			GrantService serv = new GrantService(podio);
 			//Create Email:
 			var recipient = check.Field<EmailItemField>(ids.GetFieldId("Applications|Email")).Value.First().Value;
-			var sharedBy = "toolkit@vilcap.com";
 			var orgName = AdminOptionToCheck.Field<TextItemField>(ids.GetFieldId("Admin|Organization Name")).Value;
-			var message = $"Invitation to Complete Your Application with {orgName}" +
+			var m = $"Invitation to Complete Your Application with {orgName}" +
 			"This application will automatically save as you work on it.To access an in-progress";
 
 			//Send email
-			ItemService shareServ = new ItemService(podio);
+			var email = recipient;
+
+			List<Ref> people = new List<Ref>();
+			Ref person = new Ref();
+			person.Type = "mail";
+			person.Id = email;
+			people.Add(person);
+			var message = m;
+
+			await serv.CreateGrant("item", check.ItemId, people, "rate", message);
 
 			Item updateMe = new Item() { ItemId = check.ItemId };
 			updateMe.Field<CategoryItemField>(ids.GetFieldId("Applications|Application Status")).OptionText="New Application";
