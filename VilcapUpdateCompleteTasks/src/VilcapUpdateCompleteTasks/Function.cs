@@ -39,14 +39,18 @@ namespace VilcapUpdateCompleteTasks
 			//Deploy Curriculum field
 			string functionName="VilcapUpdateCompleteTasks";
 			lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
-			try
+            context.Logger.LogLine($"1");
+            try
 			{
-				if (string.IsNullOrEmpty(lockValue))
+                context.Logger.LogLine($"2");
+                if (string.IsNullOrEmpty(lockValue))
 				{
 					context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
 					return;
 				}
+                context.Logger.LogLine($"3");
                 TaskService serv = new TaskService(podio);
+                context.Logger.LogLine($"4");
                 /*
 				var revision = await podio.GetRevisionDifference
 					(
@@ -60,9 +64,12 @@ namespace VilcapUpdateCompleteTasks
                 if (firstRevision.FieldId == completionStatus.FieldId)
 				{
                 */
+                context.Logger.LogLine($"5");
                 var completionStatus = check.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion"));
-                    if (completionStatus.Options.Any() && completionStatus.Options.First().Text == "Complete")
+                context.Logger.LogLine($"6");
+                if (completionStatus.Options.Any() && completionStatus.Options.First().Text == "Complete")
 					{
+                    context.Logger.LogLine($"7");
                     context.Logger.LogLine($"{check.TaskCount} ({check.Tasks.Count}) Tasks");
 
                     await serv.GetTasks(check.ItemId);
