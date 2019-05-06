@@ -48,75 +48,75 @@ namespace VilcapKickoffDateChanged
 					return;
 				}
 
-                
-				var revision = await podio.GetRevisionDifference
-			(
-			Convert.ToInt32(check.ItemId),
-			check.CurrentRevision.Revision - 1,
-			check.CurrentRevision.Revision
-			);
-				var firstRevision = revision.First();
-				var date = check.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
-				var calendarColor = check.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Calendar Color"));
-				if (firstRevision.FieldId == date.FieldId)
-				{
-					if (calendarColor.Options.Any() &&
-						(calendarColor.Options.First().Text == "Date Manager" ||
-						calendarColor.Options.First().Text == "Addon Date Manager"))
-					{
-                        context.Logger.LogLine($"{calendarColor.Options.First().Text}");
-                        if(firstRevision.From[0] != null) { 
-                        
-                        //if (previous.value != null)
-						{
-                                dynamic previous = firstRevision.From[0];
-                                context.Logger.LogLine($"{previous.value.toString()}");
-                                context.Logger.LogLine($"date.state.val: {date.Start.Value.Ticks}");
-                            var offset = date.Start.Value.Subtract(previous.value.start);//check to see if this works
-                            context.Logger.LogLine($"offset: {offset.toString()}");
-                            var fieldIdToSearch = ids.GetFieldId("Workshop Modules|Day #");
-							var filterValue = check.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Day Number")).Options.First().Text;
-							var filter = new Dictionary<int, object>
-							{
-								{ fieldIdToSearch, filterValue }
-							};
-							FilterOptions newOptions = new FilterOptions
-							{
-								Filters = filter,
-								Offset = 500
-							};
-							context.Logger.LogLine("Checking for duplicates");
+                var date = check.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
+                var calendarColor = check.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Calendar Color"));
+                var revision = await podio.GetRevisionDifference
+			    (
+			    Convert.ToInt32(check.ItemId),
+			    check.CurrentRevision.Revision - 1,
+			    check.CurrentRevision.Revision
+			    );
 
-							var items = await podio.FilterItems(ids.GetFieldId("Admin"), newOptions);
-                                foreach (var item in items.Items)
+                if (revision.First().Label == "Date" 
+                    && calendarColor.Options.Any() 
+                    && (calendarColor.Options.First().Text == "Date Manager" ||
+                        calendarColor.Options.First().Text == "Addon Date Manager"))
+				{
+
+                    context.Logger.LogLine($"Module Type: {calendarColor.Options.First().Text}");
+                    //if(changedField.From[0] != null) { 
+                    //if (previous.value != null)
+					{
+                        DateTime oldTime = (DateTime)revision.First().From;
+                        TimeSpan diff = date.Start.Value.Subtract(oldTime);
+                        context.Logger.LogLine($"Got Values");
+                        //context.Logger.LogLine($"{itemFrom.value.toString()}");
+                        //context.Logger.LogLine($"date.state.val: {date.Start.Value.Ticks}");
+                        //var offset = date.Start.Value.Subtract(itemFrom.value.start);//check to see if this works
+                        //context.Logger.LogLine($"offset: {offset.toString()}");
+                        var fieldIdToSearch = ids.GetFieldId("Workshop Modules|Day #");
+						var filterValue = check.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Day Number")).Options.First().Text;
+						var filter = new Dictionary<int, object>
+						{
+							{ fieldIdToSearch, filterValue }
+						};
+						FilterOptions newOptions = new FilterOptions
+						{
+							Filters = filter,
+							Offset = 500
+						};
+						context.Logger.LogLine("Checking for duplicates");
+
+						var items = await podio.FilterItems(ids.GetFieldId("Admin"), newOptions);
+                            foreach (var item in items.Items)
+                            {
+                                Item updateMe = new Item();
+                                var checkCalendarColor = check.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Calendar Color"));
+                                var foreachItemCalendarColor = item.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Calendar Color"));
+                                if (
+                                    (checkCalendarColor.Options.Any() &&
+                                    checkCalendarColor.Options.First().Text == "Date Manager" &&
+                                    (!foreachItemCalendarColor.Options.Any() ||
+                                    foreachItemCalendarColor.Options.First().Text == "Module"))
+                                    ||
+                                    (checkCalendarColor.Options.Any() &&
+                                    checkCalendarColor.Options.First().Text == "Addon Date Manager" &&
+                                    foreachItemCalendarColor.Options.Any() &&
+                                    foreachItemCalendarColor.Options.First().Text == "Addon")
+                                    )
                                 {
-                                    Item updateMe = new Item();
-                                    var checkCalendarColor = check.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Calendar Color"));
-                                    var foreachItemCalendarColor = item.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Calendar Color"));
-                                    if (
-                                        (checkCalendarColor.Options.Any() &&
-                                        checkCalendarColor.Options.First().Text == "Date Manager" &&
-                                        (!foreachItemCalendarColor.Options.Any() ||
-                                        foreachItemCalendarColor.Options.First().Text == "Module"))
-                                        ||
-                                        (checkCalendarColor.Options.Any() &&
-                                        checkCalendarColor.Options.First().Text == "Addon Date Manager" &&
-                                        foreachItemCalendarColor.Options.Any() &&
-                                        foreachItemCalendarColor.Options.First().Text == "Addon")
-                                      )
-                                    {
-                                        updateMe = new Item() { ItemId = item.ItemId };
-                                        var updateDate = updateMe.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
-                                        var checkDate = item.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
-                                        var duration = item.Field<DurationItemField>(ids.GetFieldId("Workshop Modules|Duration"));
-                                        updateDate.Start = checkDate.Start.Value.Add(offset);
-                                        updateDate.End = checkDate.Start.Value.Add(offset + duration.Value);
-                                    }
-                                    await podio.UpdateItem(updateMe, true);
+                                    updateMe = new Item() { ItemId = item.ItemId };
+                                    var updateDate = updateMe.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
+                                    var checkDate = item.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
+                                    var duration = item.Field<DurationItemField>(ids.GetFieldId("Workshop Modules|Duration"));
+                                    updateDate.Start = checkDate.Start.Value.Add(offset);
+                                    updateDate.End = checkDate.Start.Value.Add(offset + duration.Value);
                                 }
-							}
+                                await podio.UpdateItem(updateMe, true);
+                            }
 						}
 					}
+					
 				}
 			}
 			catch(Exception ex)
