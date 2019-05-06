@@ -52,30 +52,23 @@ namespace VilcapKickoffDateChanged
                 var calendarColor = check.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Calendar Color"));
                 var revision = await podio.GetRevisionDifference
 			    (
-			    Convert.ToInt32(check.ItemId),
-			    check.CurrentRevision.Revision - 1,
-			    check.CurrentRevision.Revision
+			        Convert.ToInt32(check.ItemId),
+			        check.CurrentRevision.Revision - 1,
+			        check.CurrentRevision.Revision
 			    );
 
-                if (revision.First().Label == "Date" 
-                    && calendarColor.Options.Any() 
-                    && (calendarColor.Options.First().Text == "Date Manager" ||
-                        calendarColor.Options.First().Text == "Addon Date Manager"))
+                if (revision.First().Label == "Date" && 
+                    calendarColor.Options.Any() && 
+                    (calendarColor.Options.First().Text == "Date Manager" ||
+                     calendarColor.Options.First().Text == "Addon Date Manager"))
 				{
-
                     context.Logger.LogLine($"Module Type: {calendarColor.Options.First().Text}");
-                    context.Logger.LogLine($"Object Type: {revision.First().From.ToString()}");
-                    //if(changedField.From[0] != null) { 
-                    //if (previous.value != null)
+                    context.Logger.LogLine($"JSON: {revision.First().From.ToString()}");
+
                     {
                         DateTime oldTime = revision.First().From.First.Value<DateTime>("start"); // Array position of "start"
                         TimeSpan diff = date.Start.Value.Subtract(oldTime);
                         context.Logger.LogLine($"Got Values");
-                        
-                        //context.Logger.LogLine($"{itemFrom.value.toString()}");
-                        //context.Logger.LogLine($"date.state.val: {date.Start.Value.Ticks}");
-                        //var offset = date.Start.Value.Subtract(itemFrom.value.start);//check to see if this works
-                        //context.Logger.LogLine($"offset: {offset.toString()}");
                         var fieldIdToSearch = ids.GetFieldId("Workshop Modules|Day #");
 						var filterValue = check.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Day Number")).Options.First().Text;
 						var filter = new Dictionary<int, object>
