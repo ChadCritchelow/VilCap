@@ -57,19 +57,22 @@ namespace VilcapDependentTaskDate
 					check.CurrentRevision.Revision
 				);
 				var firstRevision = revision.First();
-				var selectionProcess = check.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Date"));
-				if (firstRevision.FieldId == selectionProcess.FieldId)
+				var date = check.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Date"));
+				if (firstRevision.FieldId == date.FieldId)
 				{
 					//Get referenced items
 					var refs = await podio.GetReferringItems(check.ItemId);
-					var taskListRefs = from r in refs
+                    context.Logger.LogLine($"- Got Item References");
+                    var taskListRefs = from r in refs
 									   where r.App.Name == "Task List"
 									   select r;
-					foreach (var itemRef in taskListRefs)
+                    context.Logger.LogLine($"- # of Dep Tasks: {taskListRefs.Count()}");
+                    foreach (var itemRef in taskListRefs)
 					{
 						foreach (var item in itemRef.Items)
 						{
-							Item updateMe = new Item() { ItemId = item.ItemId };
+                            context.Logger.LogLine($"- Iterating...");
+                            Item updateMe = new Item() { ItemId = item.ItemId };
 							var updateDate = updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
 							Item checkMe = await podio.GetItem(item.ItemId);
 							var moduleDate = check.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date")).Start;
