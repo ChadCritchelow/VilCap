@@ -63,9 +63,13 @@ namespace VilcapUpdateCompleteTasks
                 var completionStatus = check.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion"));
                     if (completionStatus.Options.Any() && completionStatus.Options.First().Text == "Complete")
 					{
-                        context.Logger.LogLine($"Status == Complete");
-                        //mark item tasks as complete
-                        foreach (var task in check.Tasks)
+                    context.Logger.LogLine($"{check.TaskCount} ({check.Tasks.Count}) Tasks");
+
+                    await serv.GetTasks(check.ItemId);
+
+                    context.Logger.LogLine($"{check.TaskCount} ({check.Tasks.Count}) Tasks");
+                    //mark item tasks as complete
+                    foreach (var task in check.Tasks)
 						{
                             context.Logger.LogLine($"Iterating ... ");
                             await serv.CompleteTask(int.Parse(task.TaskId));
