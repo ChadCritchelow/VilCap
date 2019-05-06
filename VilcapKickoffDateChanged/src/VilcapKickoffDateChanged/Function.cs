@@ -82,8 +82,7 @@ namespace VilcapKickoffDateChanged
 						};
 						FilterOptions newOptions = new FilterOptions
 						{
-							Filters = filter,
-							Offset = 500
+							Filters = filter
 						};
 						context.Logger.LogLine("Checking for duplicates");
 
@@ -109,8 +108,8 @@ namespace VilcapKickoffDateChanged
                                     var updateDate = updateMe.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
                                     var checkDate = item.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
                                     var duration = item.Field<DurationItemField>(ids.GetFieldId("Workshop Modules|Duration"));
-                                    updateDate.Start = checkDate.Start.Value.Add(offset);
-                                    updateDate.End = checkDate.Start.Value.Add(offset + duration.Value);
+                                    updateDate.Start = checkDate.Start.Value.Add(diff);
+                                    updateDate.End = checkDate.Start.Value.Add(diff + duration.Value.Value);
                                 }
                                 await podio.UpdateItem(updateMe, true);
                             }
