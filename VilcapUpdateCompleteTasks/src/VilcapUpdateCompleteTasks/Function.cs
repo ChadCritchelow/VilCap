@@ -71,7 +71,7 @@ namespace VilcapUpdateCompleteTasks
 					{
                     context.Logger.LogLine($"7");
                     //mark item tasks as complete
-                    var tasks = check.Tasks;
+                    await serv.CompleteTask(117872827);
                     foreach (var task in check.Tasks)
 						{
                             context.Logger.LogLine($"Iterating ... ");
