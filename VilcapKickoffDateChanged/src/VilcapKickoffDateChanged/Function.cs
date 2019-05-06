@@ -67,7 +67,7 @@ namespace VilcapKickoffDateChanged
                     //if(changedField.From[0] != null) { 
                     //if (previous.value != null)
 					{
-                        DateTime oldTime = (DateTime)revision.First().From[0];
+                        DateTime oldTime = (DateTime)revision.First().From.First;
                         TimeSpan diff = date.Start.Value.Subtract(oldTime);
                         context.Logger.LogLine($"Got Values");
                         //context.Logger.LogLine($"{itemFrom.value.toString()}");
