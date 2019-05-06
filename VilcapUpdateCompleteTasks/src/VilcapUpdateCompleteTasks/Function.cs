@@ -12,6 +12,7 @@ using PodioCore.Models.Request;
 using BrickBridge.Lambda.VilCap;
 using newVilcapCopyFileToGoogleDrive;
 using Saasafras;
+using Task = PodioCore.Models.Task;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
@@ -77,7 +78,7 @@ namespace VilcapUpdateCompleteTasks
                     foreach (var task in check.Tasks)
 						{
                             context.Logger.LogLine($"Iterating ... ");
-                            Task completeMe = await serv.GetTask(int.Parse(task.TaskId));
+                            var completeMe = await serv.GetTask(int.Parse(task.TaskId));
                             await serv.CompleteTask(int.Parse(completeMe.TaskId));
                             context.Logger.LogLine($"Completed a task");
                         //send to podio?

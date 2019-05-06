@@ -48,6 +48,7 @@ namespace VilcapKickoffDateChanged
 					return;
 				}
 
+                
 				var revision = await podio.GetRevisionDifference
 			(
 			Convert.ToInt32(check.ItemId),
@@ -63,11 +64,14 @@ namespace VilcapKickoffDateChanged
 						(calendarColor.Options.First().Text == "Date Manager" ||
 						calendarColor.Options.First().Text == "Addon Date Manager"))
 					{
-						dynamic previous = firstRevision.From[0];
+                        context.Logger.LogLine($"{calendarColor.Options.First().Text}");
+                        dynamic previous = firstRevision.From[0];
 						if (previous.value != null)
 						{
-							var offset = date.Start.Value.Subtract(previous.value.start);//check to see if this works
-							var fieldIdToSearch = ids.GetFieldId("Workshop Modules|Day #");
+                            context.Logger.LogLine($"date.state.val: {date.Start.Value.Ticks}");
+                            var offset = date.Start.Value.Subtract(previous.value.start);//check to see if this works
+                            context.Logger.LogLine($"offset: {offset.toString()}");
+                            var fieldIdToSearch = ids.GetFieldId("Workshop Modules|Day #");
 							var filterValue = check.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Day Number")).Options.First().Text;
 							var filter = new Dictionary<int, object>
 							{
