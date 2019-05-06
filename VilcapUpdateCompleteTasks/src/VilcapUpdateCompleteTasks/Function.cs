@@ -55,14 +55,17 @@ namespace VilcapUpdateCompleteTasks
 					);
 				var firstRevision = revision.First();
 				var completionStatus = check.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion"));
-				if (firstRevision.FieldId == completionStatus.FieldId)
+                context.Logger.LogLine($"Checking Completion Status");
+                if (firstRevision.FieldId == completionStatus.FieldId)
 				{
 					if (completionStatus.Options.Any() && completionStatus.Options.First().Text == "Complete")
 					{
-						//mark item tasks as complete
-						foreach (var task in check.Tasks)
+                        context.Logger.LogLine($"Status == Complete");
+                        //mark item tasks as complete
+                        foreach (var task in check.Tasks)
 						{
-							await serv.CompleteTask(int.Parse(task.TaskId));
+                            context.Logger.LogLine($"Iterating ... ");
+                            await serv.CompleteTask(int.Parse(task.TaskId));
 							//send to podio?
 						}
 					}
