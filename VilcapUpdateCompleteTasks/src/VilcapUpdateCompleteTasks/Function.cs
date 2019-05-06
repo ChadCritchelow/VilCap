@@ -46,7 +46,8 @@ namespace VilcapUpdateCompleteTasks
 					context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
 					return;
 				}
-				TaskService serv = new TaskService(podio);
+                TaskService serv = new TaskService(podio);
+                /*
 				var revision = await podio.GetRevisionDifference
 					(
 					Convert.ToInt32(check.ItemId),
@@ -54,11 +55,13 @@ namespace VilcapUpdateCompleteTasks
 					check.CurrentRevision.Revision
 					);
 				var firstRevision = revision.First();
-				var completionStatus = check.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion"));
+                
                 context.Logger.LogLine($"Checking Completion Status");
                 if (firstRevision.FieldId == completionStatus.FieldId)
 				{
-					if (completionStatus.Options.Any() && completionStatus.Options.First().Text == "Complete")
+                */
+                var completionStatus = check.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion"));
+                    if (completionStatus.Options.Any() && completionStatus.Options.First().Text == "Complete")
 					{
                         context.Logger.LogLine($"Status == Complete");
                         //mark item tasks as complete
@@ -69,7 +72,7 @@ namespace VilcapUpdateCompleteTasks
 							//send to podio?
 						}
 					}
-				}
+				//}
 			}
 			catch(Exception ex)
 			{
