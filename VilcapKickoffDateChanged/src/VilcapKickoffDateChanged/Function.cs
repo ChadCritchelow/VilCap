@@ -66,7 +66,8 @@ namespace VilcapKickoffDateChanged
 					{
                         context.Logger.LogLine($"{calendarColor.Options.First().Text}");
                         dynamic previous = firstRevision.From[0];
-						if (previous.value != null)
+                        context.Logger.LogLine($"{previous.value.toString()}");
+                        if (previous.value != null)
 						{
                             context.Logger.LogLine($"date.state.val: {date.Start.Value.Ticks}");
                             var offset = date.Start.Value.Subtract(previous.value.start);//check to see if this works
