@@ -70,13 +70,11 @@ namespace VilcapUpdateCompleteTasks
                 if (completionStatus.Options.Any() && completionStatus.Options.First().Text == "Complete")
 					{
                     context.Logger.LogLine($"7");
-                    context.Logger.LogLine($"{check.TaskCount} ({check.Tasks.Count}) Tasks");
+                    var tasks = await serv.GetTasks(check.ItemId);
 
-                    await serv.GetTasks(check.ItemId);
-
-                    context.Logger.LogLine($"{check.TaskCount} ({check.Tasks.Count}) Tasks");
+                    context.Logger.LogLine($"{tasks.Count} Tasks");
                     //mark item tasks as complete
-                    foreach (var task in check.Tasks)
+                    foreach (var task in tasks)
 						{
                             context.Logger.LogLine($"Iterating ... ");
                             await serv.CompleteTask(int.Parse(task.TaskId));
