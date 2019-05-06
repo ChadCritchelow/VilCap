@@ -65,11 +65,13 @@ namespace VilcapKickoffDateChanged
 						calendarColor.Options.First().Text == "Addon Date Manager"))
 					{
                         context.Logger.LogLine($"{calendarColor.Options.First().Text}");
-                        dynamic previous = firstRevision.From[0];
-                        context.Logger.LogLine($"{previous.value.toString()}");
-                        if (previous.value != null)
+                        if(firstRevision.From[0] != null) { 
+                        
+                        //if (previous.value != null)
 						{
-                            context.Logger.LogLine($"date.state.val: {date.Start.Value.Ticks}");
+                                dynamic previous = firstRevision.From[0];
+                                context.Logger.LogLine($"{previous.value.toString()}");
+                                context.Logger.LogLine($"date.state.val: {date.Start.Value.Ticks}");
                             var offset = date.Start.Value.Subtract(previous.value.start);//check to see if this works
                             context.Logger.LogLine($"offset: {offset.toString()}");
                             var fieldIdToSearch = ids.GetFieldId("Workshop Modules|Day #");
