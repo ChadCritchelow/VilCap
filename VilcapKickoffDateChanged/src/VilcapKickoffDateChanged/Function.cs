@@ -88,31 +88,32 @@ namespace VilcapKickoffDateChanged
 							context.Logger.LogLine("Checking for duplicates");
 
 							var items = await podio.FilterItems(ids.GetFieldId("Admin"), newOptions);
-							foreach (var item in items.Items)
-							{
-								Item updateMe = new Item();
-								var checkCalendarColor = check.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Calendar Color"));
-								var foreachItemCalendarColor = item.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Calendar Color"));
-								if (
-									(checkCalendarColor.Options.Any() &&
-									checkCalendarColor.Options.First().Text == "Date Manager" &&
-									(!foreachItemCalendarColor.Options.Any() ||
-									foreachItemCalendarColor.Options.First().Text == "Module"))
-									||
-									(checkCalendarColor.Options.Any() &&
-									checkCalendarColor.Options.First().Text == "Addon Date Manager" &&
-									foreachItemCalendarColor.Options.Any() &&
-									foreachItemCalendarColor.Options.First().Text == "Addon")
-								  )
-								{
-									updateMe = new Item() { ItemId = item.ItemId };
-									var updateDate = updateMe.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
-									var checkDate = item.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
-									var duration = item.Field<DurationItemField>(ids.GetFieldId("Workshop Modules|Duration"));
-									updateDate.Start = checkDate.Start.Value.Add(offset);
-									updateDate.End = checkDate.Start.Value.Add(offset + duration.Value);
-								}
-								await podio.UpdateItem(updateMe, true);
+                                foreach (var item in items.Items)
+                                {
+                                    Item updateMe = new Item();
+                                    var checkCalendarColor = check.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Calendar Color"));
+                                    var foreachItemCalendarColor = item.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Calendar Color"));
+                                    if (
+                                        (checkCalendarColor.Options.Any() &&
+                                        checkCalendarColor.Options.First().Text == "Date Manager" &&
+                                        (!foreachItemCalendarColor.Options.Any() ||
+                                        foreachItemCalendarColor.Options.First().Text == "Module"))
+                                        ||
+                                        (checkCalendarColor.Options.Any() &&
+                                        checkCalendarColor.Options.First().Text == "Addon Date Manager" &&
+                                        foreachItemCalendarColor.Options.Any() &&
+                                        foreachItemCalendarColor.Options.First().Text == "Addon")
+                                      )
+                                    {
+                                        updateMe = new Item() { ItemId = item.ItemId };
+                                        var updateDate = updateMe.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
+                                        var checkDate = item.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
+                                        var duration = item.Field<DurationItemField>(ids.GetFieldId("Workshop Modules|Duration"));
+                                        updateDate.Start = checkDate.Start.Value.Add(offset);
+                                        updateDate.End = checkDate.Start.Value.Add(offset + duration.Value);
+                                    }
+                                    await podio.UpdateItem(updateMe, true);
+                                }
 							}
 						}
 					}
