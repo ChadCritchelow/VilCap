@@ -29,7 +29,6 @@ namespace newVilcapCopyFileToGoogleDrive
         static string[] Scopes = { DriveService.Scope.Drive };
         static string ApplicationName = "BrickBridgeVilCap";
         static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
-		int fieldId = 0;
 		Dictionary<string, string> dictChild;
 		Dictionary<string, string> dictMaster;
 		Dictionary<string, string> fullNames;

@@ -116,8 +116,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 var dayMaster = master.Field<CategoryItemField>(fieldId);
                 if (dayMaster.Values != null)
                 {
-                    int dayMasterVal = 0;
-                    Int32.TryParse(dayMaster.Options.First().Text.Split("Day ")[1], out dayMasterVal);
+                    Int32.TryParse(dayMaster.Options.First().Text.Split("Day ")[1], out int dayMasterVal);
                     var color = child.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Calendar Color"));
                     var dayChild = child.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Day Number"));
                     dayChild.OptionText = dayMaster.Options.First().Text.Split(" ")[dayMaster.Options.First().Text.Split(" ").Length-1];
@@ -377,7 +376,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 // Aux Material Generation//
                 foreach (var masterMat in masterMats.Items)
                 {
-                    await AuxMats.CreateAuxMats(context, podio, check, e, service, ids, google, masterMat);      
+                    //await AuxMats.CreateAuxMats(context, podio, check, e, service, ids, google, masterMat);      
                 }
 
              #region // Create WorkshopModule Podio Item //
