@@ -64,9 +64,10 @@ namespace VilcapKickoffDateChanged
 				{
 
                     context.Logger.LogLine($"Module Type: {calendarColor.Options.First().Text}");
+                    context.Logger.LogLine($"Object Type: {revision.First().From.ToString()}");
                     //if(changedField.From[0] != null) { 
                     //if (previous.value != null)
-					{
+                    {
                         DateTime oldTime = (DateTime)revision.First().From.First;
                         TimeSpan diff = date.Start.Value.Subtract(oldTime);
                         context.Logger.LogLine($"Got Values");
