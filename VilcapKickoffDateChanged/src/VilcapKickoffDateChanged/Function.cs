@@ -88,7 +88,7 @@ namespace VilcapKickoffDateChanged
 						};
 						context.Logger.LogLine("Checking for duplicates");
 
-						var items = await podio.FilterItems(ids.GetFieldId("Admin"), newOptions);
+						var items = await podio.FilterItems(ids.GetFieldId("Workshop Modules"), newOptions);
                         foreach (var item in items.Items)
                         {
                             Item updateMe = new Item();
