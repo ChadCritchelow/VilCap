@@ -77,7 +77,7 @@ namespace VilcapUpdateCompleteTasks
                     context.Logger.LogLine($"Taskname: {exTask.Text}");
                     TaskCreateUpdateRequest taskCreate = new TaskCreateUpdateRequest();
                     taskCreate.ExternalId = exTask.ExternalId;
-                    context.Logger.LogLine($"exID: {taskCreate.Id}");
+                    context.Logger.LogLine($"Request: {taskCreate.ToString()}");
                     await serv.UpdateTask(int.Parse(exTask.TaskId), taskCreate);
                     context.Logger.LogLine($"Updated");
                     await serv.CompleteTask(117872827);
