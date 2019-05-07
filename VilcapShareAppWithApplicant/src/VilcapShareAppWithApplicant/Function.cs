@@ -48,16 +48,10 @@ namespace VilcapShareAppWithApplicant
 					return;
 				}
 
-				var fieldIdToSearch = ids.GetFieldId("Applications");
-				var filterValue = "vilcapadmin";
-				var filter = new Dictionary<int, object>
-							{
-								{ fieldIdToSearch, filterValue }
-							};
+				var fieldIdToSearch = ids.GetFieldId("Admin");
 				FilterOptions newOptions = new FilterOptions
 				{
-					Filters = filter,
-					Offset = 500
+					Limit = 1
 				};
 				context.Logger.LogLine("Checking for duplicates");
 

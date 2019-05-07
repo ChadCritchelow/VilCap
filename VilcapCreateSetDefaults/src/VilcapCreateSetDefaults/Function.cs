@@ -51,38 +51,36 @@ namespace VilcapCreateSetDefaults
 
 				//get referenced items from applications app:
 				Item checkApp = new Item();
-				var refs = await podio.GetReferringItems(check.ItemId);
+				var itemRef = check.Field<AppItemField>(ids.GetFieldId("Company Profiles|Application"));
+				
+				Item updateApp = new Item() { ItemId = itemRef.Items.First().ItemId };
+				updateApp.Field<CategoryItemField>(ids.GetFieldId("Applications|Application Status")).OptionText = "Company Profile Created";
+				await podio.UpdateItem(updateApp, true);
+				checkApp = await podio.GetItem(itemRef.Items.First().ItemId);
+				context.Logger.LogLine($"Item ID in foreach: {itemRef.Items.First().ItemId}");
 
-				var refsFromApplications = from r in refs
-										   where r.App.Name == "Applications"
-										   select r;
-				foreach (var itemRef in refsFromApplications)
-				{
-					foreach (var app in itemRef.Items)
-					{
-						Item updateApp = new Item() { ItemId = app.ItemId };
-						updateApp.Field<CategoryItemField>(ids.GetFieldId("Applications|Application Status")).OptionText = "Company Profile Created";
-						await podio.UpdateItem(updateApp, true);
-						checkApp = await podio.GetItem(app.ItemId);
-					}
-				}
+				context.Logger.LogLine($"Application ITem ID: {checkApp.ItemId}");
 				Item updateCompanyProfile = new Item() { ItemId = check.ItemId };
 				updateCompanyProfile.Field<PhoneItemField>(ids.GetFieldId("Company Profiles|Phone")).Value =
 					checkApp.Field<PhoneItemField>(ids.GetFieldId("Applications|Phone")).Value;
 				updateCompanyProfile.Field<EmailItemField>(ids.GetFieldId("Company Profiles|Email")).Value =
 					checkApp.Field<EmailItemField>(ids.GetFieldId("Applications|Email")).Value;
-				updateCompanyProfile.Field<DateItemField>(ids.GetFieldId("Company Profiles|Company Founding Date")).Start =
-					checkApp.Field<DateItemField>(ids.GetFieldId("Applications|Company Founding Date")).Start;
-
-				var emails = check.Field<EmailItemField>(ids.GetFieldId("Company Profiles|Email")).Value;
+				if (checkApp.Field<DateItemField>(ids.GetFieldId("Applications|Company Founding Date ")).Start != null)
+				{
+					updateCompanyProfile.Field<DateItemField>(ids.GetFieldId("Company Profiles|Company Founding Date")).Start =
+						checkApp.Field<DateItemField>(ids.GetFieldId("Applications|Company Founding Date ")).Start;
+				}
+				var emails = checkApp.Field<EmailItemField>(ids.GetFieldId("Applications|Email")).Value;
 				foreach (var email in emails)
 				{
 					Item entrepreneur = new Item();
-					entrepreneur.Field<AppItemField>(ids.GetFieldId("Entrepreneurs|Company *")).ItemId = check.ItemId;
-					entrepreneur.Field<EmailItemField>(ids.GetFieldId("Entrepreneurs|Entrepreneur Email")).Value =
-						check.Field<EmailItemField>(ids.GetFieldId("Company Profiles|Email")).Value;
+					entrepreneur.Field<AppItemField>(ids.GetFieldId("Entrepreneurs|Company")).ItemId = check.ItemId;
+					List<EmailPhoneFieldResult> emailList = new List<EmailPhoneFieldResult>();
+					emailList.Add(email);
+					entrepreneur.Field<EmailItemField>(ids.GetFieldId("Entrepreneurs|Entrepreneur Email")).Value =emailList;
 					await podio.CreateItem(entrepreneur, ids.GetFieldId("Entrepreneurs"), true);
 				}
+				await podio.UpdateItem(updateCompanyProfile, true);
 			}
 			catch(Exception ex)
 			{

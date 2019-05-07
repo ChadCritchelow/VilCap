@@ -44,16 +44,11 @@ namespace CreateSetResponsibleRole
 					context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
 					return;
 				}
-				var fieldIdToSearch = ids.GetFieldId("Applications");
-				var filterValue = "vilcapadmin";
-				var filter = new Dictionary<int, object>
-							{
-								{ fieldIdToSearch, filterValue }
-							};
+				var fieldIdToSearch = ids.GetFieldId("Admin");
+				
 				FilterOptions newOptions = new FilterOptions
 				{
-					Filters = filter,
-					Offset = 500
+					Limit=1
 				};
 				context.Logger.LogLine("Checking for duplicates");
 
@@ -62,7 +57,7 @@ namespace CreateSetResponsibleRole
 				Item CheckScheduleItem = check;
 				Item UpdateScheduleItem = new Item() { ItemId = check.ItemId };
 				List<int> contactids = new List<int>();
-				var esoMemberRole = CheckScheduleItem.Field<CategoryItemField>(ids.GetFieldId("ESO Member Role"));
+				var esoMemberRole = CheckScheduleItem.Field<CategoryItemField>(ids.GetFieldId("Task List|ESO Member Role"));
 				if (esoMemberRole.Options.Any())
 				{
 					var responsibleMember = UpdateScheduleItem.Field<ContactItemField>(ids.GetFieldId("Task List|Responsible Member"));
@@ -71,15 +66,15 @@ namespace CreateSetResponsibleRole
 					{
 						case "Programs Associate":
 
-							var programAssociates = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Program Associate(s)"));
+							var programAssociates = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Program Associate"));
 							foreach (var contact in programAssociates.Contacts)
 							{
 								contactids.Add(contact.ProfileId);
 							}
 							responsibleMember.ContactIds = contactids;
 							break;
-						case "Investments Analyst":
-							var InvestmentsAnalysts = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Investments Analyst(s)"));
+						case "Investment Analyst":
+							var InvestmentsAnalysts = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Investments Analyst"));
 							foreach (var contact in InvestmentsAnalysts.Contacts)
 							{
 								contactids.Add(contact.ProfileId);
@@ -87,7 +82,7 @@ namespace CreateSetResponsibleRole
 							responsibleMember.ContactIds = contactids;
 							break;
 						case "Program Manager":
-							var programManagers = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Program Manager(s)"));
+							var programManagers = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Program Manager"));
 							foreach (var contact in programManagers.Contacts)
 							{
 								contactids.Add(contact.ProfileId);
@@ -95,7 +90,7 @@ namespace CreateSetResponsibleRole
 							responsibleMember.ContactIds = contactids;
 							break;
 						case "Program Director":
-							var programDirectors = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Program Director(s)"));
+							var programDirectors = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Program Director"));
 							foreach (var contact in programDirectors.Contacts)
 							{
 								contactids.Add(contact.ProfileId);

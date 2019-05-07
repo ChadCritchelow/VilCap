@@ -60,18 +60,11 @@ namespace VilcapUpdateApplicationStatus
 				{
 					if (completionStatus.Options.Any() && completionStatus.Options.First().Text == "Submit")
 					{
-						SearchService searchServ = new SearchService(podio);
 
-						var fieldIdToSearch = ids.GetFieldId("Applications");
-						var filterValue = "vilcapadmin";
-						var filter = new Dictionary<int, object>
-							{
-								{ fieldIdToSearch, filterValue }
-							};
+						var fieldIdToSearch = ids.GetFieldId("Admin");
 						FilterOptions newOptions = new FilterOptions
 						{
-							Filters = filter,
-							Offset = 500
+							Limit=1
 						};
 						context.Logger.LogLine("Checking for duplicates");
 
@@ -81,22 +74,30 @@ namespace VilcapUpdateApplicationStatus
 						//assign tasks:
 						TaskService taskServ = new TaskService(podio);
 
-						var programAssociates = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Programs Associate(s)"));
+						var programAssociates = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Programs Associate"));
 						var title = "Review Completed Application for " +
-							$"{check.Field<TextItemField>(ids.GetFieldId("Applications|Company Name")).Value}";
+							$"{check.Field<TextItemField>(ids.GetFieldId("Applications|Company Name")).Value} here: {check.Link}";
 
 						var date = DateTime.Now.AddDays(5);
 						TaskCreateUpdateRequest t = new TaskCreateUpdateRequest();
 						t.Description = title;
-						List<int> cIds = new List<int>();
+						t.Text = "Details";
+						int cId=0;
+
 						foreach (var contact in programAssociates.Contacts)
 						{
-							cIds.Add(Convert.ToInt32(contact.UserId));
+							context.Logger.LogLine($"Adding Contact: {contact.Mail.First()} with userID: {contact.UserId}");
+							cId=Convert.ToInt32(contact.UserId);
 						}
-						t.SetResponsible(cIds);
+						t.Private = false;
+						t.RefType = "item";
+						t.Id = check.ItemId;
+						t.SetResponsible(cId);
 						t.DueDate = date;
-						var task = await taskServ.CreateTask(t);
-						await taskServ.AssignTask(int.Parse(task.First().TaskId));//neccessary?
+						var task = await taskServ.CreateTask(t,silent:false);
+						context.Logger.LogLine($"Created task: {task.First().TaskId}");
+						await taskServ.AssignTask(int.Parse(task.First().TaskId),cId,true);//neccessary?
+						context.Logger.LogLine($"Assigned task: {task.First().TaskId} to userID: {cId}");
 					}
 				}
 			}

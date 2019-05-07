@@ -67,21 +67,25 @@ namespace VilcapCreateFinalSelCards
 						//Get view "Program Support":
 						ViewService viewServ = new ViewService(podio);
 						ItemService filterServ = new ItemService(podio);
-						View view = new View();
 						string selectionRound = "";
+						string viewName = "";
 						switch (selectionProcess.Options.First().Text)
 						{
 							case "Finalist":
-								view = await viewServ.GetView(ids.GetFieldId("Program Support"), "Selection Committee - Final");
+
+								viewName = "Selection Committee - Final";
 								selectionRound = "Final Round";
 								break;
 							case "Semi-Finalist":
-								view = await viewServ.GetView(ids.GetFieldId("Program Support"), "Selection Committee - Semi Final");
+								viewName = "Selection Committee - Semi Final";
 								selectionRound = "Semi-Final Round";
 								break;
 						}
-
-						var viewItems = await filterServ.FilterItemsByView(ids.GetFieldId("Program Support"), int.Parse(view.ViewId), limit: 500);
+						var views=await viewServ.GetViews(ids.GetFieldId("Program Support"));
+						var view = from v in views
+									where v.Name == viewName
+									select v;
+						var viewItems = await filterServ.FilterItemsByView(ids.GetFieldId("Program Support"), int.Parse(view.First().ViewId), limit: 500);
 						foreach (var item in viewItems.Items)
 						{
 							Item create = new Item();
