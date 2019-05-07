@@ -70,8 +70,8 @@ namespace VilcapDependentTaskDate
                     foreach (var depTask in depTasks.Items)
 					{
                         context.Logger.LogLine($"- Iterating...");
-                        Item updateMe = new Item() { ItemId = depTask.ItemId };
-                        updateMe = await podio.GetItem(depTask.ItemId);
+                        //Item updateMe = new Item() { ItemId = depTask.ItemId };
+                        Item updateMe = await podio.GetItem(depTask.ItemId);
                         var taskDate = updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
                         var duration = taskDate.End.GetValueOrDefault() - taskDate.Start.GetValueOrDefault();
                         if (duration.Ticks < 0) duration = new TimeSpan(0);
