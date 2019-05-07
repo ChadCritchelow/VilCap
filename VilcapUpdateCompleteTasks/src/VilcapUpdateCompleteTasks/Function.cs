@@ -70,17 +70,22 @@ namespace VilcapUpdateCompleteTasks
                 if (completionStatus.Options.Any() && completionStatus.Options.First().Text == "Complete")
 					{
                     context.Logger.LogLine($"6");
+
                     //mark item tasks as complete
                     var exTask = await serv.GetTask(117872827);
-                    context.Logger.LogLine($"{exTask.Text}");
+                    exTask.Status = "complete";
+                    context.Logger.LogLine($"Taskname: {exTask.Text}");
+                    TaskCreateUpdateRequest taskCreate = new TaskCreateUpdateRequest();
+                    taskCreate.ExternalId = exTask.ExternalId;
+                    context.Logger.LogLine($"exID: {taskCreate.Id}");
+                    await serv.UpdateTask(int.Parse(exTask.TaskId), taskCreate);
+                    context.Logger.LogLine($"Updated");
                     await serv.CompleteTask(117872827);
-                    context.Logger.LogLine($"7");
+                    context.Logger.LogLine($"Completed");
                     foreach (var task in check.Tasks)
 						{
-                            context.Logger.LogLine($"Iterating ... ");
                             var completeMe = await serv.GetTask(int.Parse(task.TaskId));
                             await serv.CompleteTask(int.Parse(completeMe.TaskId));
-                            context.Logger.LogLine($"Completed a task");
                         //send to podio?
                     }
 					}
