@@ -52,7 +52,7 @@ namespace VilcapUpdateCompleteTasks
                 context.Logger.LogLine($"3");
                 TaskService serv = new TaskService(podio);
                 context.Logger.LogLine($"4");
-                /*
+                
 				var revision = await podio.GetRevisionDifference
 					(
 					Convert.ToInt32(check.ItemId),
@@ -62,29 +62,29 @@ namespace VilcapUpdateCompleteTasks
 				var firstRevision = revision.First();
                 
                 context.Logger.LogLine($"Checking Completion Status");
-                if (firstRevision.FieldId == completionStatus.FieldId)
+				var completionStatus = check.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion"));
+				if (firstRevision.FieldId == completionStatus.FieldId)
 				{
-                */
-                var completionStatus = check.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion"));
-                context.Logger.LogLine($"5");
-                if (completionStatus.Options.Any() && completionStatus.Options.First().Text == "Complete")
+
+
+					context.Logger.LogLine($"5");
+					if (completionStatus.Options.Any() && completionStatus.Options.First().Text == "Complete")
 					{
-                    context.Logger.LogLine($"6");
-                    //mark item tasks as complete
-                    var exTask = await serv.GetTask(117872827);
-                    context.Logger.LogLine($"{exTask.Text}");
-                    await serv.CompleteTask(117872827);
-                    context.Logger.LogLine($"7");
-                    foreach (var task in check.Tasks)
+						context.Logger.LogLine($"6");
+						//mark item tasks as complete
+						var exTask = await serv.GetTask(117872827);
+						context.Logger.LogLine($"{exTask.Text}");
+						await serv.CompleteTask(117872827,true,false);
+						context.Logger.LogLine($"7");
+						foreach (var task in check.Tasks)
 						{
-                            context.Logger.LogLine($"Iterating ... ");
-                            var completeMe = await serv.GetTask(int.Parse(task.TaskId));
-                            await serv.CompleteTask(int.Parse(completeMe.TaskId));
-                            context.Logger.LogLine($"Completed a task");
-                        //send to podio?
-                    }
+							context.Logger.LogLine($"Iterating ... ");
+							await serv.CompleteTask(int.Parse(task.TaskId),true,false);
+							context.Logger.LogLine($"Completed a task");
+							//send to podio?
+						}
 					}
-				//}
+				}
 			}
 			catch(Exception ex)
 			{
