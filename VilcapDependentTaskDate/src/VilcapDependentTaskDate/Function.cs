@@ -49,7 +49,7 @@ namespace VilcapDependentTaskDate
 					context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
 					return;
 				}
-				//When an item is updated in Workshop Modules:
+				// When an item is updated in Workshop Modules:
 				var revision = await podio.GetRevisionDifference
 				(
 					Convert.ToInt32(check.ItemId),
@@ -60,36 +60,19 @@ namespace VilcapDependentTaskDate
 				var date = check.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
 				if (firstRevision.FieldId == date.FieldId)
 				{
-					//Get referenced items
-					var refs = await podio.GetReferringItems(check.ItemId);
-                    context.Logger.LogLine($"- Got Item References");
-                    var taskListRefs = from r in refs
-									   where r.App.Name == "Task List"
-									   select r;
-                    context.Logger.LogLine($"- # of Dep Tasks: {taskListRefs.Count()}");
-                    foreach (var itemRef in taskListRefs)
+					// Get Dep Tasks
+                    var depTasks = check.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Dependent Task"));
+                    context.Logger.LogLine($"- # of Dep Tasks: {depTasks.Values.Count}");
+                    DateTime oldTime = revision.First().From.First.Value<DateTime>("start");
+                    TimeSpan diff = date.Start.Value.Subtract(oldTime);
+
+                    foreach (var depTask in depTasks.Items)
 					{
-						foreach (var item in itemRef.Items)
-						{
-                            context.Logger.LogLine($"- Iterating...");
-
-                            //DateTime oldTime = revision.First().From.First.Value<DateTime>("start");
-                            //TimeSpan diff = date.Start.Value.Subtract(oldTime);
-
-                            Item updateMe = new Item() { ItemId = item.ItemId };
-							var updateDate = updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
-							Item checkMe = await podio.GetItem(item.ItemId);
-							var moduleDate = check.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date")).Start;
-							var dependantTaskOffsetField =
-								check.Field<DurationItemField>(ids.GetFieldId("Workshop Modules|Dependent Task Offset"));
-							var duration = checkMe.Field<DurationItemField>(ids.GetFieldId("Task List|Duration"));
-							updateDate.Start = moduleDate.Value
-								.Subtract(dependantTaskOffsetField.Value.Value);
-							updateDate.End = moduleDate.Value
-								.Subtract(dependantTaskOffsetField.Value.Value)
-								.Add(duration.Value.Value);
-							await podio.UpdateItem(updateMe, true);
-						}
+                        context.Logger.LogLine($"- Iterating...");
+                        Item updateMe = depTask;
+						var taskDate = updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date")).Start.Value;
+                        taskDate = taskDate.Add(diff);
+						await podio.UpdateItem(updateMe, true);
 					}
 				}
 			}
