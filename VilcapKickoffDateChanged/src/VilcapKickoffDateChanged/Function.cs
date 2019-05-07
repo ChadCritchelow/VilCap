@@ -66,7 +66,7 @@ namespace VilcapKickoffDateChanged
                     context.Logger.LogLine($"JSON: {revision.First().From.ToString()}");
 
                     {
-                        DateTime oldTime = revision.First().From.First.Value<DateTime>("start"); // Array position of "start"
+                        DateTime oldTime = revision.First().From.First.Value<DateTime>("start");
                         TimeSpan diff = date.Start.Value.Subtract(oldTime);
                         context.Logger.LogLine($"Got Values");
                         var fieldIdToSearch = ids.GetFieldId("Workshop Modules|Day #");

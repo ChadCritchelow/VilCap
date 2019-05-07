@@ -49,7 +49,7 @@ namespace VilcapDependentTaskDate
 					context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
 					return;
 				}
-				//When an item is updated in Workshop Modules:
+				// When an item is updated in Workshop Modules:
 				var revision = await podio.GetRevisionDifference
 				(
 					Convert.ToInt32(check.ItemId),
@@ -57,36 +57,33 @@ namespace VilcapDependentTaskDate
 					check.CurrentRevision.Revision
 				);
 				var firstRevision = revision.First();
-				var date = check.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Date"));
+				var date = check.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
 				if (firstRevision.FieldId == date.FieldId)
 				{
-					//Get referenced items
-					var refs = await podio.GetReferringItems(check.ItemId);
-                    context.Logger.LogLine($"- Got Item References");
-                    var taskListRefs = from r in refs
-									   where r.App.Name == "Task List"
-									   select r;
-                    context.Logger.LogLine($"- # of Dep Tasks: {taskListRefs.Count()}");
-                    foreach (var itemRef in taskListRefs)
+					// Get Dep Tasks
+                    var depTasks = check.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Dependent Task"));
+                    context.Logger.LogLine($"- # of Dep Tasks: {depTasks.Values.Count}");
+                    DateTime oldTime = revision.First().From.First.Value<DateTime>("start");
+                    TimeSpan diff = date.Start.Value.Subtract(oldTime);
+                    context.Logger.LogLine($"Oldtime: {oldTime} Offset: {diff}");
+
+                    foreach (var depTask in depTasks.Items)
 					{
-						foreach (var item in itemRef.Items)
-						{
-                            context.Logger.LogLine($"- Iterating...");
-                            Item updateMe = new Item() { ItemId = item.ItemId };
-							var updateDate = updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
-							Item checkMe = await podio.GetItem(item.ItemId);
-							var moduleDate = check.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date")).Start;
-							var dependantTaskOffsetField =
-								check.Field<DurationItemField>(ids.GetFieldId("Workshop Modules|Dependent Task Offset"));
-							var duration = checkMe.Field<DurationItemField>(ids.GetFieldId("Task List|Duration"));
-							updateDate.Start = moduleDate.Value
-								.Subtract(dependantTaskOffsetField.Value.Value);
-							updateDate.End = moduleDate.Value
-								.Subtract(dependantTaskOffsetField.Value.Value)
-								.Add(duration.Value.Value);
-							await podio.UpdateItem(updateMe, true);
-						}
-					}
+                        Item updateMe = new Item();
+                        context.Logger.LogLine($"- Iterating...");
+                        updateMe = new Item() { ItemId = depTask.ItemId };
+                        updateMe = await podio.GetItem(depTask.ItemId);
+                        var taskDate = updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
+                        var checkDate = updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
+                        var duration = taskDate.End.GetValueOrDefault() - taskDate.Start.GetValueOrDefault();
+                        if (duration.Ticks < 0) duration = new TimeSpan(0);
+                        context.Logger.LogLine($"Old Task Time: {taskDate.Start.GetValueOrDefault()} Old Task End: {taskDate.End.GetValueOrDefault()}");
+                        taskDate.Start = checkDate.Start.GetValueOrDefault().Add(diff);
+                        taskDate.End = checkDate.Start.GetValueOrDefault().Add(diff + duration);
+                        context.Logger.LogLine($"New Task Time: {taskDate.Start.GetValueOrDefault()} New Task End: {taskDate.End.GetValueOrDefault()}");
+                        await podio.UpdateItem(updateMe, true);
+                        context.Logger.LogLine($"New Task Time: {taskDate.Start.GetValueOrDefault()} New Task End: {taskDate.End.GetValueOrDefault()}");
+                    }
 				}
 			}
 			catch(Exception ex)
