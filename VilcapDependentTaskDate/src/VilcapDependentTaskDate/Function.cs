@@ -65,18 +65,21 @@ namespace VilcapDependentTaskDate
                     context.Logger.LogLine($"- # of Dep Tasks: {depTasks.Values.Count}");
                     DateTime oldTime = revision.First().From.First.Value<DateTime>("start");
                     TimeSpan diff = date.Start.Value.Subtract(oldTime);
+                    context.Logger.LogLine($"Oldtime: {oldTime} Offset: {diff}");
 
                     foreach (var depTask in depTasks.Items)
 					{
                         context.Logger.LogLine($"- Iterating...");
-						var taskDate = depTask.Field<DateItemField>(ids.GetFieldId("Task List|Date")).Start;
-                        if (taskDate != null)
-                        {
-                            taskDate = taskDate.Value.Add(diff);
-                            await podio.UpdateItem(depTask, true);
+                        Item updateMe = depTask;
+                        if(updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date")).Start.HasValue) {
+                            var taskDate = updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date")).Start.Value;
+                            taskDate = taskDate.Add(diff);
+                            await podio.UpdateItem(updateMe, true);
                         }
-                        
-						
+                        else
+                        {
+                            context.Logger.LogLine($"- Error with {updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date")).ToString()}");
+                        }
 					}
 				}
 			}
