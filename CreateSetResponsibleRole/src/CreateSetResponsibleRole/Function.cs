@@ -12,7 +12,6 @@ using newVilcapCopyFileToGoogleDrive;
 using Saasafras;
 using System.Text.RegularExpressions;
 using PodioCore.Models.Request;
-using PodioCore.Services;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
@@ -40,44 +39,25 @@ namespace CreateSetResponsibleRole
 			lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
 			try
 			{
-                if (string.IsNullOrEmpty(lockValue))
-                {
-                    context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
-                    return;
-                }
-                //when an item is updated im applications:
-                var revision = await podio.GetRevisionDifference
-                    (
-                    Convert.ToInt32(check.ItemId),
-                    check.CurrentRevision.Revision - 1,
-                    check.CurrentRevision.Revision
-                    );
-                var firstRevision = revision.First();
-                var completionStatus = check.Field<CategoryItemField>(ids.GetFieldId("Applications|Complete This Application"));
-                if (firstRevision.FieldId == completionStatus.FieldId)
-                {
-                    if (completionStatus.Options.Any() && completionStatus.Options.First().Text == "Submit")
-                    {
-                        SearchService searchServ = new SearchService(podio);
+				if (string.IsNullOrEmpty(lockValue))
+				{
+					context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
+					return;
+				}
+				var fieldIdToSearch = ids.GetFieldId("Admin");
+				
+				FilterOptions newOptions = new FilterOptions
+				{
+					Limit=1
+				};
+				context.Logger.LogLine("Checking for duplicates");
 
-                        var fieldIdToSearch = ids.GetFieldId("Applications");
-                        var filterValue = "vilcapadmin";
-                        var filter = new Dictionary<int, object>
-                            {
-                                { fieldIdToSearch, filterValue }
-                            };
-                        FilterOptions newOptions = new FilterOptions
-                        {
-                            Filters = filter,
-                            Offset = 500
-                        };
-                        context.Logger.LogLine("Checking for duplicates");
-                        var items = await podio.FilterItems(ids.GetFieldId("Admin"), newOptions);
+				var items = await podio.FilterItems(ids.GetFieldId("Admin"), newOptions);
 				Item AdminOptionToCheck = await podio.GetItem(items.Items.First().ItemId);
 				Item CheckScheduleItem = check;
 				Item UpdateScheduleItem = new Item() { ItemId = check.ItemId };
 				List<int> contactids = new List<int>();
-				var esoMemberRole = CheckScheduleItem.Field<CategoryItemField>(ids.GetFieldId("ESO Member Role"));
+				var esoMemberRole = CheckScheduleItem.Field<CategoryItemField>(ids.GetFieldId("Task List|ESO Member Role"));
 				if (esoMemberRole.Options.Any())
 				{
 					var responsibleMember = UpdateScheduleItem.Field<ContactItemField>(ids.GetFieldId("Task List|Responsible Member"));
@@ -86,15 +66,15 @@ namespace CreateSetResponsibleRole
 					{
 						case "Programs Associate":
 
-							var programAssociates = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Program Associate(s)"));
+							var programAssociates = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Program Associate"));
 							foreach (var contact in programAssociates.Contacts)
 							{
 								contactids.Add(contact.ProfileId);
 							}
 							responsibleMember.ContactIds = contactids;
 							break;
-						case "Investments Analyst":
-							var InvestmentsAnalysts = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Investments Analyst(s)"));
+						case "Investment Analyst":
+							var InvestmentsAnalysts = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Investments Analyst"));
 							foreach (var contact in InvestmentsAnalysts.Contacts)
 							{
 								contactids.Add(contact.ProfileId);
@@ -102,7 +82,7 @@ namespace CreateSetResponsibleRole
 							responsibleMember.ContactIds = contactids;
 							break;
 						case "Program Manager":
-							var programManagers = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Program Manager(s)"));
+							var programManagers = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Program Manager"));
 							foreach (var contact in programManagers.Contacts)
 							{
 								contactids.Add(contact.ProfileId);
@@ -110,7 +90,7 @@ namespace CreateSetResponsibleRole
 							responsibleMember.ContactIds = contactids;
 							break;
 						case "Program Director":
-							var programDirectors = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Program Director(s)"));
+							var programDirectors = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Program Director"));
 							foreach (var contact in programDirectors.Contacts)
 							{
 								contactids.Add(contact.ProfileId);

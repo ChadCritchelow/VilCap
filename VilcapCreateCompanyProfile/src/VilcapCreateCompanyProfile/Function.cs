@@ -55,14 +55,14 @@ namespace VilcapCreateCompanyProfile
 					check.CurrentRevision.Revision
 					);
 				var firstRevision = revision.First();
-				var completionStatus = check.Field<CategoryItemField>(ids.GetFieldId("Applications|Application Status"));
+				var completionStatus = check.Field<CategoryItemField>(ids.GetFieldId("Applications|Complete This Application"));
 				if (firstRevision.FieldId == completionStatus.FieldId)
 				{
-					if (completionStatus.Options.Any() && completionStatus.Options.First().Text == "Application Complete")
+					if (completionStatus.Options.Any() && completionStatus.Options.First().Text == "Submit")
 					{
 						Item companyProfile = new Item();
-						companyProfile.Field<CategoryItemField>(ids.GetFieldId("Selection Process *")).OptionText = "New Application";
-						companyProfile.Field<AppItemField>(ids.GetFieldId("Application")).ItemId = check.ItemId;
+						companyProfile.Field<CategoryItemField>(ids.GetFieldId("Company Profiles|Selection Process")).OptionText = "New Application";
+						companyProfile.Field<AppItemField>(ids.GetFieldId("Company Profiles|Application")).ItemId = check.ItemId;
 						await podio.CreateItem(companyProfile, ids.GetFieldId("Company Profiles"), true);
 					}
 				}
