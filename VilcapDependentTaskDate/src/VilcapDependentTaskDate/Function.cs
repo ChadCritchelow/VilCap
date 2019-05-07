@@ -57,7 +57,7 @@ namespace VilcapDependentTaskDate
 					check.CurrentRevision.Revision
 				);
 				var firstRevision = revision.First();
-				var date = check.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Date"));
+				var date = check.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
 				if (firstRevision.FieldId == date.FieldId)
 				{
 					//Get referenced items
@@ -72,6 +72,10 @@ namespace VilcapDependentTaskDate
 						foreach (var item in itemRef.Items)
 						{
                             context.Logger.LogLine($"- Iterating...");
+
+                            //DateTime oldTime = revision.First().From.First.Value<DateTime>("start");
+                            //TimeSpan diff = date.Start.Value.Subtract(oldTime);
+
                             Item updateMe = new Item() { ItemId = item.ItemId };
 							var updateDate = updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
 							Item checkMe = await podio.GetItem(item.ItemId);
