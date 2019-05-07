@@ -69,20 +69,20 @@ namespace VilcapDependentTaskDate
 
                     foreach (var depTask in depTasks.Items)
 					{
-                        Item updateMe = new Item();
                         context.Logger.LogLine($"- Iterating...");
+                        Item updateMe = new Item();
                         updateMe = new Item() { ItemId = depTask.ItemId };
-                        Item checkMe = await podio.GetItem(depTask.ItemId);
                         var taskDate = updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
+
+                        Item checkMe = await podio.GetItem(depTask.ItemId);
                         var checkDate = checkMe.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
-                        var duration = checkDate.End.GetValueOrDefault() - checkDate.Start.GetValueOrDefault();
+                        var duration = checkDate.EndDate.GetValueOrDefault() - checkDate.StartDate.GetValueOrDefault();
                         if (duration.Ticks < 0) duration = new TimeSpan(0);
-                        context.Logger.LogLine($"Old Task Time: {checkDate.Start.GetValueOrDefault()} Old Task End: {checkDate.End.GetValueOrDefault()}");
-                        taskDate.Start = checkDate.Start.GetValueOrDefault().Add(diff);
-                        taskDate.End = taskDate.Start.GetValueOrDefault().Add(duration);
-                        context.Logger.LogLine($"New Task Time: {taskDate.Start.GetValueOrDefault()} New Task End: {taskDate.End.GetValueOrDefault()}");
+
+                        taskDate.Start = checkDate.StartDate.GetValueOrDefault().Add(diff);
+                        taskDate.End = taskDate.StartDate.GetValueOrDefault().Add(duration);
                         await podio.UpdateItem(updateMe, true);
-                        context.Logger.LogLine($"New Task Time: {taskDate.Start.GetValueOrDefault()} New Task End: {taskDate.End.GetValueOrDefault()}");
+                        context.Logger.LogLine($"New Task Start: {taskDate.Start.GetValueOrDefault()} New Task End: {taskDate.End.GetValueOrDefault()}");
                     }
 				}
 			}
