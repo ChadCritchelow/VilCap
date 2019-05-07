@@ -69,16 +69,17 @@ namespace VilcapDependentTaskDate
 
                     foreach (var depTask in depTasks.Items)
 					{
+                        Item updateMe = new Item();
                         context.Logger.LogLine($"- Iterating...");
-                        Item updateMe = new Item() { ItemId = depTask.ItemId };
-                        updateMe = await podio.GetFullItem(depTask.ItemId);
+                        updateMe = new Item() { ItemId = depTask.ItemId };
+                        //Item updateMe = await podio.GetItem(depTask.ItemId);
                         var taskDate = updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
-                        var checkDate = depTask.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
+                        var checkDate = updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
                         var duration = taskDate.End.GetValueOrDefault() - taskDate.Start.GetValueOrDefault();
                         if (duration.Ticks < 0) duration = new TimeSpan(0);
                         context.Logger.LogLine($"Old Task Time: {taskDate.Start.GetValueOrDefault()} Old Task End: {taskDate.End.GetValueOrDefault()}");
                         taskDate.Start = checkDate.Start.GetValueOrDefault().Add(diff);
-                        taskDate.End = checkDate.Start.GetValueOrDefault().Add(duration);
+                        taskDate.End = checkDate.Start.GetValueOrDefault().Add(diff + duration);
                         context.Logger.LogLine($"New Task Time: {taskDate.Start.GetValueOrDefault()} New Task End: {taskDate.End.GetValueOrDefault()}");
                         await podio.UpdateItem(updateMe, true);
                         context.Logger.LogLine($"New Task Time: {taskDate.Start.GetValueOrDefault()} New Task End: {taskDate.End.GetValueOrDefault()}");
