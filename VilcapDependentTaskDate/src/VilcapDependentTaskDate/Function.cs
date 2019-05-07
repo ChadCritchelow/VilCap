@@ -71,16 +71,11 @@ namespace VilcapDependentTaskDate
 					{
                         context.Logger.LogLine($"- Iterating...");
                         Item updateMe = depTask;
-                        if(updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date")).Start.HasValue) {
-                            var taskDate = updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date")).Start.Value;
-                            taskDate = taskDate.Add(diff);
-                            await podio.UpdateItem(updateMe, true);
-                        }
-                        else
-                        {
-                            context.Logger.LogLine($"- Error with {updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date")).ToString()}");
-                        }
-					}
+                        var taskDate = updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
+                        taskDate.Start = taskDate.Start.Value.Add(diff);
+                        taskDate.End = taskDate.End.Value.Add(diff);
+                        await podio.UpdateItem(updateMe, true);
+                    }
 				}
 			}
 			catch(Exception ex)
