@@ -77,9 +77,9 @@ namespace VilcapDependentTaskDate
                         var checkDate = checkMe.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
                         var duration = checkDate.End.GetValueOrDefault() - checkDate.Start.GetValueOrDefault();
                         if (duration.Ticks < 0) duration = new TimeSpan(0);
-                        context.Logger.LogLine($"Old Task Time: {taskDate.Start.GetValueOrDefault()} Old Task End: {taskDate.End.GetValueOrDefault()}");
+                        context.Logger.LogLine($"Old Task Time: {checkDate.Start.GetValueOrDefault()} Old Task End: {checkDate.End.GetValueOrDefault()}");
                         taskDate.Start = checkDate.Start.GetValueOrDefault().Add(diff);
-                        taskDate.End = checkDate.Start.GetValueOrDefault().Add(duration);
+                        taskDate.End = taskDate.Start.GetValueOrDefault().Add(duration);
                         context.Logger.LogLine($"New Task Time: {taskDate.Start.GetValueOrDefault()} New Task End: {taskDate.End.GetValueOrDefault()}");
                         await podio.UpdateItem(updateMe, true);
                         context.Logger.LogLine($"New Task Time: {taskDate.Start.GetValueOrDefault()} New Task End: {taskDate.End.GetValueOrDefault()}");
