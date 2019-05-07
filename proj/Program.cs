@@ -29,7 +29,6 @@ namespace newVilcapCopyFileToGoogleDrive
         static string[] Scopes = { DriveService.Scope.Drive };
         static string ApplicationName = "BrickBridgeVilCap";
         static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
-		int fieldId = 0;
 		Dictionary<string, string> dictChild;
 		Dictionary<string, string> dictMaster;
 		Dictionary<string, string> fullNames;
@@ -73,7 +72,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
 			GoogleIntegration google = new GoogleIntegration();
 			PreSurvAndExp pre = new PreSurvAndExp();
-			GetIds ids = new GetIds(dictChild,dictMaster,fullNames,e);
+			GetIds ids = new GetIds(dictChild,dictMaster,e);
             CommentService comm = new CommentService(podio);
             Survey s = new Survey();
 

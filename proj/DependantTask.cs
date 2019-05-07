@@ -25,7 +25,6 @@ namespace NewVilcapCopyFileToGoogleDrive
         int fieldId;
         Item child = new Item();
 
-        PodioCollection<Item> filter;
 		public static string StripHTML(string input)
 		{
 			return Regex.Replace(input, "<.*?>", String.Empty);

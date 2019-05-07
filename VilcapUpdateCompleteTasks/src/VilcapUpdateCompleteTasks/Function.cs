@@ -12,6 +12,7 @@ using PodioCore.Models.Request;
 using BrickBridge.Lambda.VilCap;
 using newVilcapCopyFileToGoogleDrive;
 using Saasafras;
+using Task = PodioCore.Models.Task;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
@@ -25,7 +26,7 @@ namespace VilcapUpdateCompleteTasks
 		{
 			var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
 			var podio = factory.ForClient(e.clientId, e.environmentId);
-			Item check = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
+			Item check = await podio.GetFullItem(Convert.ToInt32(e.podioEvent.item_id));
 			SaasafrasClient saasafrasClient = new SaasafrasClient(System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
 			var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
 			var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
@@ -39,14 +40,19 @@ namespace VilcapUpdateCompleteTasks
 			//Deploy Curriculum field
 			string functionName="VilcapUpdateCompleteTasks";
 			lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
-			try
+            context.Logger.LogLine($"1");
+            try
 			{
-				if (string.IsNullOrEmpty(lockValue))
+                context.Logger.LogLine($"2");
+                if (string.IsNullOrEmpty(lockValue))
 				{
 					context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
 					return;
 				}
-				TaskService serv = new TaskService(podio);
+                context.Logger.LogLine($"3");
+                TaskService serv = new TaskService(podio);
+                context.Logger.LogLine($"4");
+                /*
 				var revision = await podio.GetRevisionDifference
 					(
 					Convert.ToInt32(check.ItemId),
@@ -54,19 +60,31 @@ namespace VilcapUpdateCompleteTasks
 					check.CurrentRevision.Revision
 					);
 				var firstRevision = revision.First();
-				var completionStatus = check.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion"));
-				if (firstRevision.FieldId == completionStatus.FieldId)
+                
+                context.Logger.LogLine($"Checking Completion Status");
+                if (firstRevision.FieldId == completionStatus.FieldId)
 				{
-					if (completionStatus.Options.Any() && completionStatus.Options.First().Text == "Complete")
+                */
+                var completionStatus = check.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion"));
+                context.Logger.LogLine($"5");
+                if (completionStatus.Options.Any() && completionStatus.Options.First().Text == "Complete")
 					{
-						//mark item tasks as complete
-						foreach (var task in check.Tasks)
+                    context.Logger.LogLine($"6");
+                    //mark item tasks as complete
+                    var exTask = await serv.GetTask(117872827);
+                    context.Logger.LogLine($"{exTask.Text}");
+                    await serv.CompleteTask(117872827);
+                    context.Logger.LogLine($"7");
+                    foreach (var task in check.Tasks)
 						{
-							await serv.CompleteTask(int.Parse(task.TaskId));
-							//send to podio?
-						}
+                            context.Logger.LogLine($"Iterating ... ");
+                            var completeMe = await serv.GetTask(int.Parse(task.TaskId));
+                            await serv.CompleteTask(int.Parse(completeMe.TaskId));
+                            context.Logger.LogLine($"Completed a task");
+                        //send to podio?
+                    }
 					}
-				}
+				//}
 			}
 			catch(Exception ex)
 			{
