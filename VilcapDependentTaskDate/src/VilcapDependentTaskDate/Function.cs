@@ -72,7 +72,7 @@ namespace VilcapDependentTaskDate
                         Item updateMe = new Item();
                         context.Logger.LogLine($"- Iterating...");
                         updateMe = new Item() { ItemId = depTask.ItemId };
-                        Item updateMe = await podio.GetItem(depTask.ItemId);
+                        updateMe = await podio.GetItem(depTask.ItemId);
                         var taskDate = updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
                         var checkDate = updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
                         var duration = taskDate.End.GetValueOrDefault() - taskDate.Start.GetValueOrDefault();
