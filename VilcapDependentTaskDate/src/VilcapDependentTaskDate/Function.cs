@@ -70,12 +70,15 @@ namespace VilcapDependentTaskDate
                     foreach (var depTask in depTasks.Items)
 					{
                         context.Logger.LogLine($"- Iterating...");
-                        Item updateMe = new Item();
+                        Item updateMe = new Item() { ItemId = depTask.ItemId };
                         updateMe = await podio.GetItem(depTask.ItemId);
                         var taskDate = updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
+                        context.Logger.LogLine($"Old Task Time: {taskDate.Start.GetValueOrDefault()} Old Task End: {taskDate.End.GetValueOrDefault()}");
                         taskDate.Start = taskDate.Start.GetValueOrDefault().Add(diff);
                         taskDate.End = taskDate.End.GetValueOrDefault().Add(diff);
+                        context.Logger.LogLine($"New Task Time: {taskDate.Start.GetValueOrDefault()} New Task End: {taskDate.End.GetValueOrDefault()}");
                         await podio.UpdateItem(updateMe, true);
+                        context.Logger.LogLine($"New Task Time: {taskDate.Start.GetValueOrDefault()} New Task End: {taskDate.End.GetValueOrDefault()}");
                     }
 				}
 			}
