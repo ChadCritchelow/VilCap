@@ -22,6 +22,7 @@ namespace VilcapUpdateCompleteTasks
     public class Function
     {
 		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
+
 		public async System.Threading.Tasks.Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
 		{
 			var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
@@ -30,28 +31,20 @@ namespace VilcapUpdateCompleteTasks
 			SaasafrasClient saasafrasClient = new SaasafrasClient(System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
 			var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
 			var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
-			var fullNames = new Dictionary<string, string>()
-			{
-				{"toolkittemplate3", "VC Toolkit Template 3" }
-			};
 			string lockValue;
-			GetIds ids = new GetIds(dictChild, dictMaster, fullNames, e);
-			//Make sure to implement by checking to see if Deploy Curriculum has just changed
-			//Deploy Curriculum field
+			GetIds ids = new GetIds(dictChild, dictMaster, e);
+
 			string functionName="VilcapUpdateCompleteTasks";
 			lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
             context.Logger.LogLine($"1");
             try
 			{
-                context.Logger.LogLine($"2");
                 if (string.IsNullOrEmpty(lockValue))
 				{
 					context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
 					return;
 				}
-                context.Logger.LogLine($"3");
                 TaskService serv = new TaskService(podio);
-                context.Logger.LogLine($"4");
                 
 				var revision = await podio.GetRevisionDifference
 					(
@@ -63,24 +56,21 @@ namespace VilcapUpdateCompleteTasks
                 
                 context.Logger.LogLine($"Checking Completion Status");
 				var completionStatus = check.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion"));
+				context.Logger.LogLine("Checking to see if completion was the last field to be updated");
 				if (firstRevision.FieldId == completionStatus.FieldId)
 				{
-
-
-					context.Logger.LogLine($"5");
+					context.Logger.LogLine("Checking to see if completion==Complete");
 					if (completionStatus.Options.Any() && completionStatus.Options.First().Text == "Complete")
 					{
-						context.Logger.LogLine($"6");
 						//mark item tasks as complete
-						var exTask = await serv.GetTask(117872827);
-						context.Logger.LogLine($"{exTask.Text}");
-						await serv.CompleteTask(117872827,true,false);
-						context.Logger.LogLine($"7");
-						foreach (var task in check.Tasks)
+						var r = $"item:{check.ItemId}";
+						var ts = await serv.GetTasks(reference: r);
+						context.Logger.LogLine($"Iterating thru {ts.Count()} task(s)");
+						foreach (var task in ts)
 						{
-							context.Logger.LogLine($"Iterating ... ");
+							context.Logger.LogLine($"Attempting to complete task with ID: {task.TaskId}");
 							await serv.CompleteTask(int.Parse(task.TaskId),true,false);
-							context.Logger.LogLine($"Completed a task");
+							context.Logger.LogLine($"Completed task");
 							//send to podio?
 						}
 					}

@@ -24,6 +24,11 @@ namespace newVilcapCopyFileToGoogleDrive
 			fullNames = _fullNames;
 			ev = _ev;
 		}
+		/// <summary>
+		/// This method returns the field or AppId related to the given key parameter
+		/// </summary>
+		/// <param name="key">Can contain 1 or 2 parts seperated by a '|'. If you are wanting an App ID use only the name of the app. If you are wanting a Field ID use the name of the app, followed by '|', followed by the field label name.</param>
+		/// <returns></returns>
 		public int GetFieldId(string key)
 		{
 			var parts = key.Split('|');

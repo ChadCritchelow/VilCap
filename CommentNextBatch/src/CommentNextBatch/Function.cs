@@ -20,22 +20,17 @@ namespace CommentNextBatch
 	public class Function
 	{
 		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
-		public async System.Threading.Tasks.Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context, Comment commentToCheck)
+		public async System.Threading.Tasks.Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
 		{
+			context.Logger.LogLine(Newtonsoft.Json.JsonConvert.SerializeObject(e));
 			var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
 			var podio = factory.ForClient(e.clientId, e.environmentId);
 			Item check = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
 			SaasafrasClient saasafrasClient = new SaasafrasClient(System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
 			var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
 			var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
-			var fullNames = new Dictionary<string, string>()
-			{
-				{"toolkittemplate3", "VC Toolkit Template 3" }
-			};
 			string lockValue;
-			GetIds ids = new GetIds(dictChild, dictMaster, fullNames, e);
-			//Make sure to implement by checking to see if Deploy Curriculum has just changed
-			//Deploy Curriculum field
+			GetIds ids = new GetIds(dictChild, dictMaster, e);
 			string functionName="CommentNextBatch";
 			lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
 			try
@@ -87,7 +82,7 @@ namespace CommentNextBatch
 			{
 				await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
 			}
-
+			
 	}
 	}
 }

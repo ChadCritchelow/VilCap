@@ -30,12 +30,8 @@ namespace VilcapShareWithEnt
 			SaasafrasClient saasafrasClient = new SaasafrasClient(System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
 			var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
 			var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
-			var fullNames = new Dictionary<string, string>()
-			{
-				{"toolkittemplate3", "VC Toolkit Template 3" }
-			};
 			string lockValue;
-			GetIds ids = new GetIds(dictChild, dictMaster, fullNames, e);
+			GetIds ids = new GetIds(dictChild, dictMaster, e);
 			//Make sure to implement by checking to see if Deploy Curriculum has just changed
 			//Deploy Curriculum field
 			string functionName="VilcapShareWithEnt";
