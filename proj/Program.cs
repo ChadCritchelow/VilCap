@@ -81,7 +81,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 {"useducation2019", "US Education 2019" },
                 {"wepowerenvironment" ,"WePower" },
                 {"middlegameventures", "Middlegame Ventures" },
-                {"testuseducation2019", "TEST - US Education 2019" }
+                //{"testuseducation2019", "TEST - US Education 2019" }
             };
 
 			string serviceAcccount = System.Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
