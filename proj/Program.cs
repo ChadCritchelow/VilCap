@@ -56,33 +56,33 @@ namespace newVilcapCopyFileToGoogleDrive
 			dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
 			context.Logger.LogLine("Got dictionary");
 			var functionName = "newVilcapCopyFileToGoogleDrive";
-			fullNames = new Dictionary<string, string>()
-			{
-				{"andela" ,"Andela"},
-				{"anza" ,"Anza"},
-				{"bluemoon" ,"blueMoon"},
-				{"energygeneration" ,"Energy Generation"},
-                {"energygeneration2", "Energy Generation 2" },
-				{"entreprenarium" ,"Entreprenarium"},
-				{"etrilabs" ,"Etrilabs"},
-				{"globalentrepreneurshipnetwork" ,"Global Entrepreneurship Network (GEN) Freetown"},
-				{"growthmosaic" ,"Growth Mosaic"},
-				{"jokkolabs" ,"Jokkolabs"},
-				{"privatesectorhealthallianceofnigeria" ,"Private Sector Health Alliance of Nigeria"},
-				{"southernafricaventurepartnership" ,"Southern Africa Venture Partnership (SAVP)"},
-				{"suguba" ,"Suguba"},
-				{"sycomoreventure" ,"Sycomore Venture"},
-				{"theinnovationvillage" ,"The Innovation Village"},
-				{"universityofbritishcolumbia" ,"University of British Columbia"},
-				{"venturesplatform" ,"Ventures Platform"},
-				{"toolkittemplate" ,"VC Toolkit Template"},
-                {"toolkittemplate2", "VC Toolkit Template 2" },
-                {"usfintech2019" ,"US Fintech 2019" },
-                {"useducation2019", "US Education 2019" },
-                {"wepowerenvironment" ,"WePower" },
-                {"middlegameventures", "Middlegame Ventures" },
-                {"testuseducation2019", "TEST - US Education 2019" }
-            };
+			//fullNames = new Dictionary<string, string>()
+			//{
+			//	{"andela" ,"Andela"},
+			//	{"anza" ,"Anza"},
+			//	{"bluemoon" ,"blueMoon"},
+			//	{"energygeneration" ,"Energy Generation"},
+   //             {"energygeneration2", "Energy Generation 2" },
+			//	{"entreprenarium" ,"Entreprenarium"},
+			//	{"etrilabs" ,"Etrilabs"},
+			//	{"globalentrepreneurshipnetwork" ,"Global Entrepreneurship Network (GEN) Freetown"},
+			//	{"growthmosaic" ,"Growth Mosaic"},
+			//	{"jokkolabs" ,"Jokkolabs"},
+			//	{"privatesectorhealthallianceofnigeria" ,"Private Sector Health Alliance of Nigeria"},
+			//	{"southernafricaventurepartnership" ,"Southern Africa Venture Partnership (SAVP)"},
+			//	{"suguba" ,"Suguba"},
+			//	{"sycomoreventure" ,"Sycomore Venture"},
+			//	{"theinnovationvillage" ,"The Innovation Village"},
+			//	{"universityofbritishcolumbia" ,"University of British Columbia"},
+			//	{"venturesplatform" ,"Ventures Platform"},
+			//	{"toolkittemplate" ,"VC Toolkit Template"},
+   //             {"toolkittemplate2", "VC Toolkit Template 2" },
+   //             {"usfintech2019" ,"US Fintech 2019" },
+   //             {"useducation2019", "US Education 2019" },
+   //             {"wepowerenvironment" ,"WePower" },
+   //             {"middlegameventures", "Middlegame Ventures" },
+   //             {"testuseducation2019", "TEST - US Education 2019" }
+   //         };
 
 			string serviceAcccount = System.Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
 			var cred = GoogleCredential.FromJson(serviceAcccount).CreateScoped(Scopes).UnderlyingCredential;
@@ -97,7 +97,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
 			GoogleIntegration google = new GoogleIntegration();
 			PreSurvAndExp pre = new PreSurvAndExp();
-			GetIds ids = new GetIds(dictChild,dictMaster,fullNames,e);
+			GetIds ids = new GetIds(dictChild,dictMaster/*,fullNames*/,e);
             CommentService comm = new CommentService(podio);
             Survey s = new Survey();
 
