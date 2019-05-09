@@ -57,7 +57,8 @@ namespace newVilcapCopyFileToGoogleDrive
 			var functionName = "newVilcapCopyFileToGoogleDrive";
 			fullNames = new Dictionary<string, string>()
 			{
-                {"toolkittemplate3", "VC Toolkit Template 3" }
+                {"toolkittemplate3", "VC Toolkit Template 3" },
+                {"testuseducation2019", "TEST - US Education 2019" }
             };
 
 			string serviceAcccount = System.Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
