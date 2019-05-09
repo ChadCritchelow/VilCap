@@ -21,6 +21,10 @@ namespace newVilcapCopyFileToGoogleDrive
             dictMaster = _dictMaster;
             fullNames = new Dictionary<string, string>()
             {
+                // Newer
+                {"testuseducation2019", "TEST - US Education 2019" },
+                {"toolkittemplate3", "VC Toolkit Template 3" },
+                // Older
                 {"andela" ,"Andela"},
                 {"anza" ,"Anza"},
                 {"bluemoon" ,"blueMoon"},
@@ -43,8 +47,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 {"usfintech2019" ,"US Fintech 2019" },
                 {"useducation2019", "US Education 2019" },
                 {"wepowerenvironment" ,"WePower" },
-                {"middlegameventures", "Middlegame Ventures" },
-                {"testuseducation2019", "TEST - US Education 2019" }
+                {"middlegameventures", "Middlegame Ventures" }
             };
             ev = _ev;
         }
