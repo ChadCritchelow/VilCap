@@ -57,8 +57,34 @@ namespace newVilcapCopyFileToGoogleDrive
 			var functionName = "newVilcapCopyFileToGoogleDrive";
 			fullNames = new Dictionary<string, string>()
 			{
-                {"toolkittemplate3", "VC Toolkit Template 3" }
-            };
+                // v3
+                {"toolkittemplate3", "VC Toolkit Template 3" },
+                {"testuseducation2019", "TEST - US Education 2019" },
+                // v1-2
+                {"andela" ,"Andela"},
+                {"anza" ,"Anza"},
+                {"bluemoon" ,"blueMoon"},
+                {"energygeneration" ,"Energy Generation"},
+                {"energygeneration2", "Energy Generation 2" },
+                {"entreprenarium" ,"Entreprenarium"},
+                {"etrilabs" ,"Etrilabs"},
+                {"globalentrepreneurshipnetwork" ,"Global Entrepreneurship Network (GEN) Freetown"},
+                {"growthmosaic" ,"Growth Mosaic"},
+                {"jokkolabs" ,"Jokkolabs"},
+                {"privatesectorhealthallianceofnigeria" ,"Private Sector Health Alliance of Nigeria"},
+                {"southernafricaventurepartnership" ,"Southern Africa Venture Partnership (SAVP)"},
+                {"suguba" ,"Suguba"},
+                {"sycomoreventure" ,"Sycomore Venture"},
+                {"theinnovationvillage" ,"The Innovation Village"},
+                {"universityofbritishcolumbia" ,"University of British Columbia"},
+                {"venturesplatform" ,"Ventures Platform"},
+                {"toolkittemplate" ,"VC Toolkit Template"},
+                {"toolkittemplate2", "VC Toolkit Template 2" },
+                {"usfintech2019" ,"US Fintech 2019" },
+                {"useducation2019", "US Education 2019" },
+                {"wepowerenvironment" ,"WePower" },
+                {"middlegameventures", "Middlegame Ventures" }
+            }; 
 
 			string serviceAcccount = System.Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
 			var cred = GoogleCredential.FromJson(serviceAcccount).CreateScoped(Scopes).UnderlyingCredential;

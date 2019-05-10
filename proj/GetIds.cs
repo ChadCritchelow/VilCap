@@ -21,7 +21,8 @@ namespace newVilcapCopyFileToGoogleDrive
 			dictMaster = _dictMaster;
             fullNames = new Dictionary<string, string>()
             {
-                {"toolkittemplate3", "VC Toolkit Template 3" }
+                {"toolkittemplate3", "Toolkit Template 3" },
+                {"testuseducation2019", "TEST - US Education 2019" }
             };
             envId = _envId;
 		}
