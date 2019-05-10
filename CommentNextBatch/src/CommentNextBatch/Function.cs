@@ -18,6 +18,10 @@ using PodioCore.Comments;
 
 namespace CommentNextBatch
 {
+	public class CurrentEnvironment
+	{
+		public string environmentId { get; set; }
+	}
 	public class PodioCommentEvent
 	{
 		public string type { get; set; }
@@ -26,11 +30,11 @@ namespace CommentNextBatch
 	}
 	public class RoutedCommentEvent
 	{
+		public CurrentEnvironment currentEnvironment { get; set; }
 		public PodioCommentEvent podioEvent { get; set; }
 		public string clientId { get; set; }
 		public string version { get; set; }
 		public string appId { get; set; }
-		public string envId { get; set; }
 	}
 	public class Function
 	{
@@ -38,14 +42,15 @@ namespace CommentNextBatch
 		public async System.Threading.Tasks.Task FunctionHandler(RoutedCommentEvent e, ILambdaContext context)
 		{
 			context.Logger.LogLine(Newtonsoft.Json.JsonConvert.SerializeObject(e));
-			var factory = new AuditedPodioClientFactory(e.appId, e.version, e.clientId, e.envId);
-			var podio = factory.ForClient(e.clientId, e.envId);
+			context.Logger.LogLine(Newtonsoft.Json.JsonConvert.SerializeObject(e));
+			var factory = new AuditedPodioClientFactory(e.appId, e.version, e.clientId, e.currentEnvironment.environmentId);
+			var podio = factory.ForClient(e.clientId, e.currentEnvironment.environmentId);
 			Item check = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
 			SaasafrasClient saasafrasClient = new SaasafrasClient(System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
-			var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.envId, e.appId, e.version);
+			var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.currentEnvironment.environmentId, e.appId, e.version);
 			var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
 			string lockValue;
-			GetIds ids = new GetIds(dictChild, dictMaster, e.envId);
+			GetIds ids = new GetIds(dictChild, dictMaster, e.currentEnvironment.environmentId);
 			string functionName="CommentNextBatch";
 			lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
 			try
@@ -57,7 +62,7 @@ namespace CommentNextBatch
 				}
 				CommentService serve = new CommentService(podio);
 				var commentToCheck = await serve.GetComment(int.Parse(e.podioEvent.comment_id));
-				
+				int fieldId = 0;
 				var commentPieces = commentToCheck.Value.Split(" ");
 				var type = commentPieces[0];
 				var batch = commentPieces[2];
@@ -69,6 +74,7 @@ namespace CommentNextBatch
 					try
 					{
 						int.TryParse(batch, out currentBatch);
+						context.Logger.LogLine($"Current batch: {currentBatch}");
 					}
 					catch (Exception ex)
 					{
@@ -79,15 +85,28 @@ namespace CommentNextBatch
 					{
 						case "WS":
 							context.Logger.LogLine("Type==WS");
-							var wsBatchField = updateMe.Field<CategoryItemField>(ids.GetFieldId("Admin|WS Batch"));
-							wsBatchField.OptionText = (currentBatch++).ToString();
+							context.Logger.LogLine("Getting Field ID");
+							fieldId = ids.GetFieldId("Admin|WS Batch");
+							context.Logger.LogLine($"Field ID: {fieldId}");
+							var wsBatchField = updateMe.Field<CategoryItemField>(fieldId);
+							context.Logger.LogLine("Got Field");
+							context.Logger.LogLine("Adding 1 to current batch");
+							wsBatchField.OptionText = (++currentBatch).ToString();
+							context.Logger.LogLine($"New Batch Value: {currentBatch}");
 							break;
 						case "TL":
 							context.Logger.LogLine("Type==TL");
-							var tlBatchField = updateMe.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch"));
-							tlBatchField.OptionText = (currentBatch++).ToString();
+							context.Logger.LogLine("Getting Field ID");
+							fieldId = ids.GetFieldId("Admin|TL Batch");
+							context.Logger.LogLine($"Field ID: {fieldId}");
+							var tlBatchField = updateMe.Field<CategoryItemField>(fieldId);
+							context.Logger.LogLine("Got Field");
+							context.Logger.LogLine("Adding 1 to current batch");
+							tlBatchField.OptionText = (++currentBatch).ToString();
+							context.Logger.LogLine($"New Batch Value: {currentBatch}");
 							break;
 					}
+					context.Logger.LogLine($"Field count on item we're updating: {updateMe.Fields.Count()}");
 					await podio.UpdateItem(updateMe, true);
 
 				}
