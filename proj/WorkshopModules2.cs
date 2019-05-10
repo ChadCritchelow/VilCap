@@ -186,8 +186,8 @@ namespace newVilcapCopyFileToGoogleDrive
                 var childTasks = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Dependent Task"));
                 var masterTasks = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task"));
                 var taskOffset = master.Field<DurationItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task Offset"));
-                var masterMats = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Auxillary Materials")); // PLACEHOLDER
-                var childMats = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Auxillary Materials")); // PLACEHOLDER
+                //var masterMats = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Auxillary Materials")); // PLACEHOLDER
+                //var childMats = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Auxillary Materials")); // PLACEHOLDER
                 
                 #endregion
 
