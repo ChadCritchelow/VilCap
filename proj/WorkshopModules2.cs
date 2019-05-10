@@ -136,7 +136,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 #region // Assign Fields //
 
-                fieldId = ids.GetFieldId("VC Administration|Content Curation |Workshop Detail Title");
+                fieldId = ids.GetFieldId("VC Administration|Content Curation |Module Name");
                 var titleMaster = master.Field<TextItemField>(fieldId);
                 if (titleMaster.Value != null)
                 {
@@ -186,8 +186,8 @@ namespace newVilcapCopyFileToGoogleDrive
                 var childTasks = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Dependent Task"));
                 var masterTasks = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task"));
                 var taskOffset = master.Field<DurationItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task Offset"));
-                var masterMats = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Auxillary Materials")); // PLACEHOLDER
-                var childMats = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Auxillary Materials")); // PLACEHOLDER
+                //var masterMats = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Auxillary Materials")); // PLACEHOLDER
+                //var childMats = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Auxillary Materials")); // PLACEHOLDER
                 
                 #endregion
 
@@ -220,7 +220,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 #region // GDrive Integration //
 
-                fieldId = ids.GetFieldId("VC Administration|Content Curation |GDrive File Name");
+                fieldId = ids.GetFieldId("VC Administration|Content Curation |GDrive Link");
                 var embedMaster = master.Field<EmbedItemField>(fieldId);
                 fieldId = ids.GetFieldId("Workshop Modules|Link to Material");
                 var embedChild = child.Field<EmbedItemField>(fieldId);
@@ -374,10 +374,10 @@ namespace newVilcapCopyFileToGoogleDrive
                 }
 
                 // Aux Material Generation//
-                foreach (var masterMat in masterMats.Items)
-                {
-                    //await AuxMats.CreateAuxMats(context, podio, check, e, service, ids, google, masterMat);      
-                }
+                //foreach (var masterMat in masterMats.Items)
+                //{
+                //    //await AuxMats.CreateAuxMats(context, podio, check, e, service, ids, google, masterMat);      
+                //}
 
              #region // Create WorkshopModule Podio Item //
                     context.Logger.LogLine($"Calling Podio");
