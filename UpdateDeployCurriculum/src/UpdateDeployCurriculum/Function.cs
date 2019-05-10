@@ -40,19 +40,32 @@ namespace UpdateDeployCurriculum
 					context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
 					return;
 				}
-				var deployField = check.Field<CategoryItemField>(ids.GetFieldId("Admin|Deploy Curriculum"));
 
-				var revision = await podio.GetRevisionDifference(Convert.ToInt32(check.ItemId), check.CurrentRevision.Revision - 1, check.CurrentRevision.Revision);
-				var firstRevision = revision.First();
-				if (firstRevision.FieldId == deployField.FieldId&&deployField.Options.Any() && deployField.Options.First().Text == "Deploy")
-				{
-					//item to update:
-					Item update = new Item() { ItemId = check.ItemId };
-					//WS Batch field
-					var wsBatch = update.Field<CategoryItemField>(ids.GetFieldId("Admin|WS Batch"));
-					wsBatch.OptionText = "1";
-					await podio.UpdateItem(update, true);
-				}
+                var revision = await podio.GetRevisionDifference(Convert.ToInt32(check.ItemId), check.CurrentRevision.Revision - 1, check.CurrentRevision.Revision);
+                var firstRevision = revision.First();
+                switch (firstRevision.Label)
+                {
+                    case "Deploy Task List":
+                        var deployField = check.Field<CategoryItemField>(ids.GetFieldId("Admin|Deploy Task List"));
+                        if (firstRevision.FieldId == deployField.FieldId && deployField.Options.Any() && deployField.Options.First().Text == "Deploy")
+                        {
+                            Item update = new Item() { ItemId = check.ItemId };
+                            var tlBatch = update.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch"));
+                            tlBatch.OptionText = "1";
+                            await podio.UpdateItem(update, true);
+                        }
+                        break;
+                    case "Deploy Curriculum":
+                        deployField = check.Field<CategoryItemField>(ids.GetFieldId("Admin|Deploy Curriculum"));
+                        if (firstRevision.FieldId == deployField.FieldId && deployField.Options.Any() && deployField.Options.First().Text == "Deploy")
+                        {
+                            Item update = new Item() { ItemId = check.ItemId };
+                            var wsBatch = update.Field<CategoryItemField>(ids.GetFieldId("Admin|WS Batch"));
+                            wsBatch.OptionText = "1";
+                            await podio.UpdateItem(update, true);
+                        }
+                        break;
+                }
 			}
 			catch(Exception ex)
 			{
