@@ -374,10 +374,10 @@ namespace newVilcapCopyFileToGoogleDrive
                 }
 
                 // Aux Material Generation//
-                foreach (var masterMat in masterMats.Items)
-                {
-                    //await AuxMats.CreateAuxMats(context, podio, check, e, service, ids, google, masterMat);      
-                }
+                //foreach (var masterMat in masterMats.Items)
+                //{
+                //    //await AuxMats.CreateAuxMats(context, podio, check, e, service, ids, google, masterMat);      
+                //}
 
              #region // Create WorkshopModule Podio Item //
                     context.Logger.LogLine($"Calling Podio");
