@@ -80,13 +80,14 @@ namespace CommentNextBatch
 						case "WS":
 							context.Logger.LogLine("Type==WS");
 							var wsBatchField = updateMe.Field<CategoryItemField>(ids.GetFieldId("Admin|WS Batch"));
-							wsBatchField.OptionText = (currentBatch++).ToString();
-							break;
+                            wsBatchField.OptionText = $"{++currentBatch}"; //(currentBatch++).ToString();
+
+                            break;
 						case "TL":
 							context.Logger.LogLine("Type==TL");
 							var tlBatchField = updateMe.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch"));
-							tlBatchField.OptionText = (currentBatch++).ToString();
-							break;
+							tlBatchField.OptionText = $"{++currentBatch}"; //(currentBatch++).ToString();
+                            break;
 					}
 					await podio.UpdateItem(updateMe, true);
 
