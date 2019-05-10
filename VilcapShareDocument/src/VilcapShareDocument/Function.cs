@@ -31,7 +31,7 @@ namespace VilcapShareDocument
 			var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
 			var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
 			string lockValue;
-			GetIds ids = new GetIds(dictChild, dictMaster, e);
+			GetIds ids = new GetIds(dictChild, dictMaster, e.environmentId);
 			//Make sure to implement by checking to see if Deploy Curriculum has just changed
 			//Deploy Curriculum field
 			string functionName = "VilcapShareDocument";
