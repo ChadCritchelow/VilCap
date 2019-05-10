@@ -136,7 +136,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 #region // Assign Fields //
 
-                fieldId = ids.GetFieldId("VC Administration|Content Curation |Workshop Detail Title");
+                fieldId = ids.GetFieldId("VC Administration|Content Curation |Module Name");
                 var titleMaster = master.Field<TextItemField>(fieldId);
                 if (titleMaster.Value != null)
                 {
@@ -220,7 +220,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 #region // GDrive Integration //
 
-                fieldId = ids.GetFieldId("VC Administration|Content Curation |GDrive File Name");
+                fieldId = ids.GetFieldId("VC Administration|Content Curation |GDrive Link");
                 var embedMaster = master.Field<EmbedItemField>(fieldId);
                 fieldId = ids.GetFieldId("Workshop Modules|Link to Material");
                 var embedChild = child.Field<EmbedItemField>(fieldId);
