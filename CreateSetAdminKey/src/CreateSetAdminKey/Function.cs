@@ -29,7 +29,7 @@ namespace CreateSetAdminKey
 			var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
 			var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
 			string lockValue;
-			GetIds ids = new GetIds(dictChild, dictMaster, e);
+			GetIds ids = new GetIds(dictChild, dictMaster, e.environmentId);
 			string functionName="CreateSetAdminKey";
 			lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
 			try

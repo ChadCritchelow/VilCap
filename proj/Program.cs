@@ -72,7 +72,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
 			GoogleIntegration google = new GoogleIntegration();
 			PreSurvAndExp pre = new PreSurvAndExp();
-			GetIds ids = new GetIds(dictChild,dictMaster,e);
+			GetIds ids = new GetIds(dictChild,dictMaster,e.environmentId);
             CommentService comm = new CommentService(podio);
             Survey s = new Survey();
 
