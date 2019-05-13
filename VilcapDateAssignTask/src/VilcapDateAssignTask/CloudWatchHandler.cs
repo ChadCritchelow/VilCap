@@ -23,7 +23,7 @@ namespace VilcapDateAssignTask
     {
         public async Task FunctionHandler(Amazon.Lambda.CloudWatchEvents.ScheduledEvents.ScheduledEvent cwe, ILambdaContext context)
         {
-            var t = Newtonsoft.Json.JsonConvert.DeserializeObject<object>(cwe.Detail.ToString());
+            //var t = Newtonsoft.Json.JsonConvert.DeserializeObject<object>(cwe.Detail.ToString());
             RoutedPodioEvent e = new RoutedPodioEvent();
             e.clientId = "toolkittemplate3";
             e.environmentId = "toolkittemplate3";
