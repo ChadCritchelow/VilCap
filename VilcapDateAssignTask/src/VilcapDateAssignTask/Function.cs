@@ -26,7 +26,7 @@ namespace VilcapDateAssignTask
 		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
 
 		//public async void ScheduledFunctionHandler(Saasafras.Model.CloudWatchEvent e, ILambdaContext context)
-        public async void ScheduledFunctionHandler(Amazon.Lambda.CloudWatchEvents.ScheduledEvents.ScheduledEvent e, ILambdaContext context)
+        public async void FunctionHandler(Amazon.Lambda.CloudWatchEvents.ScheduledEvents.ScheduledEvent e, ILambdaContext context)
         {
             context.Logger.LogLine($"---{e.Id}");
 			//var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
