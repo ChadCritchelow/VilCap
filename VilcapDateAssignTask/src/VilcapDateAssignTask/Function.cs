@@ -66,17 +66,16 @@ namespace VilcapDateAssignTask
                 TaskService taskServ = new TaskService(podio);
 
                 var fieldIdToSearch = ids.GetFieldId("Task List|Date");
-                var filterValue = DateTime.Now.AddDays(7);
-                var filter = new Dictionary<int, DateTime>
+                var filterValue = DateTime.Now.AddDays(7).Ticks;
+                var filter = new Dictionary<int, object>
                             {
                                 { fieldIdToSearch, filterValue }
                             };
                 FilterOptions newOptions = new FilterOptions
                 {
                     Filters = filter,
-                    Offset = 500
                 };
-                context.Logger.LogLine("Checking for duplicates");
+                context.Logger.LogLine("Checking for duplicates.");
 
                 var filteredItems = await podio.FilterItems(ids.GetFieldId("Task List"), newOptions);
                 context.Logger.LogLine("Initial Filter Successful");
