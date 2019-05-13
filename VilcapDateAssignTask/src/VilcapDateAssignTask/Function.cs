@@ -67,7 +67,7 @@ namespace VilcapDateAssignTask
 
                 var fieldIdToSearch = ids.GetFieldId("Task List|Date");
                 var filterValue = DateTime.Now.AddDays(7);
-                var filter = new Dictionary<int, object>
+                var filter = new Dictionary<int, DateTime>
                             {
                                 { fieldIdToSearch, filterValue }
                             };
@@ -79,6 +79,7 @@ namespace VilcapDateAssignTask
                 context.Logger.LogLine("Checking for duplicates");
 
                 var filteredItems = await podio.FilterItems(ids.GetFieldId("Task List"), newOptions);
+                context.Logger.LogLine("Initial Filter Successful");
 
                 var furtherFilteredItems = from f in filteredItems.Items
                                            where
