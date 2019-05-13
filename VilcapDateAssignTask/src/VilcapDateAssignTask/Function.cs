@@ -36,7 +36,7 @@ namespace VilcapDateAssignTask
             Amazon.Lambda.CloudWatchEvents.ScheduledEvents.Detail detail = new Amazon.Lambda.CloudWatchEvents.ScheduledEvents.Detail();
             detail = cw.Detail;
             context.Logger.LogLine($"---{cw.Id}");
-            context.Logger.LogLine($"---{detail.ToString()}");
+            //context.Logger.LogLine($"---{detail.ToString()}");
 
             RoutedPodioEvent e = new RoutedPodioEvent();
             e.clientId = "toolkittemplate3";
