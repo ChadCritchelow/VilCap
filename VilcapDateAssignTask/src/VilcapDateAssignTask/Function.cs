@@ -15,6 +15,7 @@ using System.Text.RegularExpressions;
 using PodioCore.Models.Request;
 using PodioCore.Services;
 using Task = System.Threading.Tasks.Task;
+using Newtonsoft.Json;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
@@ -25,86 +26,95 @@ namespace VilcapDateAssignTask
     {
 
 		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
+        Dictionary<string, string> dictChild;
+        Dictionary<string, string> dictMaster;
+        Dictionary<string, string> fullNames;
 
-		//public async void ScheduledFunctionHandler(Saasafras.Model.CloudWatchEvent e, ILambdaContext context)
-        public async Task FunctionHandler(Amazon.Lambda.CloudWatchEvents.ScheduledEvents.ScheduledEvent e, ILambdaContext context)
+        //public async void ScheduledFunctionHandler(Saasafras.Model.CloudWatchEvent e, ILambdaContext context)
+        public async Task FunctionHandler(Amazon.Lambda.CloudWatchEvents.ScheduledEvents.ScheduledEvent cw, ILambdaContext context)
         {
-            context.Logger.LogLine($"---{e.Id}");
-            context.Logger.LogLine($"---{e.Detail}");
+            Amazon.Lambda.CloudWatchEvents.ScheduledEvents.Detail detail = new Amazon.Lambda.CloudWatchEvents.ScheduledEvents.Detail();
+            detail = cw.Detail;
+            context.Logger.LogLine($"---{cw.Id}");
+            context.Logger.LogLine($"---{detail.ToString()}");
 
-            //var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
-            //var podio = factory.ForClient(e.clientId, e.environmentId);
-            //Item check = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
+            RoutedPodioEvent e = new RoutedPodioEvent();
+            e.clientId = "toolkittemplate3";
+            e.environmentId = "toolkittemplate3";
+            e.solutionId = "vilcap";
+            e.version = "0.0";
+
+            var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
+            var podio = factory.ForClient(e.clientId, e.environmentId);
             SaasafrasClient saasafrasClient = new SaasafrasClient(System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
-            //var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
+            var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
             var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
-            return;
-            //string lockValue;
-            //GetIds ids = new GetIds(dictChild, dictMaster, e.environmentId);
-            ////Make sure to implement by checking to see if Deploy Curriculum has just changed
-            ////Deploy Curriculum field
-            //string functionName="VilcapDateAssignTask";
-            //lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
-            //try
-            //{
-            //	if (string.IsNullOrEmpty(lockValue))
-            //	{
-            //		context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
-            //		return;
-            //	}
+            string lockValue;
+            GetIds ids = new GetIds(dictChild, dictMaster, e.environmentId);
+            //Make sure to implement by checking to see if Deploy Curriculum has just changed
+            //Deploy Curriculum field
+            string functionName = "VilcapDateAssignTask";
+            lockValue = await saasafrasClient.LockFunction(functionName, cw.Time.ToString());
+            try
+            {
+                if (string.IsNullOrEmpty(lockValue))
+                {
+                    context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {cw.Time.ToString()}");
+                    return;
+                }
 
-            //	TaskService taskServ = new TaskService(podio);
+                TaskService taskServ = new TaskService(podio);
 
-            //	var fieldIdToSearch = ids.GetFieldId("Task List|Date");
-            //	var filterValue = DateTime.Now.AddDays(7);
-            //	var filter = new Dictionary<int, object>
-            //				{
-            //					{ fieldIdToSearch, filterValue }
-            //				};
-            //	FilterOptions newOptions = new FilterOptions
-            //	{
-            //		Filters = filter,
-            //		Offset = 500
-            //	};
-            //	context.Logger.LogLine("Checking for duplicates");
+                var fieldIdToSearch = ids.GetFieldId("Task List|Date");
+                var filterValue = DateTime.Now.AddDays(7);
+                var filter = new Dictionary<int, object>
+                            {
+                                { fieldIdToSearch, filterValue }
+                            };
+                FilterOptions newOptions = new FilterOptions
+                {
+                    Filters = filter,
+                    Offset = 500
+                };
+                context.Logger.LogLine("Checking for duplicates");
 
-            //	var filteredItems = await podio.FilterItems(ids.GetFieldId("Task List"), newOptions);
+                var filteredItems = await podio.FilterItems(ids.GetFieldId("Task List"), newOptions);
 
-            //	var furtherFilteredItems = from f in filteredItems.Items
-            //							   where
-            //							   f.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion")).Options.Any()
-            //							   &&
-            //							   f.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion")).Options.First().Text != "Complete"
-            //							   select f;
+                var furtherFilteredItems = from f in filteredItems.Items
+                                           where
+                                           f.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion")).Options.Any()
+                                           &&
+                                           f.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion")).Options.First().Text != "Complete"
+                                           select f;
 
-            //	foreach (var item in furtherFilteredItems)
-            //	{
-            //		var responsibleMember = item.Field<ContactItemField>(ids.GetFieldId("Task List|Responsible Member"));
-            //		var title = item.Field<TextItemField>(ids.GetFieldId("Task List|Title"));
-            //		var date = item.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
-            //		var description = item.Field<TextItemField>(ids.GetFieldId("Task List|Description"));
-            //		TaskCreateUpdateRequest t = new TaskCreateUpdateRequest();
-            //		t.Description = title.Value;
-            //		List<int> cIds = new List<int>();
-            //		foreach (var contact in responsibleMember.Contacts)
-            //		{
-            //			cIds.Add(Convert.ToInt32(contact.UserId));
-            //		}
-            //		t.SetResponsible(cIds);
-            //		t.DueDate = date.Start;
-            //		t.Text = description.Value;
-            //		var task = await taskServ.CreateTask(t);
-            //		await taskServ.AssignTask(int.Parse(task.First().TaskId));//neccessary?
-            //	}
-            //}
-            //catch(Exception ex)
-            //{
-            //	throw ex;
-            //}
-            //finally
-            //{
-            //	await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
-            //}
+                foreach (var item in furtherFilteredItems)
+                {
+                    var responsibleMember = item.Field<ContactItemField>(ids.GetFieldId("Task List|Responsible Member"));
+                    var title = item.Field<TextItemField>(ids.GetFieldId("Task List|Title"));
+                    var date = item.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
+                    var description = item.Field<TextItemField>(ids.GetFieldId("Task List|Description"));
+                    TaskCreateUpdateRequest t = new TaskCreateUpdateRequest();
+                    t.Description = title.Value;
+                    List<int> cIds = new List<int>();
+                    foreach (var contact in responsibleMember.Contacts)
+                    {
+                        cIds.Add(Convert.ToInt32(contact.UserId));
+                    }
+                    t.SetResponsible(cIds);
+                    t.DueDate = date.Start;
+                    t.Text = description.Value;
+                    var task = await taskServ.CreateTask(t);
+                    await taskServ.AssignTask(int.Parse(task.First().TaskId));//neccessary?
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                await saasafrasClient.UnlockFunction(functionName, cw.Time.ToString(), lockValue);
+            }
         }
-	}
+    }
 }
