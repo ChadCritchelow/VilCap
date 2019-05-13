@@ -1,5 +1,6 @@
 using Amazon.Lambda.Core;
 using Amazon.CloudWatchEvents;
+using Amazon.Lambda.CloudWatchEvents;
 using PodioCore;
 using PodioCore.Models;
 using PodioCore.Utils.ItemFields;
@@ -25,9 +26,9 @@ namespace VilcapDateAssignTask
 
 		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
 
-		public async void FunctionHandler(EventArgs eventArgs, ILambdaContext context)
+		public async void ScheduledFunctionHandler(Saasafras.Model.CloudWatchEvent e, ILambdaContext context)
 		{
-            context.Logger.LogLine($"---{eventArgs.ToString()}");
+            context.Logger.LogLine($"---{e.appId}");
 			//var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
 			//var podio = factory.ForClient(e.clientId, e.environmentId);
 			//Item check = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
