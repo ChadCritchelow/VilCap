@@ -1,4 +1,4 @@
-using Amazon.Lambda.Core;
+﻿using Amazon.Lambda.Core;
 using Amazon.Lambda.CloudWatchEvents;
 using PodioCore;
 using PodioCore.Models;
@@ -16,27 +16,28 @@ using PodioCore.Models.Request;
 using PodioCore.Services;
 using Task = System.Threading.Tasks.Task;
 using Newtonsoft.Json;
-using Amazon.Lambda.Model;
-
-// Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
-[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
 
 namespace VilcapDateAssignTask
 {
-    public class Function
+    public class CloudWatchHandler
     {
-
-		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
-        Dictionary<string, string> dictChild;
-        Dictionary<string, string> dictMaster;
-        Dictionary<string, string> fullNames;
-
-        public async Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
+        public async Task CloudFunctionHandler(Amazon.Lambda.CloudWatchEvents.ScheduledEvents.ScheduledEvent cw, ILambdaContext context)
         {
-            //var awsClient = new Amazon.Lambda.AmazonLambdaClient();
-            //InvokeRequest request = new InvokeRequest { FunctionName = "FunctionHandler" };
-            //await awsClient.InvokeAsync(request);
+            RoutedPodioEvent e = new RoutedPodioEvent();
+            e.clientId = "toolkittemplate3";
+            e.environmentId = "toolkittemplate3";
+            e.solutionId = "vilcap";
+            e.version = "0.0";
 
+            var function = new Function();
+            await function.FunctionHandler(e, context);
+
+            return;
+
+
+            var detail = cw.Detail;
+            context.Logger.LogLine($"---{cw.Id}");
+            //context.Logger.LogLine($"---{detail.ToString()}");
 
             var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
             var podio = factory.ForClient(e.clientId, e.environmentId);
@@ -48,12 +49,12 @@ namespace VilcapDateAssignTask
             //Make sure to implement by checking to see if Deploy Curriculum has just changed
             //Deploy Curriculum field
             string functionName = "VilcapDateAssignTask";
-            lockValue = await saasafrasClient.LockFunction(functionName, e.clientId);
+            lockValue = await saasafrasClient.LockFunction(functionName, cw.Time.ToString());
             try
             {
                 if (string.IsNullOrEmpty(lockValue))
                 {
-                    context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {e.clientId}");
+                    context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {cw.Time.ToString()}");
                     return;
                 }
 
@@ -108,7 +109,7 @@ namespace VilcapDateAssignTask
             }
             finally
             {
-                await saasafrasClient.UnlockFunction(functionName, e.clientId, lockValue);
+                await saasafrasClient.UnlockFunction(functionName, cw.Time.ToString(), lockValue);
             }
         }
     }
