@@ -37,16 +37,13 @@ namespace VilcapDateAssignTask
             //InvokeRequest request = new InvokeRequest { FunctionName = "FunctionHandler" };
             //await awsClient.InvokeAsync(request);
 
-
             var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
             var podio = factory.ForClient(e.clientId, e.environmentId);
             SaasafrasClient saasafrasClient = new SaasafrasClient(System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
             var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
-            var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
             string lockValue;
             GetIds ids = new GetIds(dictChild, dictMaster, e.environmentId);
-            //Make sure to implement by checking to see if Deploy Curriculum has just changed
-            //Deploy Curriculum field
+
             string functionName = "VilcapDateAssignTask";
             lockValue = await saasafrasClient.LockFunction(functionName, e.clientId);
             try
@@ -61,28 +58,37 @@ namespace VilcapDateAssignTask
 
                 var fieldIdToSearch = ids.GetFieldId("Task List|Date");
                 var filterValue = DateTime.Now.AddDays(7).Ticks;
-                var filter = new Dictionary<int, object>
-                            {
-                                { fieldIdToSearch, filterValue }
-                            };
-                FilterOptions newOptions = new FilterOptions
-                {
-                    Filters = filter,
-                };
-                context.Logger.LogLine("Checking for duplicates.");
+                //var filter = new Dictionary<int, object>
+                //            {
+                //                { fieldIdToSearch, filterValue }
+                //            };
+                //FilterOptions newOptions = new FilterOptions
+                //{
+                //    Filters = filter,
+                //};
+                //context.Logger.LogLine("Checking for duplicates.");
 
+                var viewServ = new ViewService(podio);
+                context.Logger.LogLine("Got View Service ...");
+                var views = await viewServ.GetViews(fieldIdToSearch);
+                var view = from v in views
+                           where v.Name == "[TaskAutomation]"
+                           select v;
+                context.Logger.LogLine($"Got View '[TaskAutomation]' ...");
+                var op = new FilterOptions { Filters = view.First().Filters };
+                var filter = await podio.FilterItems(fieldIdToSearch, op);
+                context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
 
-                var filteredItems = await podio.FilterItems(ids.GetFieldId("Task List"), newOptions);
-                context.Logger.LogLine("Initial Filter Successful");
+                //var filteredItems = await podio.FilterItems(ids.GetFieldId("Task List"), newOptions);
 
-                var furtherFilteredItems = from f in filteredItems.Items
-                                           where
-                                           f.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion")).Options.Any()
-                                           &&
-                                           f.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion")).Options.First().Text != "Complete"
-                                           select f;
+                //var furtherFilteredItems = from f in filteredItems.Items
+                //                           where
+                //                           f.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion")).Options.Any()
+                //                           &&
+                //                           f.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion")).Options.First().Text != "Complete"
+                //                           select f;
 
-                foreach (var item in furtherFilteredItems)
+                foreach (var item in filter.Items)
                 {
                     var responsibleMember = item.Field<ContactItemField>(ids.GetFieldId("Task List|Responsible Member"));
                     var title = item.Field<TextItemField>(ids.GetFieldId("Task List|Title"));
@@ -99,7 +105,7 @@ namespace VilcapDateAssignTask
                     t.DueDate = date.Start;
                     t.Text = description.Value;
                     var task = await taskServ.CreateTask(t);
-                    await taskServ.AssignTask(int.Parse(task.First().TaskId));//neccessary?
+                    await taskServ.AssignTask(int.Parse(task.First().TaskId)); //neccessary?
                 }
             }
             catch (Exception ex)
