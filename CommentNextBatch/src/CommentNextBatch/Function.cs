@@ -41,6 +41,7 @@ namespace CommentNextBatch
 		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
 		public async System.Threading.Tasks.Task FunctionHandler(RoutedCommentEvent e, ILambdaContext context)
 		{
+			#region //Required code for all Vilcap Lambda Functions//
 			context.Logger.LogLine(Newtonsoft.Json.JsonConvert.SerializeObject(e));
 			context.Logger.LogLine(Newtonsoft.Json.JsonConvert.SerializeObject(e));
 			var factory = new AuditedPodioClientFactory(e.appId, e.version, e.clientId, e.currentEnvironment.environmentId);
@@ -53,13 +54,16 @@ namespace CommentNextBatch
 			GetIds ids = new GetIds(dictChild, dictMaster, e.currentEnvironment.environmentId);
 			string functionName="CommentNextBatch";
 			lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+			#endregion
 			try
 			{
+				#region //Locker//
 				if (string.IsNullOrEmpty(lockValue))
 				{
 					context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
 					return;
 				}
+				#endregion
 				CommentService serve = new CommentService(podio);
 				var commentToCheck = await serve.GetComment(int.Parse(e.podioEvent.comment_id));
 				int fieldId = 0;
@@ -84,6 +88,7 @@ namespace CommentNextBatch
 					switch (type)
 					{
 						case "WS":
+							#region //update WS Batch number//
 							context.Logger.LogLine("Type==WS");
 							context.Logger.LogLine("Getting Field ID");
 							fieldId = ids.GetFieldId("Admin|WS Batch");
@@ -94,7 +99,9 @@ namespace CommentNextBatch
 							wsBatchField.OptionText = (++currentBatch).ToString();
 							context.Logger.LogLine($"New Batch Value: {currentBatch}");
 							break;
+						#endregion
 						case "TL":
+							#region //update TL Batch number//
 							context.Logger.LogLine("Type==TL");
 							context.Logger.LogLine("Getting Field ID");
 							fieldId = ids.GetFieldId("Admin|TL Batch");
@@ -105,10 +112,10 @@ namespace CommentNextBatch
 							tlBatchField.OptionText = (++currentBatch).ToString();
 							context.Logger.LogLine($"New Batch Value: {currentBatch}");
 							break;
+							#endregion
 					}
 					context.Logger.LogLine($"Field count on item we're updating: {updateMe.Fields.Count()}");
 					await podio.UpdateItem(updateMe, true);
-
 				}
 			}
 			catch (Exception ex)
