@@ -25,9 +25,9 @@ namespace VilcapDateAssignTask
 
 		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
 
-		public async System.Threading.Tasks.Task FunctionHandler(AmazonCloudWatchEventsClient eventsClient, ILambdaContext context)
+		public async void FunctionHandler(EventArgs eventArgs, ILambdaContext context)
 		{
-            context.Logger.LogLine($"---{eventsClient.ToString()}");
+            context.Logger.LogLine($"---{eventArgs.ToString()}");
 			//var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
 			//var podio = factory.ForClient(e.clientId, e.environmentId);
 			//Item check = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
