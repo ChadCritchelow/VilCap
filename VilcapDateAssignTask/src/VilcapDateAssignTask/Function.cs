@@ -1,5 +1,5 @@
 using Amazon.Lambda.Core;
-using Amazon.Lambda.SNSEvents;
+using Amazon.CloudWatchEvents;
 using PodioCore;
 using PodioCore.Models;
 using PodioCore.Utils.ItemFields;
@@ -24,10 +24,10 @@ namespace VilcapDateAssignTask
     {
 
 		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
-		//public async System.Threading.Tasks.Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
-        public async System.Threading.Tasks.Task FunctionHandler(Amazon.Lambda.SNSEvents.SNSEvent sns, ILambdaContext context)
-        {
-            context.Logger.LogLine($"Got SNSEvent: {sns.ToString()}");
+
+		public async System.Threading.Tasks.Task FunctionHandler(AmazonCloudWatchEventsClient eventsClient, ILambdaContext context)
+		{
+            context.Logger.LogLine($"---{eventsClient.ToString()}");
 			//var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
 			//var podio = factory.ForClient(e.clientId, e.environmentId);
 			//Item check = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
