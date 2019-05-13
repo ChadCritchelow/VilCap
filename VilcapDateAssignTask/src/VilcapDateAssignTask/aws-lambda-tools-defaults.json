@@ -15,5 +15,5 @@
   "function-runtime": "dotnetcore2.1",
   "function-memory-size": 256,
   "function-timeout": 30,
-  "function-handler": "VilcapDateAssignTask::VilcapDateAssignTask.Function::FunctionHandler"
+  "function-handler": "VilcapDateAssignTask::VilcapDateAssignTask.CloudWatchHandler::FunctionHandler"
 }
