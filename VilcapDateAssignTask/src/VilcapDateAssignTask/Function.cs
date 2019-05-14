@@ -30,7 +30,7 @@ namespace VilcapDateAssignTask
             //var awsClient = new Amazon.Lambda.AmazonLambdaClient();
             //InvokeRequest request = new InvokeRequest { FunctionName = "FunctionHandler" };
             //await awsClient.InvokeAsync(request);
-            context.Logger.LogLine("Recieved Routed Podio Event");
+            context.Logger.LogLine("---Recieved Routed Podio Event");
 
             var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
             var podio = factory.ForClient(e.clientId, e.environmentId);
@@ -70,25 +70,28 @@ namespace VilcapDateAssignTask
 
                 var t = new TaskCreateUpdateRequest
                 {
-                    Description = title.Value,
+                    Description = description.Value,
                     Private = false,
                     RefType = "item",
                     Id = item.ItemId,
                     DueDate = date.Start.GetValueOrDefault(),
-                    Text = "Text"
+                    Text = title.Value   
                 };
+
                 List<int> cIds = new List<int>();
                 foreach (var contact in responsibleMember.Contacts)
                 {
                     cIds.Add(Convert.ToInt32(contact.UserId));
                 }
-                t.SetResponsible(cIds.AsEnumerable<int>());
+                t.SetResponsible(cIds);
+
                 var task = await taskServ.CreateTask(t);
+
                 await taskServ.AssignTask(int.Parse(task.First().TaskId)); //neccessary?
                 context.Logger.LogLine($"Assigned Task");
 
                 var updateMe = new Item() { ItemId = item.ItemId };
-                var dupecheck = item.Field<CategoryItemField>(ids.GetFieldId("Task List|Task Assigned?"));
+                var dupecheck = updateMe.Field<CategoryItemField>(ids.GetFieldId("Task List|Task Assigned?"));
                 dupecheck.OptionText = "Yes";
                 await itemServ.UpdateItem(updateMe, hook: false);
                 context.Logger.LogLine($"Updated Item");
