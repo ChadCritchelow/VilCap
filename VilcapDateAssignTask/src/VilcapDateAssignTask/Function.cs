@@ -72,21 +72,22 @@ namespace VilcapDateAssignTask
                     var title = item.Field<TextItemField>(ids.GetFieldId("Task List|Title"));
                     var date = item.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
                     var description = item.Field<TextItemField>(ids.GetFieldId("Task List|Description"));
-                    
+
                     var t = new TaskCreateUpdateRequest
                     {
-                        Description = title.Value
+                        Description = title.Value,
+                        Private = false,
+                        RefType = "item",
+                        Id = item.ItemId,
+                        DueDate = date.Start.GetValueOrDefault(),
+                        Text = "Text"
                     };
                     List<int> cIds = new List<int>();
                     foreach (var contact in responsibleMember.Contacts)
                     {
                         cIds.Add(Convert.ToInt32(contact.UserId));
                     }
-                    t.Private = false;
-                    t.RefType = "item";
-                    t.Id = item.ItemId;
-                    t.SetResponsible(cIds);
-                    t.DueDate = date.StartDate.GetValueOrDefault();
+                    t.SetResponsible(cIds.AsEnumerable<int>());
                     var task = await taskServ.CreateTask(t);
                     await taskServ.AssignTask(int.Parse(task.First().TaskId)); //neccessary?
                     context.Logger.LogLine($"Assigned Task");
