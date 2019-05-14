@@ -34,78 +34,64 @@ namespace VilcapDateAssignTask
 
             var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
             var podio = factory.ForClient(e.clientId, e.environmentId);
-            SaasafrasClient saasafrasClient = new SaasafrasClient(System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
+            SaasafrasClient saasafrasClient = new SaasafrasClient(
+                System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"),
+                System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY")
+            );
             var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
-            string lockValue;
+            
             GetIds ids = new GetIds(dictChild, dictMaster, e.environmentId);
 
             string functionName = "VilcapDateAssignTask";
-            lockValue = await saasafrasClient.LockFunction(functionName, e.clientId);
-            try
+
+            var taskServ = new TaskService(podio);
+            var itemServ = new ItemService(podio);
+
+            var fieldIdToSearch = ids.GetFieldId("Task List|Date");
+            var filterValue = DateTime.Now.AddDays(7).Ticks;
+
+            var viewServ = new ViewService(podio);
+            context.Logger.LogLine("Got View Service ...");
+            var views = await viewServ.GetViews(22708289);
+            var view = from v in views
+                        where v.Name == "[TaskAutomation]"
+                        select v;
+            context.Logger.LogLine($"Got View '[TaskAutomation]' ...");
+            var op = new FilterOptions { Filters = view.First().Filters };
+            var filter = await podio.FilterItems(22708289, op);
+            context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
+
+            foreach (var item in filter.Items)
             {
-                if (string.IsNullOrEmpty(lockValue))
+                var responsibleMember = item.Field<ContactItemField>(ids.GetFieldId("Task List|Responsible Member"));
+                var title = item.Field<TextItemField>(ids.GetFieldId("Task List|Title"));
+                var date = item.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
+                var description = item.Field<TextItemField>(ids.GetFieldId("Task List|Description"));
+
+                var t = new TaskCreateUpdateRequest
                 {
-                    context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {e.clientId}");
-                    return;
-                }
-
-                var taskServ = new TaskService(podio);
-                var itemServ = new ItemService(podio);
-
-                var fieldIdToSearch = ids.GetFieldId("Task List|Date");
-                var filterValue = DateTime.Now.AddDays(7).Ticks;
-
-                var viewServ = new ViewService(podio);
-                context.Logger.LogLine("Got View Service ...");
-                var views = await viewServ.GetViews(22708289);
-                var view = from v in views
-                           where v.Name == "[TaskAutomation]"
-                           select v;
-                context.Logger.LogLine($"Got View '[TaskAutomation]' ...");
-                var op = new FilterOptions { Filters = view.First().Filters };
-                var filter = await podio.FilterItems(22708289, op);
-                context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
-
-                foreach (var item in filter.Items)
+                    Description = title.Value,
+                    Private = false,
+                    RefType = "item",
+                    Id = item.ItemId,
+                    DueDate = date.Start.GetValueOrDefault(),
+                    Text = "Text"
+                };
+                List<int> cIds = new List<int>();
+                foreach (var contact in responsibleMember.Contacts)
                 {
-                    var responsibleMember = item.Field<ContactItemField>(ids.GetFieldId("Task List|Responsible Member"));
-                    var title = item.Field<TextItemField>(ids.GetFieldId("Task List|Title"));
-                    var date = item.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
-                    var description = item.Field<TextItemField>(ids.GetFieldId("Task List|Description"));
-
-                    var t = new TaskCreateUpdateRequest
-                    {
-                        Description = title.Value,
-                        Private = false,
-                        RefType = "item",
-                        Id = item.ItemId,
-                        DueDate = date.Start.GetValueOrDefault(),
-                        Text = "Text"
-                    };
-                    List<int> cIds = new List<int>();
-                    foreach (var contact in responsibleMember.Contacts)
-                    {
-                        cIds.Add(Convert.ToInt32(contact.UserId));
-                    }
-                    t.SetResponsible(cIds.AsEnumerable<int>());
-                    var task = await taskServ.CreateTask(t);
-                    await taskServ.AssignTask(int.Parse(task.First().TaskId)); //neccessary?
-                    context.Logger.LogLine($"Assigned Task");
-
-                    var updateMe = new Item() { ItemId = item.ItemId };
-                    var dupecheck = item.Field<CategoryItemField>(ids.GetFieldId("Task List|Task Assigned?"));
-                    dupecheck.OptionText = "Yes";
-                    await itemServ.UpdateItem(updateMe, hook: false);
-                    context.Logger.LogLine($"Updated Item");
+                    cIds.Add(Convert.ToInt32(contact.UserId));
                 }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                await saasafrasClient.UnlockFunction(functionName, e.clientId, lockValue);
+                t.SetResponsible(cIds.AsEnumerable<int>());
+                var task = await taskServ.CreateTask(t);
+                await taskServ.AssignTask(int.Parse(task.First().TaskId)); //neccessary?
+                context.Logger.LogLine($"Assigned Task");
+
+                var updateMe = new Item() { ItemId = item.ItemId };
+                var dupecheck = item.Field<CategoryItemField>(ids.GetFieldId("Task List|Task Assigned?"));
+                dupecheck.OptionText = "Yes";
+                await itemServ.UpdateItem(updateMe, hook: false);
+                context.Logger.LogLine($"Updated Item");
             }
         }
     }
