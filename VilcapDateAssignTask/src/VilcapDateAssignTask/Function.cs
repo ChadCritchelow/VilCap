@@ -62,13 +62,13 @@ namespace VilcapDateAssignTask
 
                 var viewServ = new ViewService(podio);
                 context.Logger.LogLine("Got View Service ...");
-                var views = await viewServ.GetViews(41796303);
+                var views = await viewServ.GetViews(22708289);
                 var view = from v in views
                            where v.Name == "[TaskAutomation]"
                            select v;
                 context.Logger.LogLine($"Got View '[TaskAutomation]' ...");
                 var op = new FilterOptions { Filters = view.First().Filters };
-                var filter = await podio.FilterItems(41796303, op);
+                var filter = await podio.FilterItems(22708289, op);
                 context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
 
                 foreach (var item in filter.Items)
