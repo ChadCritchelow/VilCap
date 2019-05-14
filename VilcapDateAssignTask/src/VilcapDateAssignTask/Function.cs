@@ -10,6 +10,7 @@ using Saasafras;
 using PodioCore.Models.Request;
 using PodioCore.Services;
 using Task = System.Threading.Tasks.Task;
+using PodioCore.Models;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
@@ -48,7 +49,8 @@ namespace VilcapDateAssignTask
                     return;
                 }
 
-                TaskService taskServ = new TaskService(podio);
+                var taskServ = new TaskService(podio);
+                var itemServ = new ItemService(podio);
 
                 var fieldIdToSearch = ids.GetFieldId("Task List|Date");
                 var filterValue = DateTime.Now.AddDays(7).Ticks;
@@ -70,8 +72,11 @@ namespace VilcapDateAssignTask
                     var title = item.Field<TextItemField>(ids.GetFieldId("Task List|Title"));
                     var date = item.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
                     var description = item.Field<TextItemField>(ids.GetFieldId("Task List|Description"));
-                    TaskCreateUpdateRequest t = new TaskCreateUpdateRequest();
-                    t.Description = title.Value;
+                    
+                    var t = new TaskCreateUpdateRequest
+                    {
+                        Description = title.Value
+                    };
                     List<int> cIds = new List<int>();
                     foreach (var contact in responsibleMember.Contacts)
                     {
@@ -79,9 +84,14 @@ namespace VilcapDateAssignTask
                     }
                     t.SetResponsible(cIds);
                     t.DueDate = date.Start;
-                    t.Text = description.Value;
+                    t.Text = t.Description;
                     var task = await taskServ.CreateTask(t);
                     await taskServ.AssignTask(int.Parse(task.First().TaskId)); //neccessary?
+
+                    var updateMe = new Item() { ItemId = item.ItemId };
+                    var dupecheck = item.Field<CategoryItemField>(ids.GetFieldId("Task List|Task Assigned?"));
+                    dupecheck.OptionText = "Yes";
+                    await itemServ.UpdateItem(updateMe, hook: false);
                 }
             }
             catch (Exception ex)
