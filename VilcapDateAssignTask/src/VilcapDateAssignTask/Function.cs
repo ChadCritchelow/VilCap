@@ -36,6 +36,7 @@ namespace VilcapDateAssignTask
             //var awsClient = new Amazon.Lambda.AmazonLambdaClient();
             //InvokeRequest request = new InvokeRequest { FunctionName = "FunctionHandler" };
             //await awsClient.InvokeAsync(request);
+            context.Logger.LogLine("Recieved Routed Podio Event");
 
             var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
             var podio = factory.ForClient(e.clientId, e.environmentId);
@@ -58,15 +59,6 @@ namespace VilcapDateAssignTask
 
                 var fieldIdToSearch = ids.GetFieldId("Task List|Date");
                 var filterValue = DateTime.Now.AddDays(7).Ticks;
-                //var filter = new Dictionary<int, object>
-                //            {
-                //                { fieldIdToSearch, filterValue }
-                //            };
-                //FilterOptions newOptions = new FilterOptions
-                //{
-                //    Filters = filter,
-                //};
-                //context.Logger.LogLine("Checking for duplicates.");
 
                 var viewServ = new ViewService(podio);
                 context.Logger.LogLine("Got View Service ...");
@@ -78,15 +70,6 @@ namespace VilcapDateAssignTask
                 var op = new FilterOptions { Filters = view.First().Filters };
                 var filter = await podio.FilterItems(41796303, op);
                 context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
-
-                //var filteredItems = await podio.FilterItems(ids.GetFieldId("Task List"), newOptions);
-
-                //var furtherFilteredItems = from f in filteredItems.Items
-                //                           where
-                //                           f.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion")).Options.Any()
-                //                           &&
-                //                           f.Field<CategoryItemField>(ids.GetFieldId("Task List|Completetion")).Options.First().Text != "Complete"
-                //                           select f;
 
                 foreach (var item in filter.Items)
                 {
