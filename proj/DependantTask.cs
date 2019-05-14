@@ -6,13 +6,9 @@ using PodioCore;
 using PodioCore.Exceptions;
 using PodioCore.Items;
 using PodioCore.Models;
-using PodioCore.Models.Request;
-using PodioCore.Services;
 using PodioCore.Utils.ItemFields;
 using System.Linq;
 using System.Text.RegularExpressions;
-using PodioCore.Utils;
-using PodioCore.Comments;
 using newVilcapCopyFileToGoogleDrive;
 
 namespace NewVilcapCopyFileToGoogleDrive

@@ -12,7 +12,6 @@ using PodioCore.Utils.ItemFields;
 using System.Linq;
 using System.Text.RegularExpressions;
 using PodioCore.Utils;
-using PodioCore.Comments;
 
 namespace newVilcapCopyFileToGoogleDrive
 {

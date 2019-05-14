@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Amazon.Lambda.Core;
 using Google.Apis.Drive.v3;
 using PodioCore;
@@ -8,17 +7,13 @@ using PodioCore.Exceptions;
 using PodioCore.Items;
 using PodioCore.Models;
 using PodioCore.Models.Request;
-using PodioCore.Services;
 using PodioCore.Utils.ItemFields;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using PodioCore.Utils;
-using PodioCore.Comments;
 
 namespace newVilcapCopyFileToGoogleDrive
 {
-	class Survey
+    class Survey
 	{
 		public static string StripHTML(string input)
 		{

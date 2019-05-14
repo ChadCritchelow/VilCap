@@ -3,7 +3,6 @@ using Amazon.Lambda.Core;
 using PodioCore;
 using PodioCore.Models;
 using PodioCore.Utils.ItemFields;
-using PodioCore.Utils;
 
 
 namespace newVilcapCopyFileToGoogleDrive

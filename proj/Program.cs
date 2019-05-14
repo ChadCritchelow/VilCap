@@ -10,9 +10,7 @@ using PodioCore.Items;
 using PodioCore.Models;
 using BrickBridge.Lambda.VilCap;
 using Task = System.Threading.Tasks.Task;
-using PodioCore.Models.Request;
 using System.Text.RegularExpressions;
-using PodioCore.Utils;
 using Saasafras;
 using PodioCore.Comments;
 

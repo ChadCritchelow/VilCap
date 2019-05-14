@@ -1,10 +1,7 @@
 using Amazon.Lambda.Core;
-using PodioCore;
 using PodioCore.Models;
 using PodioCore.Utils.ItemFields;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using PodioCore.Items;
 using BrickBridge.Lambda.VilCap;
@@ -18,7 +15,7 @@ using PodioCore.Comments;
 
 namespace CommentNextBatch
 {
-	public class CurrentEnvironment
+    public class CurrentEnvironment
 	{
 		public string environmentId { get; set; }
 	}
