@@ -82,16 +82,20 @@ namespace VilcapDateAssignTask
                     {
                         cIds.Add(Convert.ToInt32(contact.UserId));
                     }
+                    t.Private = false;
+                    t.RefType = "item";
+                    t.Id = item.ItemId;
                     t.SetResponsible(cIds);
-                    t.DueDate = date.Start;
-                    t.Text = t.Description;
+                    t.DueDate = date.StartDate.GetValueOrDefault();
                     var task = await taskServ.CreateTask(t);
                     await taskServ.AssignTask(int.Parse(task.First().TaskId)); //neccessary?
+                    context.Logger.LogLine($"Assigned Task");
 
                     var updateMe = new Item() { ItemId = item.ItemId };
                     var dupecheck = item.Field<CategoryItemField>(ids.GetFieldId("Task List|Task Assigned?"));
                     dupecheck.OptionText = "Yes";
                     await itemServ.UpdateItem(updateMe, hook: false);
+                    context.Logger.LogLine($"Updated Item");
                 }
             }
             catch (Exception ex)
