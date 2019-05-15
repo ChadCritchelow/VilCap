@@ -82,11 +82,11 @@ namespace VilcapConfirmAppEmail
 						person.Id = recipient;
 						people.Add(person);
 						var grant = await serv.CreateGrant("item", check.ItemId, people, "rate", messageBody);
+                        context.Logger.LogLine("Re-Granted");
                         await serv.RemoveGrant("item", check.ItemId, people.First().Id);
+                        context.Logger.LogLine("De-Granted");
                         await serv.CreateGrant("item", check.ItemId, people, "view", messageBody);
-
-
-                        context.Logger.LogLine(grant.ToString());
+                        context.Logger.LogLine("Re-Re-Granted");
                     }
 				}
 			}
