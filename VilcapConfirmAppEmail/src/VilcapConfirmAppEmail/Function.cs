@@ -80,7 +80,26 @@ namespace VilcapConfirmAppEmail
 						person.Type = "mail";
 						person.Id = recipient;
 						people.Add(person);
-						await serv.CreateGrant("item", check.ItemId, people, "rate", messageBody);
+						context.Logger.LogLine("Getting all grants");
+						var grants = await serv.GetGrantsOnObject("item", check.ItemId);
+						context.Logger.LogLine("Counting grants");
+
+						context.Logger.LogLine($"Number of Grants: {grants.Count()}");
+
+						foreach(var grant in grants)
+						{
+							if (grant.User.Mail == recipient)
+							{
+								context.Logger.LogLine($"Got grant with email: {grant.User.Mail}");
+								context.Logger.LogLine("Removing Grant");
+
+								await serv.RemoveGrant("item", check.ItemId, grant.User.UserId.GetValueOrDefault());
+								context.Logger.LogLine("Creating Grant");
+
+								await serv.CreateGrant("item", check.ItemId, people, "rate", messageBody);
+							}
+						}
+						
 					}
 				}
 			}

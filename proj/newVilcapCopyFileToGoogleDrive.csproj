@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PodioCore.Async" Version="0.0.30" />
+    <PackageReference Include="PodioCore.Async" Version="0.0.32" />
     <PackageReference Include="PodioCore.Comments" Version="0.0.7" />
     <PackageReference Include="PodioCore.Items" Version="0.0.24" />
     <PackageReference Include="Saasafras" Version="0.2.16" />
