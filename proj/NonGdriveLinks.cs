@@ -2,11 +2,10 @@
 using PodioCore.Models;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace newVilcapCopyFileToGoogleDrive
 {
-	class NonGdriveLinks
+    class NonGdriveLinks
 	{
 		public async System.Threading.Tasks.Task NonGDriveCopy(Embed embed, List<Embed> embeds, Podio podio, RoutedPodioEvent e)  // Hold for 2.0 //
 		{

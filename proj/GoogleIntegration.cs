@@ -7,12 +7,10 @@ using PodioCore.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace newVilcapCopyFileToGoogleDrive
 {
-	class GoogleIntegration
+    class GoogleIntegration
 	{
 		public string GetSubfolderId(DriveService ds, Podio podio, RoutedPodioEvent e, string parentFolder)
 		{

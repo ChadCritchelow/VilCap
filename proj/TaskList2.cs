@@ -66,12 +66,14 @@ namespace newVilcapCopyFileToGoogleDrive
             else
             {
                 context.Logger.LogLine($"Creating View '{tlPackageName}' ...");
-                var viewReq = new ViewCreateUpdateRequest();
-                viewReq.Name = $"AWS - {tlPackageName}";
-                viewReq.SortBy = "174999400"; // fieldId of "Title"
-                viewReq.Filters = new Dictionary<string, object>
+                var viewReq = new ViewCreateUpdateRequest
                 {
-                    {"185003953" /*Curriculum Package field*/, tlPackageName }
+                    Name = $"AWS - {tlPackageName}",
+                    SortBy = "174999400", // fieldId of "Title"
+                    Filters = new Dictionary<string, object>
+                    {
+                        {"185003953" /*Curriculum Package field*/, tlPackageName }
+                    }
                 };
                 var viewId = await viewServ.CreateView(MASTER_SCHEDULE_APP, viewReq);
                 view = from v in views

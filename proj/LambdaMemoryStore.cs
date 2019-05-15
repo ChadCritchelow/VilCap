@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Task = System.Threading.Tasks.Task;
-using Amazon.Lambda.Core;
 using System.Threading.Tasks;
 
 namespace BrickBridge.Lambda.VilCap
