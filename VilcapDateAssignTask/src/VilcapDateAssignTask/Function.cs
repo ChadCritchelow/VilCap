@@ -85,10 +85,14 @@ namespace VilcapDateAssignTask
                 }
                 t.SetResponsible(cIds);
 
-                var task = await taskServ.CreateTask(t);
-
-                await taskServ.AssignTask(int.Parse(task.First().TaskId)); //neccessary?
-                context.Logger.LogLine($"Assigned Task");
+                var tasks = await taskServ.CreateTask(t);
+                
+                foreach (PodioCore.Models.Task task in tasks)
+                {
+                    await taskServ.AssignTask(Convert.ToInt32(task.TaskId),task.Responsible.UserId); //neccessary?
+                    context.Logger.LogLine($"Assigned Task");
+                }
+                
 
                 var updateMe = new Item() { ItemId = item.ItemId };
                 var dupecheck = updateMe.Field<CategoryItemField>(ids.GetFieldId("Task List|Task Assigned?"));

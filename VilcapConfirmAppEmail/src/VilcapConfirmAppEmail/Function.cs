@@ -74,6 +74,7 @@ namespace VilcapConfirmAppEmail
 							" and Learning Program 2019. We will be reviewing your application and following up in the " +
 							"coming weeks regarding next steps. If you do have questions, please feel free to email me at" +
 							" stephen.wemple@vilcap.com.";
+                        context.Logger.LogLine(messageBody);
 						GrantService serv = new GrantService(podio);
 						List<Ref> people = new List<Ref>();
 						Ref person = new Ref();
@@ -81,7 +82,8 @@ namespace VilcapConfirmAppEmail
 						person.Id = recipient;
 						people.Add(person);
 						var grant = await serv.CreateGrant("item", check.ItemId, people, "rate", messageBody);
-					}
+                        context.Logger.LogLine(grant.ToString());
+                    }
 				}
 			}
 			catch (Exception ex)
