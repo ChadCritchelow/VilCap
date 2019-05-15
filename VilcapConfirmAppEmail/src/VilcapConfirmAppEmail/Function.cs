@@ -83,7 +83,7 @@ namespace VilcapConfirmAppEmail
 						people.Add(person);
 						var grant = await serv.CreateGrant("item", check.ItemId, people, "rate", messageBody);
                         await serv.RemoveGrant("item", check.ItemId, people.First().Id);
-                        await serv.CreateGrant("item", check.ItemId, people, "rate", messageBody);
+                        await serv.CreateGrant("item", check.ItemId, people, "view", messageBody);
 
 
                         context.Logger.LogLine(grant.ToString());
