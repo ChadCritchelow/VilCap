@@ -70,7 +70,7 @@ namespace VilcapConfirmAppEmail
 						var adminItem = await podio.GetItem(items.Items.First().ItemId);
 						var fromName = adminItem.Field<ContactItemField>(ids.GetFieldId("Admin|Program Manager")).Contacts.First().Name;
 						var subject = "Thank you for submitting your application!";
-						var messageBody = $"Thank you for submitting your application to {ids.GetFieldId($"{e.environmentId}-FN")}'s Future of Work" +
+						var messageBody = $"Thank you for submitting your application to {ids.GetLongName($"{e.environmentId}-FN")}'s Future of Work" +
 							" and Learning Program 2019. We will be reviewing your application and following up in the " +
 							"coming weeks regarding next steps. If you do have questions, please feel free to email me at" +
 							" stephen.wemple@vilcap.com.";

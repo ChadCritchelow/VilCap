@@ -28,7 +28,10 @@ namespace newVilcapCopyFileToGoogleDrive
 			}
 			else
 				return Convert.ToInt32(dictMaster[key]);
-
+		}
+		public string GetLongName(string key)
+		{
+			return dictChild[key];
 		}
 	}
 }
