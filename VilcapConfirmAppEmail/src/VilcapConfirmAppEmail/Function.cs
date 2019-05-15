@@ -14,13 +14,21 @@ using System.Text.RegularExpressions;
 using PodioCore.Services;
 using PodioCore.Models.Request;
 
+
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
 
-namespace VilcapShareAppWithApplicant
+namespace VilcapConfirmAppEmail
 {
-    public class Function
-    {
+	public class Function
+	{
+
+		/// <summary>
+		/// A simple function that takes a string and does a ToUpper
+		/// </summary>
+		/// <param name="input"></param>
+		/// <param name="context"></param>
+		/// <returns></returns>
 		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
 		public async System.Threading.Tasks.Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
 		{
@@ -30,11 +38,12 @@ namespace VilcapShareAppWithApplicant
 			SaasafrasClient saasafrasClient = new SaasafrasClient(System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
 			var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
 			var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
+
 			string lockValue;
 			GetIds ids = new GetIds(dictChild, dictMaster, e.environmentId);
 			//Make sure to implement by checking to see if Deploy Curriculum has just changed
 			//Deploy Curriculum field
-			string functionName = "VilcapShareAppWithApplicant";
+			string functionName = "VilcapConfirmAppEmail";
 			lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
 			try
 			{
@@ -43,39 +52,37 @@ namespace VilcapShareAppWithApplicant
 					context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
 					return;
 				}
-
-				var fieldIdToSearch = ids.GetFieldId("Admin");
-				FilterOptions newOptions = new FilterOptions
+				var revision = await podio.GetRevisionDifference
+				(
+				Convert.ToInt32(check.ItemId),
+				check.CurrentRevision.Revision - 1,
+				check.CurrentRevision.Revision
+				);
+				var firstRevision = revision.First();
+				var complete = check.Field<CategoryItemField>(ids.GetFieldId("Applications|Complete This Application"));
+				if (firstRevision.FieldId == complete.FieldId)
 				{
-					Limit = 1
-				};
-				context.Logger.LogLine("Checking for duplicates");
-
-				var items = await podio.FilterItems(ids.GetFieldId("Admin"), newOptions);
-				Item AdminOptionToCheck = await podio.GetItem(items.Items.First().ItemId);
-
-				GrantService serv = new GrantService(podio);
-				//Create Email:
-				var recipient = check.Field<EmailItemField>(ids.GetFieldId("Applications|Email")).Value.First().Value;
-				var orgName = AdminOptionToCheck.Field<TextItemField>(ids.GetFieldId("Admin|Organization Name")).Value;
-				var m = $"Invitation to Complete Your Application with {orgName}" +
-				"This application will automatically save as you work on it. To access an in-progress";
-
-				//Send email
-				var email = recipient;
-
-				List<Ref> people = new List<Ref>();
-				Ref person = new Ref();
-				person.Type = "mail";
-				person.Id = email;
-				people.Add(person);
-				var message = m;
-
-				await serv.CreateGrant("item", check.ItemId, people, "rate", message);
-
-				Item updateMe = new Item() { ItemId = check.ItemId };
-				updateMe.Field<CategoryItemField>(ids.GetFieldId("Applications|Application Status")).OptionText = "New Application";
-				await podio.UpdateItem(updateMe, true);
+					if (complete.Options.Any() && complete.Options.First().Text == "Submit")
+					{
+						var recipient = check.Field<EmailItemField>(ids.GetFieldId("Applications|Email")).Value.First().Value;
+						//get admin item to get program manager name
+						var items = await podio.FilterItems(ids.GetFieldId("Admin"), new FilterOptions() { Limit = 1 });
+						var adminItem = await podio.GetItem(items.Items.First().ItemId);
+						var fromName = adminItem.Field<ContactItemField>(ids.GetFieldId("Admin|Program Manager")).Contacts.First().Name;
+						var subject = "Thank you for submitting your application!";
+						var messageBody = $"Thank you for submitting your application to {ids.GetFieldId($"{e.environmentId}-FN")}'s Future of Work" +
+							" and Learning Program 2019. We will be reviewing your application and following up in the " +
+							"coming weeks regarding next steps. If you do have questions, please feel free to email me at" +
+							" stephen.wemple@vilcap.com.";
+						GrantService serv = new GrantService(podio);
+						List<Ref> people = new List<Ref>();
+						Ref person = new Ref();
+						person.Type = "mail";
+						person.Id = recipient;
+						people.Add(person);
+						await serv.CreateGrant("item", check.ItemId, people, "rate", messageBody);
+					}
+				}
 			}
 			catch (Exception ex)
 			{

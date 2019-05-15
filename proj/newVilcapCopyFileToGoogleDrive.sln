@@ -39,6 +39,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VilcapKickoffDateChanged", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VilcapShareDocument", "..\VilcapShareDocument\src\VilcapShareDocument\VilcapShareDocument.csproj", "{D66B03E9-EAE3-4295-A8DD-5AAE26FFA463}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VilcapConfirmAppEmail", "..\VilcapConfirmAppEmail\src\VilcapConfirmAppEmail\VilcapConfirmAppEmail.csproj", "{F9459B15-2474-4EA2-A9CB-1DBAEE8FDE1C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -116,6 +118,10 @@ Global
 		{D66B03E9-EAE3-4295-A8DD-5AAE26FFA463}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D66B03E9-EAE3-4295-A8DD-5AAE26FFA463}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D66B03E9-EAE3-4295-A8DD-5AAE26FFA463}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9459B15-2474-4EA2-A9CB-1DBAEE8FDE1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9459B15-2474-4EA2-A9CB-1DBAEE8FDE1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9459B15-2474-4EA2-A9CB-1DBAEE8FDE1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9459B15-2474-4EA2-A9CB-1DBAEE8FDE1C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
