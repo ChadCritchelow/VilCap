@@ -80,7 +80,7 @@ namespace VilcapConfirmAppEmail
 						person.Type = "mail";
 						person.Id = recipient;
 						people.Add(person);
-						await serv.CreateGrant("item", check.ItemId, people, "rate", messageBody);
+						var grant = await serv.CreateGrant("item", check.ItemId, people, "rate", messageBody);
 					}
 				}
 			}
