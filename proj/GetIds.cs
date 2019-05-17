@@ -19,6 +19,10 @@ namespace newVilcapCopyFileToGoogleDrive
 			dictMaster = _dictMaster;
             envId = _envId;
 		}
+        /// <summary>
+        /// Returns an appId or fieldId
+        /// </summary>
+        /// <param name="key">Some permutation of "WorkspaceName|ApplicationName|FieldName"</param>
 		public int GetFieldId(string key)
 		{
 			var parts = key.Split('|');

@@ -24,6 +24,9 @@ namespace newVilcapCopyFileToGoogleDrive
 			return Regex.Replace(input, "<.*?>", string.Empty);
 		}
 
+        /// <summary>
+        /// Pulls content from Content Curation into Workshop Modules, as well as accessory tasks and Google files
+        /// </summary>
 		public async System.Threading.Tasks.Task<int> CreateWorkshopModules2(ILambdaContext context, Podio podio, Item check, RoutedPodioEvent e, DriveService service, GetIds ids, GoogleIntegration google,PreSurvAndExp pre)
 		{
 

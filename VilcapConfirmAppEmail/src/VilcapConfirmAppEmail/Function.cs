@@ -23,14 +23,11 @@ namespace VilcapConfirmAppEmail
 	public class Function
 	{
 
-		/// <summary>
-		/// A simple function that takes a string and does a ToUpper
-		/// </summary>
-		/// <param name="input"></param>
-		/// <param name="context"></param>
-		/// <returns></returns>
 		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
-		public async System.Threading.Tasks.Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
+        /// <summary>
+        /// Sends a confirmation email to the applicant when an application is completed.
+        /// </summary>
+        public async System.Threading.Tasks.Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
 		{
 			var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
 			var podio = factory.ForClient(e.clientId, e.environmentId);
@@ -88,9 +85,9 @@ namespace VilcapConfirmAppEmail
 
 						foreach(var grant in grants)
 						{
-							if (grant.User.Mail == recipient)
+							if (grant.User.Mail.FirstOrDefault() == recipient)
 							{
-								context.Logger.LogLine($"Got grant with email: {grant.User.Mail}");
+								context.Logger.LogLine($"Got grant with email: {grant.User.Mail.FirstOrDefault()}");
 								context.Logger.LogLine("Removing Grant");
 
 								await serv.RemoveGrant("item", check.ItemId, grant.User.UserId.GetValueOrDefault());
