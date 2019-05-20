@@ -4,7 +4,6 @@ using Saasafras;
 using System.Collections.Generic;
 using Task = System.Threading.Tasks.Task;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace VilcapDateAssignTask
 {
