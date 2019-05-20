@@ -32,12 +32,12 @@ namespace VilcapDateAssignTask
                 context.Logger.LogLine($"--- Created events : {e.clientId}/{e.clientId}/{e.solutionId}/{e.version}");
             }
 
-            string lockValue = await saasafrasClient.LockFunction(FUNCTION_NAME, cwe.Time.ToString());
+            string lockValue = await saasafrasClient.LockFunction(FUNCTION_NAME, cwe.Id);
             try
             {
                 if (string.IsNullOrEmpty(lockValue))
                 {
-                    context.Logger.LogLine($"Failed to acquire lock for {FUNCTION_NAME} at time {cwe.Time.ToString()}");
+                    context.Logger.LogLine($"Failed to acquire lock for {FUNCTION_NAME} at time {cwe.Id}");
                     return;
                 }
 
