@@ -9,7 +9,7 @@ using newVilcapCopyFileToGoogleDrive;
 using Saasafras;
 using PodioCore.Models.Request;
 using PodioCore.Services;
-//using Task = System.Threading.Tasks.Task;
+using Task = System.Threading.Tasks.Task;
 using PodioCore.Models;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
