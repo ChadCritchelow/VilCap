@@ -54,8 +54,10 @@ namespace VilcapShareAppWithApplicant
 				//Create Email:
 				var recipient = check.Field<EmailItemField>(ids.GetFieldId("Applications|Email")).Value.First().Value;
 				var orgName = AdminOptionToCheck.Field<TextItemField>(ids.GetFieldId("Admin|Organization Name")).Value;
-				var m = $"Invitation to Complete Your Application with {orgName}" +
-				"This application will automatically save as you work on it. To access an in-progress application, you may follow";
+				var m = $"Invitation to Complete Your Application with {orgName}. " +
+                "This application will automatically save as you work on it. You are advised " +
+                "to either save your invitation email or bookmark your in-progress application for easy access. " +
+                "You can view all of your Podio items by following the following link : <https://podio.com/vilcapcom/organization/grants>";
 
 				//Send email
 				var email = recipient;
