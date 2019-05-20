@@ -9,14 +9,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Task = System.Threading.Tasks.Task;
+using PdfSharp;
 
 namespace newVilcapCopyFileToGoogleDrive
+
 {
     public class GoogleIntegration
 	{
         // Google Drive : DriveService
+        
 
-		public string GetSubfolderId(DriveService ds, Podio podio, RoutedPodioEvent e, string parentFolder)
+        public string GetSubfolderId(DriveService ds, Podio podio, RoutedPodioEvent e, string parentFolder)
 		{
 			try
 			{
@@ -134,10 +137,13 @@ namespace newVilcapCopyFileToGoogleDrive
         }
         public void AppendOneFile(DriveService ds, RoutedPodioEvent e, File addMe, File book)
         {
+            //var reader = PdfSharp.Pdf.IO.PdfReader.Open()
             try
             {
-                //var export = new FilesResource.ExportRequest(ds, addMe.Id, "application/vnd.google-apps.file").Execute();
+                var export = new FilesResource.ExportRequest(ds, addMe.Id, "application/pdf").Execute();
                 //var merged = new File();
+                
+                var pdf = new PdfSharp.Pdf.PdfDocument();
                 var result = new FilesResource.UpdateRequest(ds, addMe, book.Id).Execute();
             }
             catch (Exception ex)

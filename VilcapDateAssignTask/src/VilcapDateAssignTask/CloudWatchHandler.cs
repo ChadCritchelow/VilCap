@@ -23,7 +23,7 @@ namespace VilcapDateAssignTask
                 System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"),
                 System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY")
             );
-            string lockValue = await saasafrasClient.LockFunction(FUNCTION_NAME, cwe.Time.ToString());
+           
 
             string vilcapEnvar = System.Environment.GetEnvironmentVariable("VILCAP_ENVS");
             var vilcapEnvs= JsonConvert.DeserializeObject<JsonHolder>(vilcapEnvar).Values;
@@ -31,7 +31,8 @@ namespace VilcapDateAssignTask
             {
                 context.Logger.LogLine($"--- Created events : {e.clientId}/{e.clientId}/{e.solutionId}/{e.version}");
             }
-            
+
+            string lockValue = await saasafrasClient.LockFunction(FUNCTION_NAME, cwe.Time.ToString());
             try
             {
                 if (string.IsNullOrEmpty(lockValue))
