@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2046
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.452
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "newVilcapCopyFileToGoogleDrive", "newVilcapCopyFileToGoogleDrive.csproj", "{EEACC09F-A71B-4AB8-87D5-E5935C763F90}"
 EndProject
@@ -40,6 +40,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VilcapShareDocument", "..\VilcapShareDocument\src\VilcapShareDocument\VilcapShareDocument.csproj", "{D66B03E9-EAE3-4295-A8DD-5AAE26FFA463}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VilcapConfirmAppEmail", "..\VilcapConfirmAppEmail\src\VilcapConfirmAppEmail\VilcapConfirmAppEmail.csproj", "{F9459B15-2474-4EA2-A9CB-1DBAEE8FDE1C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VilcapCreateWorkbook", "..\VilcapCreateWorkbook\src\VilcapCreateWorkbook\VilcapCreateWorkbook.csproj", "{853B1A91-50E2-4FAD-9BDF-A53D88F86B8D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -122,6 +124,10 @@ Global
 		{F9459B15-2474-4EA2-A9CB-1DBAEE8FDE1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9459B15-2474-4EA2-A9CB-1DBAEE8FDE1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F9459B15-2474-4EA2-A9CB-1DBAEE8FDE1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{853B1A91-50E2-4FAD-9BDF-A53D88F86B8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{853B1A91-50E2-4FAD-9BDF-A53D88F86B8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{853B1A91-50E2-4FAD-9BDF-A53D88F86B8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{853B1A91-50E2-4FAD-9BDF-A53D88F86B8D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
