@@ -47,14 +47,14 @@ namespace newVilcapCopyFileToGoogleDrive
 			context.Logger.LogLine("Getting Podio Instance");
 			Item check = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
 			context.Logger.LogLine($"Got item with ID: {check.ItemId}");
-            SaasafrasClient saasafrasClient = new SaasafrasClient(System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
+            SaasafrasClient saasafrasClient = new SaasafrasClient(Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
             context.Logger.LogLine("Getting BBC Client Instance");
 			dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
 			dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
 			context.Logger.LogLine("Got dictionary");
 			var functionName = "newVilcapCopyFileToGoogleDrive";
 		
-			string serviceAcccount = System.Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
+			string serviceAcccount = Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
 			var cred = GoogleCredential.FromJson(serviceAcccount).CreateScoped(Scopes).UnderlyingCredential;
 			var service = new DriveService(new BaseClientService.Initializer()
 			{

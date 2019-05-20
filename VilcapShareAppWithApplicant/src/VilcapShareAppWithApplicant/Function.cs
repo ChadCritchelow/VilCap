@@ -18,13 +18,12 @@ namespace VilcapShareAppWithApplicant
 {
     public class Function
     {
-		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
 		public async System.Threading.Tasks.Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
 		{
 			var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
 			var podio = factory.ForClient(e.clientId, e.environmentId);
 			Item check = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
-			SaasafrasClient saasafrasClient = new SaasafrasClient(System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
+			SaasafrasClient saasafrasClient = new SaasafrasClient(Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
 			var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
 			var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
 			string lockValue;
@@ -56,19 +55,21 @@ namespace VilcapShareAppWithApplicant
 				var recipient = check.Field<EmailItemField>(ids.GetFieldId("Applications|Email")).Value.First().Value;
 				var orgName = AdminOptionToCheck.Field<TextItemField>(ids.GetFieldId("Admin|Organization Name")).Value;
 				var m = $"Invitation to Complete Your Application with {orgName}" +
-				"This application will automatically save as you work on it. To access an in-progress";
+				"This application will automatically save as you work on it. To access an in-progress application, you may follow";
 
 				//Send email
 				var email = recipient;
 
 				List<Ref> people = new List<Ref>();
-				Ref person = new Ref();
-				person.Type = "mail";
-				person.Id = email;
-				people.Add(person);
+                Ref person = new Ref
+                {
+                    Type = "mail",
+                    Id = email
+                };
+                people.Add(person);
 				var message = m;
 
-				await serv.CreateGrant("item", check.ItemId, people, "rate", message);
+				await serv.CreateGrant("item", check.ItemId, people, message);
 
 				Item updateMe = new Item() { ItemId = check.ItemId };
 				updateMe.Field<CategoryItemField>(ids.GetFieldId("Applications|Application Status")).OptionText = "New Application";

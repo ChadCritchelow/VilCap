@@ -167,7 +167,7 @@ namespace newVilcapCopyFileToGoogleDrive
 					fieldId = ids.GetFieldId("Surveys|Link to Survey");
 					var embedChild = child.Field<EmbedItemField>(fieldId);
 					List<Embed> embeds = new List<Embed>();
-					string parentFolderId = System.Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
+					string parentFolderId = Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
 					var cloneFolderId = google.GetSubfolderId(service, podio, e, parentFolderId);
 					foreach (var em in embedMaster.Embeds)
 					{
