@@ -3,13 +3,14 @@ using newVilcapCopyFileToGoogleDrive;
 using Saasafras;
 using System.Collections.Generic;
 using Task = System.Threading.Tasks.Task;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace VilcapDateAssignTask
 {
     public class CloudWatchHandler
     {
        
-        private static List<RoutedPodioEvent> _values;
         public async Task FunctionHandler(Amazon.Lambda.CloudWatchEvents.ScheduledEvents.ScheduledEvent cwe, ILambdaContext context)
         {
             //var envs = Newtonsoft.Json.JsonConvert.DeserializeObject<EnvsList>(cwe.Detail.ToString());
@@ -18,6 +19,15 @@ namespace VilcapDateAssignTask
                 System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"),
                 System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY")
             );
+
+            string vilcapEnvar = System.Environment.GetEnvironmentVariable("VILCAP_ENVS");
+            var vilcapEnvs = JsonConvert.DeserializeObject<RoutedPodioEvent[]>(vilcapEnvar);
+            foreach(RoutedPodioEvent env in vilcapEnvs)
+            {
+                context.Logger.LogLine($"---{env.clientId}/{env.clientId}/{env.solutionId}/{env.version}");
+            }
+            
+
             string lockValue = await saasafrasClient.LockFunction(FUNCTION_NAME, cwe.Time.ToString());
             try
             {
@@ -39,7 +49,7 @@ namespace VilcapDateAssignTask
 
                 var function = new Function();
                 context.Logger.LogLine("---Submitting Routed Podio Event");
-                await function.FunctionHandler(e, context);
+                //await function.FunctionHandler(e, context);
 
                 return;
             }
