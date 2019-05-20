@@ -9,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Task = System.Threading.Tasks.Task;
-using PdfSharp;
+//using PdfSharp;
 
 namespace newVilcapCopyFileToGoogleDrive
 
@@ -143,7 +143,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 var export = new FilesResource.ExportRequest(ds, addMe.Id, "application/pdf").Execute();
                 //var merged = new File();
                 
-                var pdf = new PdfSharp.Pdf.PdfDocument();
+                //var pdf = new PdfSharp.Pdf.PdfDocument();
                 var result = new FilesResource.UpdateRequest(ds, addMe, book.Id).Execute();
             }
             catch (Exception ex)
