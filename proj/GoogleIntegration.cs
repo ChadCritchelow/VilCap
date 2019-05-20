@@ -1,6 +1,6 @@
 ﻿using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
-using Google.Apis.Gmail.v1;
+//using Google.Apis.Gmail.v1;
 using PodioCore;
 using PodioCore.Exceptions;
 using PodioCore.Models;

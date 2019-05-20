@@ -32,7 +32,7 @@ namespace VilcapCreateWorkbook
             var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
             var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
             GetIds ids = new GetIds(dictChild, dictMaster, e.environmentId);
-            GoogleIntegration google = new GoogleIntegration();
+            //GoogleIntegration google = new GoogleIntegration();
             DriveService drive = new DriveService();
             EmbedService embedServ = new EmbedService(podio);
 
@@ -61,7 +61,7 @@ namespace VilcapCreateWorkbook
                     var matEmbed = material.Field<EmbedItemField>(ids.GetFieldId("Materials|Link to Material"));
                     foreach (Embed embed in matEmbed.Embeds)
                     {
-                        pages.Add(google.GetOneFile(drive, embed, e));
+                        //pages.Add(google.GetOneFile(drive, embed, e));
                     }
                 }
                 foreach (File page in pages)

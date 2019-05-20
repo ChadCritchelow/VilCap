@@ -12,6 +12,7 @@
     <PackageReference Include="Amazon.Lambda.Serialization.Json" Version="1.5.0" />
     <PackageReference Include="AWSSDK.Core" Version="3.3.101.11" />
     <PackageReference Include="AWSSDK.S3" Version="3.3.102.1" />
+    <PackageReference Include="Google.Apis.Gmail.v1" Version="1.40.0.1572" />
   </ItemGroup>
 <ItemGroup>
   <DotNetCliToolReference Include="Amazon.Lambda.Tools" Version="2.2.0" />
