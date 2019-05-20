@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.Core" Version="3.3.101.11" />
     <PackageReference Include="PodioCore.Async" Version="0.0.34" />
     <PackageReference Include="PodioCore.Comments" Version="0.0.7" />
     <PackageReference Include="PodioCore.Items" Version="0.0.24" />
