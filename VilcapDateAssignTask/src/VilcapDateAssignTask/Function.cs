@@ -9,7 +9,7 @@ using newVilcapCopyFileToGoogleDrive;
 using Saasafras;
 using PodioCore.Models.Request;
 using PodioCore.Services;
-using Task = System.Threading.Tasks.Task;
+//using Task = System.Threading.Tasks.Task;
 using PodioCore.Models;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
@@ -35,8 +35,8 @@ namespace VilcapDateAssignTask
             var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
             var podio = factory.ForClient(e.clientId, e.environmentId);
             SaasafrasClient saasafrasClient = new SaasafrasClient(
-                System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"),
-                System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY")
+                Environment.GetEnvironmentVariable("BBC_SERVICE_URL"),
+                Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY")
             );
             var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
             
