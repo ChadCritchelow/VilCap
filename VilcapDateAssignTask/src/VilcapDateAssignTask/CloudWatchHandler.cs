@@ -10,6 +10,10 @@ namespace VilcapDateAssignTask
 {
     public class CloudWatchHandler
     {
+        private class JsonHolder
+        {
+            public RoutedPodioEvent[] Values { get; set; }
+        }
        
         public async Task FunctionHandler(Amazon.Lambda.CloudWatchEvents.ScheduledEvents.ScheduledEvent cwe, ILambdaContext context)
         {
@@ -21,7 +25,7 @@ namespace VilcapDateAssignTask
             );
 
             string vilcapEnvar = System.Environment.GetEnvironmentVariable("VILCAP_ENVS");
-            var vilcapEnvs = JsonConvert.DeserializeObject<RoutedPodioEvent[]>(vilcapEnvar);
+            var vilcapEnvs= JsonConvert.DeserializeObject<JsonHolder>(vilcapEnvar).Values;
             foreach(RoutedPodioEvent env in vilcapEnvs)
             {
                 context.Logger.LogLine($"---{env.clientId}/{env.clientId}/{env.solutionId}/{env.version}");
