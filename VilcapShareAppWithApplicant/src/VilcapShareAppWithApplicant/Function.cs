@@ -69,7 +69,7 @@ namespace VilcapShareAppWithApplicant
                 people.Add(person);
 				var message = m;
 
-				await serv.CreateGrant("item", check.ItemId, people, message);
+				await serv.CreateGrant("item", check.ItemId, people, "", message);
 
 				Item updateMe = new Item() { ItemId = check.ItemId };
 				updateMe.Field<CategoryItemField>(ids.GetFieldId("Applications|Application Status")).OptionText = "New Application";
