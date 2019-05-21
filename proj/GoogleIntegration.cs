@@ -198,7 +198,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
 
         /// <summary>
-        /// 
+        /// Sends an email.
         /// </summary>
         /// <param name="service"></param>
         /// <param name="_userId"></param>
