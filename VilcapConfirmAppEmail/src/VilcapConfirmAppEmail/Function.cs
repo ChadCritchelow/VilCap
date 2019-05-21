@@ -13,6 +13,7 @@ using Saasafras;
 using System.Text.RegularExpressions;
 using PodioCore.Services;
 using PodioCore.Models.Request;
+using PodioCore.Comments;
 
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
@@ -72,34 +73,10 @@ namespace VilcapConfirmAppEmail
 						var subject = "Thank you for submitting your application!";
 						var messageBody = $"Thank you for submitting your application to {ids.GetLongName($"{e.environmentId}-FN")}'s Future of Work" +
 							" and Learning Program 2019. We will be reviewing your application and following up in the " +
-							"coming weeks regarding next steps. If you do have questions, please feel free to email me at" +
-							" stephen.wemple@vilcap.com.";
-						GrantService serv = new GrantService(podio);
-						List<Ref> people = new List<Ref>();
-						Ref person = new Ref();
-						person.Type = "mail";
-						person.Id = recipient;
-						people.Add(person);
-						context.Logger.LogLine("Getting all grants");
-						var grants = await serv.GetGrantsOnObject("item", check.ItemId);
-						context.Logger.LogLine("Counting grants");
-
-						context.Logger.LogLine($"Number of Grants: {grants.Count()}");
-
-						foreach(var grant in grants)
-						{
-							if (grant.User.Mail == recipient)
-							{
-								context.Logger.LogLine($"Got grant with email: {grant.User.Mail}");
-								context.Logger.LogLine("Removing Grant");
-
-								await serv.RemoveGrant("item", check.ItemId, grant.User.UserId.GetValueOrDefault());
-								context.Logger.LogLine("Creating Grant");
-
-								await serv.CreateGrant("item", check.ItemId, people, "rate", messageBody);
-							}
-						}
-						
+							"coming weeks regarding next steps. If you do have questions, please feel free to email me at " +
+						"[stephen.wemple@vilcap.com](mailto: stephen.wemple@vilcap.com)";
+						CommentService comm = new CommentService(podio);
+						await comm.AddCommentToObject("item", check.ItemId, messageBody);
 					}
 				}
 			}
