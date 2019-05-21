@@ -11,10 +11,7 @@
     <PackageReference Include="AWSSDK.S3" Version="3.3.102.1" />
     <PackageReference Include="Google.Apis.Gmail.v1" Version="1.40.0.1572" />
   </ItemGroup>
-<ItemGroup>
-  <DotNetCliToolReference Include="Amazon.Lambda.Tools" Version="2.2.0" />
-</ItemGroup>
-<ItemGroup>
-  <ProjectReference Include="..\..\..\proj\newVilcapCopyFileToGoogleDrive.csproj" />
-</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\proj\newVilcapCopyFileToGoogleDrive.csproj" />
+  </ItemGroup>
 </Project>

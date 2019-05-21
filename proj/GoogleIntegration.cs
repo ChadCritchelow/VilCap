@@ -1,5 +1,6 @@
 ﻿using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
+//using Google.Apis.Gmail.v1;
 using PodioCore;
 using PodioCore.Exceptions;
 using PodioCore.Models;
@@ -7,12 +8,18 @@ using PodioCore.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Task = System.Threading.Tasks.Task;
+//using PdfSharp;
 
 namespace newVilcapCopyFileToGoogleDrive
+
 {
-    class GoogleIntegration
+    public class GoogleIntegration
 	{
-		public string GetSubfolderId(DriveService ds, Podio podio, RoutedPodioEvent e, string parentFolder)
+        // Google Drive : DriveService
+        
+
+        public string GetSubfolderId(DriveService ds, Podio podio, RoutedPodioEvent e, string parentFolder)
 		{
 			try
 			{
@@ -66,7 +73,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
 				File clone = ds.Files.Copy(original, id).Execute();
 
-				await System.Threading.Tasks.Task.Run(() =>
+				await Task.Run(() =>
 				{
 					Permission p = new Permission
 					{
@@ -76,9 +83,9 @@ namespace newVilcapCopyFileToGoogleDrive
 					new PermissionsResource.CreateRequest(ds, p, clone.Id).Execute();
 				});
 
-				await System.Threading.Tasks.Task.Run(() =>
+				await Task.Run(() =>
 				{
-					PodioCore.Services.EmbedService embedServ = new EmbedService(podio);;
+					EmbedService embedServ = new EmbedService(podio);;
 
 					Console.WriteLine($"{e.podioEvent.item_id} - CloneID: {clone.Id}");
 					var req = ds.Files.Get(clone.Id);
@@ -114,7 +121,38 @@ namespace newVilcapCopyFileToGoogleDrive
 			}
 		}
 
-		public string GetDriveId(string url, RoutedPodioEvent e)
+        public File GetOneFile(DriveService ds, Embed embed, RoutedPodioEvent e)
+        {
+            try
+            {
+                var id = GetDriveId(embed.OriginalUrl, e);
+                File original = GetFileByTitle(ds, id, e);
+                return original;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
+                return null;
+            }
+        }
+        public void AppendOneFile(DriveService ds, RoutedPodioEvent e, File addMe, File book)
+        {
+            //var reader = PdfSharp.Pdf.IO.PdfReader.Open()
+            try
+            {
+                var export = new FilesResource.ExportRequest(ds, addMe.Id, "application/pdf").Execute();
+                //var merged = new File();
+                
+                //var pdf = new PdfSharp.Pdf.PdfDocument();
+                var result = new FilesResource.UpdateRequest(ds, addMe, book.Id).Execute();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
+            }
+        }
+
+        public string GetDriveId(string url, RoutedPodioEvent e)
 		{
 			try
 			{
@@ -152,5 +190,7 @@ namespace newVilcapCopyFileToGoogleDrive
 				return null;
 			}
 		}
+
+        // Gmail : 
 	}
 }

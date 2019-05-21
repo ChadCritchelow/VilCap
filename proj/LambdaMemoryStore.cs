@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 
 namespace BrickBridge.Lambda.VilCap
 {
+    /// <summary>
+    /// Something to integrate with google??
+    /// </summary>
     public class LambdaMemoryStore : Google.Apis.Util.Store.IDataStore
     {
         private Dictionary<string, string> dictionary = new Dictionary<string, string>();
