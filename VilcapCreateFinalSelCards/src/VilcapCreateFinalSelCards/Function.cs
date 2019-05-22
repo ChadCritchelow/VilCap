@@ -8,6 +8,7 @@ using BrickBridge.Lambda.VilCap;
 using newVilcapCopyFileToGoogleDrive;
 using Saasafras;
 using PodioCore.Services;
+using System.Collections.Generic;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
@@ -88,7 +89,29 @@ namespace VilcapCreateFinalSelCards
 							create.Field<EmailItemField>(ids.GetFieldId("Diligence and Selection|Shared Email")).Value =
 								item.Field<EmailItemField>(ids.GetFieldId("Program Support|Email")).Value;
 							await podio.CreateItem(create, ids.GetFieldId("Diligence and Selection"), true);
-						}
+
+                            GrantService serv = new GrantService(podio);
+                            //Create Email:
+                            var recipient = item.Field<EmailItemField>(ids.GetFieldId("Program Support|Email")).Value;
+                            var orgName = create.Field<TextItemField>(ids.GetFieldId("Diligence and Selection|Company")).Value;
+                            var m = $"Please Rate the {selectionRound} Company: {orgName}. \n" +
+                            "You can view all of your Podio items by at: <https://podio.com/vilcapcom/organization/grants>.\n " +
+                            "Please bookmark this link before changing your email notification settings.";
+
+                            //Send email
+                            var email = recipient;
+
+                            List<Ref> people = new List<Ref>();
+                            Ref person = new Ref
+                            {
+                                Type = "mail",
+                                Id = email
+                            };
+                            people.Add(person);
+                            var message = m;
+
+                            await serv.CreateGrant("item", check.ItemId, people, "rate", message);
+                        }
 					}
 				}
 			}
