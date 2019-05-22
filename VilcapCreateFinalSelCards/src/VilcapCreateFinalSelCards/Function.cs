@@ -92,7 +92,7 @@ namespace VilcapCreateFinalSelCards
 
                             GrantService serv = new GrantService(podio);
                             //Create Email:
-                            var recipient = item.Field<EmailItemField>(ids.GetFieldId("Program Support|Email")).Value;
+                            var recipient = item.Field<EmailItemField>(ids.GetFieldId("Program Support|Email")).Value.FirstOrDefault().Value;
                             var orgName = create.Field<TextItemField>(ids.GetFieldId("Diligence and Selection|Company")).Value;
                             var m = $"Please Rate the {selectionRound} Company: {orgName}. \n" +
                             "You can view all of your Podio items by at: <https://podio.com/vilcapcom/organization/grants>.\n " +
