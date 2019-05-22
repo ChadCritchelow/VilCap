@@ -52,7 +52,7 @@ namespace VilcapShareDocument
                 {
                     var item = new Item { ItemId = entrepreneur.ItemId };
                     var fieldId = ids.GetFieldId("Entrepreneurs|Entrepreneur Email");
-                    var emailField = entrepreneur.Field<EmailItemField>(fieldId);
+                    var emailField = item.Field<EmailItemField>(fieldId);
                     var email = emailField.Value.FirstOrDefault().Value;
                     Ref person = new Ref
                     {
