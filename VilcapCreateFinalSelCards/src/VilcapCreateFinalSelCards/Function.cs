@@ -88,7 +88,7 @@ namespace VilcapCreateFinalSelCards
 							create.Field<AppItemField>(ids.GetFieldId("Diligence and Selection|Selection Comittee Member")).ItemId = item.ItemId;
 							create.Field<EmailItemField>(ids.GetFieldId("Diligence and Selection|Shared Email")).Value =
 								item.Field<EmailItemField>(ids.GetFieldId("Program Support|Email")).Value;
-							await podio.CreateItem(create, ids.GetFieldId("Diligence and Selection"), true);
+							var card = await podio.CreateItem(create, ids.GetFieldId("Diligence and Selection"), true);
 
                             GrantService serv = new GrantService(podio);
                             //Create Email:
@@ -108,9 +108,9 @@ namespace VilcapCreateFinalSelCards
                                 Id = email
                             };
                             people.Add(person);
-                            var message = m;
 
-                            await serv.CreateGrant("item", check.ItemId, people, "rate", message);
+                            await serv.CreateGrant("item", check.ItemId, people, "rate", m);
+                            await serv.CreateGrant("item", card, people, "rate", m);
                         }
 					}
 				}
