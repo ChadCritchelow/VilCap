@@ -27,12 +27,12 @@ namespace VilcapDateAssignTask
             string vilcapEnvar = System.Environment.GetEnvironmentVariable("VILCAP_ENVS");
             var vilcapEnvs= JsonConvert.DeserializeObject<JsonHolder>(vilcapEnvar).Values;
 
-            string lockValue = await saasafrasClient.LockFunction(FUNCTION_NAME, cwe.Id);
+            string lockValue = await saasafrasClient.LockFunction(FUNCTION_NAME, cwe.Account);
             try
             {
                 if (string.IsNullOrEmpty(lockValue))
                 {
-                    context.Logger.LogLine($"Failed to acquire lock for {FUNCTION_NAME} at time {cwe.Id}");
+                    context.Logger.LogLine($"Failed to acquire lock for {FUNCTION_NAME} at time {cwe.Time.ToString()}");
                     return;
                 }
 
@@ -55,7 +55,7 @@ namespace VilcapDateAssignTask
             }
             finally
             {
-                await saasafrasClient.UnlockFunction(FUNCTION_NAME, cwe.Time.ToString(), lockValue);
+                await saasafrasClient.UnlockFunction(FUNCTION_NAME, cwe.Account, lockValue);
             }
         }
     }
