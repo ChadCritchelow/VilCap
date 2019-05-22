@@ -1,6 +1,7 @@
 ﻿using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
-//using Google.Apis.Gmail.v1;
+using Google.Apis.Gmail.v1;
+using Google.Apis.Gmail.v1.Data;
 using PodioCore;
 using PodioCore.Exceptions;
 using PodioCore.Models;
@@ -9,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Task = System.Threading.Tasks.Task;
+using Microsoft.IdentityModel.Tokens;
 //using PdfSharp;
 
 namespace newVilcapCopyFileToGoogleDrive
@@ -135,6 +137,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 return null;
             }
         }
+
         public void AppendOneFile(DriveService ds, RoutedPodioEvent e, File addMe, File book)
         {
             //var reader = PdfSharp.Pdf.IO.PdfReader.Open()
@@ -192,5 +195,36 @@ namespace newVilcapCopyFileToGoogleDrive
 		}
 
         // Gmail : 
-	}
+
+
+        /// <summary>
+        /// Sends an email.
+        /// </summary>
+        public void SendEmail(GmailService service, string _userId, string subject, string body, string from, string to, string fromAlias = "", string toAlias = "")
+        {
+            _userId = "toolkit@vilcap.com";
+            var content = Base64UrlEncoder.Encode(
+                $"MIME - Version: 1.0\n" +
+                $"Subject: {subject}\n" +
+                $"From: {fromAlias}<{from}>\n" +
+                $"To: {toAlias}<{to}>\n" +
+                $"Content - Type: text / plain; charset = \"UTF-8\\n\n" +
+                $"{body}"
+            );
+            var message = new Message
+            {
+                Raw = content
+            };
+
+            try
+            {
+                var result = service.Users.Messages.Send(message, _userId).Execute();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("An error occurred: " + e.Message);
+            }
+
+        }
+    }
 }

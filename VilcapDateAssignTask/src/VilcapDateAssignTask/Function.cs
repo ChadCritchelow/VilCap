@@ -75,15 +75,16 @@ namespace VilcapDateAssignTask
                     RefType = "item",
                     Id = item.ItemId,
                     DueDate = date.Start.GetValueOrDefault(),
-                    Text = title.Value   
+                    Text = title.Value
                 };
 
-                List<int> cIds = new List<int>();
+                IEnumerable<int> cIds = new List<int>();
                 foreach (var contact in responsibleMember.Contacts)
                 {
-                    cIds.Add(Convert.ToInt32(contact.UserId));
+                    cIds.Append(Convert.ToInt32(contact.UserId));
                 }
                 t.SetResponsible(cIds);
+                //t.SetResponsible(cIds);
 
                 var tasks = await taskServ.CreateTask(t);
                 
@@ -92,6 +93,10 @@ namespace VilcapDateAssignTask
                     await taskServ.AssignTask(Convert.ToInt32(task.TaskId),task.Responsible.UserId); //neccessary?
                     context.Logger.LogLine($"Assigned Task");
                 }
+
+
+
+
                 
 
                 var updateMe = new Item() { ItemId = item.ItemId };
