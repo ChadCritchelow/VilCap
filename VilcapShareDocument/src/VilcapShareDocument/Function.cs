@@ -50,7 +50,10 @@ namespace VilcapShareDocument
 
                 foreach (var entrepreneur in entrepreneurs.Items)
                 {
-                    var email = entrepreneur.Field<EmailItemField>(ids.GetFieldId("Entrepreneurs|Entrepreneur Email")).Value.FirstOrDefault().Value;
+                    var item = new Item { ItemId = entrepreneur.ItemId };
+                    var fieldId = ids.GetFieldId("Entrepreneur Email");
+                    var emailField = entrepreneur.Field<EmailItemField>(fieldId);
+                    var email = emailField.Value.FirstOrDefault().Value;
                     Ref person = new Ref
                     {
                         Type = "mail",
