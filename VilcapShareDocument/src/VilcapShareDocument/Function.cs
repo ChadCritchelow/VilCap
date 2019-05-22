@@ -45,7 +45,9 @@ namespace VilcapShareDocument
 											where r.App.Name == "Company Profiles"
 											select r;
 				GrantService serv = new GrantService(podio);
-				foreach (var reference in refFromCompanyProfile)
+
+                context.Logger.LogLine($"--- ref #: {refFromCompanyProfile.Count()}");
+                foreach (var reference in refFromCompanyProfile)
 				{
 					var item = await podio.GetItem(reference.Items.First().ItemId);
 					var email = item.Field<EmailItemField>(ids.GetFieldId("Company Profiles|Email")).Value.FirstOrDefault().Value;
