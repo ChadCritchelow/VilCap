@@ -58,18 +58,21 @@ namespace VilcapShareDocument
                     };
                     people.Add(person);
 
-					var description = check.Field<TextItemField>(ids.GetFieldId("Cohort Documents|Docment Desciption")).Value;
-					var message = $"Thank you for sending us your documents {description}. Please follow this link to view your submission.";
+                    context.Logger.LogLine($"--- email: {email}");
 
+                    var description = check.Field<TextItemField>(ids.GetFieldId("Cohort Documents|Docment Desciption")).Value;
+					var message = $"Thank you for sending us your documents {description}. Please follow this link to view your submission.";
 					await serv.CreateGrant("item", check.ItemId, people, "view", message);
-					if (string.IsNullOrEmpty(description))
+
+                    context.Logger.LogLine("--- Created grant");
+                    if (string.IsNullOrEmpty(description))
 					{
 						var docName = check.Files[0].Name;
 						Item updateMe = new Item() { ItemId = check.ItemId };
 						description = updateMe.Field<TextItemField>(ids.GetFieldId("Cohort Documents|Docment Desciption")).Value;
 						await podio.UpdateItem(updateMe, true);
 					}
-
+                    context.Logger.LogLine("--- ok");
 
 				}
 			}
