@@ -23,14 +23,9 @@ namespace VilcapDateAssignTask
                 System.Environment.GetEnvironmentVariable("BBC_SERVICE_URL"),
                 System.Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY")
             );
-           
 
             string vilcapEnvar = System.Environment.GetEnvironmentVariable("VILCAP_ENVS");
             var vilcapEnvs= JsonConvert.DeserializeObject<JsonHolder>(vilcapEnvar).Values;
-            foreach(RoutedPodioEvent e in vilcapEnvs)
-            {
-                context.Logger.LogLine($"--- Created events : {e.clientId}/{e.clientId}/{e.solutionId}/{e.version}");
-            }
 
             string lockValue = await saasafrasClient.LockFunction(FUNCTION_NAME, cwe.Id);
             try
@@ -39,6 +34,11 @@ namespace VilcapDateAssignTask
                 {
                     context.Logger.LogLine($"Failed to acquire lock for {FUNCTION_NAME} at time {cwe.Id}");
                     return;
+                }
+
+                foreach (RoutedPodioEvent e in vilcapEnvs)
+                {
+                    context.Logger.LogLine($"--- Created events : {e.clientId}/{e.clientId}/{e.solutionId}/{e.version}");
                 }
 
                 foreach (RoutedPodioEvent e in vilcapEnvs)
