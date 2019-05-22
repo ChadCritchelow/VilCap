@@ -45,7 +45,7 @@ namespace VilcapShareDocument
 
 				GrantService serv = new GrantService(podio);
                 List<Ref> people = new List<Ref>();
-                var entrepreneurs = check.Field<AppItemField>(ids.GetFieldId("Cohort Documents|Entreprenuer")).Items;
+                var entrepreneurs = check.Field<AppItemField>(ids.GetFieldId("Cohort Documents|Entrepreneur")).Items;
                 foreach (var entrepreneur in entrepreneurs)
                 {
                     var email = entrepreneur.Field<EmailItemField>(ids.GetFieldId("Entrepreneurs|Entrepreneur Email")).Value.FirstOrDefault().Value;
