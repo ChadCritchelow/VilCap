@@ -15,6 +15,9 @@ using PodioCore.Services;
 
 namespace VilcapShareDocument
 {
+    /// <summary>
+    /// Runs on Cohort Documement|item.create
+    /// </summary>
     public class Function
     {
 		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
@@ -39,44 +42,36 @@ namespace VilcapShareDocument
 					context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
 					return;
 				}
-				//when an item is created in cohort documents:
-				var refs = await podio.GetReferringItems(check.ItemId);
-				var refFromCompanyProfile = from r in refs
-											where r.App.Name == "Company Profiles"
-											select r;
+
 				GrantService serv = new GrantService(podio);
-
-                context.Logger.LogLine($"--- ref #: {refFromCompanyProfile.Count()}");
-                foreach (var reference in refFromCompanyProfile)
-				{
-					var item = await podio.GetItem(reference.Items.First().ItemId);
-					var email = item.Field<EmailItemField>(ids.GetFieldId("Company Profiles|Email")).Value.FirstOrDefault().Value;
-
-                    List<Ref> people = new List<Ref>();
+                List<Ref> people = new List<Ref>();
+                var entrepreneurs = check.Field<AppItemField>(ids.GetFieldId("Cohort Documents|Entreprenuers")).Items;
+                foreach (var entrepreneur in entrepreneurs)
+                {
+                    var email = entrepreneur.Field<EmailItemField>(ids.GetFieldId("Entreprenuers|Entrepreneur Email")).Value.FirstOrDefault().Value;
                     Ref person = new Ref
                     {
                         Type = "mail",
                         Id = email
                     };
                     people.Add(person);
+                    context.Logger.LogLine($"--- Added Email: {email}");
+                }
 
-                    context.Logger.LogLine($"--- email: {email}");
+                var description = check.Field<TextItemField>(ids.GetFieldId("Cohort Documents|Docment Desciption")).Value;
+				var message = $"Thank you for sending us your documents {description}. Please follow this link to view your submission.";
+				await serv.CreateGrant("item", check.ItemId, people, "view", message);
+                context.Logger.LogLine("--- Created grant(s)");
 
-                    var description = check.Field<TextItemField>(ids.GetFieldId("Cohort Documents|Docment Desciption")).Value;
-					var message = $"Thank you for sending us your documents {description}. Please follow this link to view your submission.";
-					await serv.CreateGrant("item", check.ItemId, people, "view", message);
-
-                    context.Logger.LogLine("--- Created grant");
-                    if (string.IsNullOrEmpty(description))
-					{
-						var docName = check.Files[0].Name;
-						Item updateMe = new Item() { ItemId = check.ItemId };
-						description = updateMe.Field<TextItemField>(ids.GetFieldId("Cohort Documents|Docment Desciption")).Value;
-						await podio.UpdateItem(updateMe, true);
-					}
-                    context.Logger.LogLine("--- ok");
-
+                if (string.IsNullOrEmpty(description))
+				{
+					var docName = check.Files[0].Name;
+					Item updateMe = new Item() { ItemId = check.ItemId };
+					description = updateMe.Field<TextItemField>(ids.GetFieldId("Cohort Documents|Docment Desciption")).Value;
+					await podio.UpdateItem(updateMe, true);
 				}
+                context.Logger.LogLine("--- ok");
+
 			}
 			catch(Exception ex)
 			{
