@@ -50,7 +50,7 @@ namespace VilcapShareDocument
 
                 foreach (var entrepreneur in entrepreneurs.Items)
                 {
-                    var item = new Item { ItemId = entrepreneur.ItemId };
+                    var item = await podio.GetItem(entrepreneur.ItemId);
                     var fieldId = ids.GetFieldId("Entrepreneurs|Entrepreneur Email");
                     var emailField = item.Field<EmailItemField>(fieldId);
                     var email = emailField.Value.FirstOrDefault().Value;
