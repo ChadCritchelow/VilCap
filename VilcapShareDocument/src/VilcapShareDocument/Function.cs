@@ -61,8 +61,8 @@ namespace VilcapShareDocument
                 var description = check.Field<TextItemField>(ids.GetFieldId("Cohort Documents|Docment Desciption")).Value;
 				var message = $"Thank you for sending us your documents {description}. Please follow this link to view your submission.";
 				await serv.CreateGrant("item", check.ItemId, people, "view", message);
-                context.Logger.LogLine("--- Created grant(s)");
 
+                context.Logger.LogLine("--- Created grant(s)");
                 if (string.IsNullOrEmpty(description))
 				{
 					var docName = check.Files[0].Name;
