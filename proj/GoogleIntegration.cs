@@ -200,16 +200,7 @@ namespace newVilcapCopyFileToGoogleDrive
         /// <summary>
         /// Sends an email.
         /// </summary>
-        /// <param name="service"></param>
-        /// <param name="_userId"></param>
-        /// <param name="subject"></param>
-        /// <param name="body"></param>
-        /// <param name="from"></param>
-        /// <param name="to"></param>
-        /// <param name="fromAlias"></param>
-        /// <param name="toAlias"></param>
-        /// <returns></returns>
-        public async Task SendEmail(GmailService service, string _userId, string subject, string body, string from, string to, string fromAlias = "", string toAlias = "")
+        public void SendEmail(GmailService service, string _userId, string subject, string body, string from, string to, string fromAlias = "", string toAlias = "")
         {
             _userId = "toolkit@vilcap.com";
             var content = Base64UrlEncoder.Encode(
@@ -227,7 +218,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
             try
             {
-                await service.Users.Messages.Send(message, _userId).ExecuteAsync();
+                var result = service.Users.Messages.Send(message, _userId).Execute();
             }
             catch (Exception e)
             {
