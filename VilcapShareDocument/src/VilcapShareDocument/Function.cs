@@ -45,10 +45,10 @@ namespace VilcapShareDocument
 
 				GrantService serv = new GrantService(podio);
                 List<Ref> people = new List<Ref>();
-                var entrepreneurs = check.Field<AppItemField>(ids.GetFieldId("Cohort Documents|Entreprenuers")).Items;
+                var entrepreneurs = check.Field<AppItemField>(ids.GetFieldId("Cohort Documents|Entreprenuer")).Items;
                 foreach (var entrepreneur in entrepreneurs)
                 {
-                    var email = entrepreneur.Field<EmailItemField>(ids.GetFieldId("Entreprenuers|Entrepreneur Email")).Value.FirstOrDefault().Value;
+                    var email = entrepreneur.Field<EmailItemField>(ids.GetFieldId("Entrepreneurs|Entrepreneur Email")).Value.FirstOrDefault().Value;
                     Ref person = new Ref
                     {
                         Type = "mail",
