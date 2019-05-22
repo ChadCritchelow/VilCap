@@ -48,17 +48,20 @@ namespace VilcapShareDocument
 				foreach (var reference in refFromCompanyProfile)
 				{
 					var item = await podio.GetItem(reference.Items.First().ItemId);
-					var email = item.Field<EmailItemField>(ids.GetFieldId("Company Profiles|Email"));
+					var email = item.Field<EmailItemField>(ids.GetFieldId("Company Profiles|Email")).Value.FirstOrDefault().Value;
 
-					List<Ref> people = new List<Ref>();
-					Ref person = new Ref();
-					person.Type = "mail";
-					person.Id = email.Value.First().Value;
-					people.Add(person);
+                    List<Ref> people = new List<Ref>();
+                    Ref person = new Ref
+                    {
+                        Type = "mail",
+                        Id = email
+                    };
+                    people.Add(person);
+
 					var description = check.Field<TextItemField>(ids.GetFieldId("Cohort Documents|Docment Desciption")).Value;
-					var message = $"Thank you for sending us your documents {description}.Please follow this link to view your submission.";
+					var message = $"Thank you for sending us your documents {description}. Please follow this link to view your submission.";
 
-					await serv.CreateGrant("item", check.ItemId, people, "rate", message);
+					await serv.CreateGrant("item", check.ItemId, people, "view", message);
 					if (string.IsNullOrEmpty(description))
 					{
 						var docName = check.Files[0].Name;
@@ -66,6 +69,8 @@ namespace VilcapShareDocument
 						description = updateMe.Field<TextItemField>(ids.GetFieldId("Cohort Documents|Docment Desciption")).Value;
 						await podio.UpdateItem(updateMe, true);
 					}
+
+
 				}
 			}
 			catch(Exception ex)
