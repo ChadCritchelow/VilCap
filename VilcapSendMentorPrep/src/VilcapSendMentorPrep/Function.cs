@@ -16,7 +16,7 @@ namespace VilcapSendMentorPrep
     public class Function
     {
         static readonly string[] Scopes = { GmailService.Scope.GmailCompose };
-        static readonly string ApplicationName = "BrickBridgeVilCap";
+        static readonly string ApplicationName = "BrickBridgeVilCapGmail";
 
         public void FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
         {
