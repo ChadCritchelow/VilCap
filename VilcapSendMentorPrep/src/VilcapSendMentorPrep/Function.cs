@@ -16,9 +16,8 @@ namespace VilcapSendMentorPrep
 {
     public class Function
     {
-        static readonly string[] Scopes = { GmailService.Scope.MailGoogleCom };
+        static readonly string[] Scopes = { GmailService.Scope.GmailCompose };
         static readonly string ApplicationName = "BrickBridgeVilcapGmail";
-        static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
 
         public void FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
         {

@@ -214,15 +214,14 @@ namespace newVilcapCopyFileToGoogleDrive
                 $"{body}"
             );
             Console.WriteLine($"--- content: {content}");
-            var message = new Message();
-            message = new Message
+            var message = new Message
             {
                 Raw = content
             };
             Console.WriteLine($"--- messageId: {message.Id}");
             try
             {
-                var result = service.Users.Messages.Send(message, _userId).Execute();
+                var result = service.Users.Messages.Send(message, service.ApiKey).Execute();
                 Console.WriteLine($"--- result raw: {result.Raw}");
             }
             catch (Exception e)
