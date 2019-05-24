@@ -209,7 +209,8 @@ namespace newVilcapCopyFileToGoogleDrive
                 $"Subject: {subject}\n" +
                 $"From: {fromAlias}<{from}>\n" +
                 $"To: {toAlias}<{to}>\n" +
-                $"Content - Type: text / plain; charset = \"UTF-8\" \n\n" +
+                $"Content - Type: text / plain; charset = \"UTF-8\" \n" +
+                $"\n" +
                 $"{body}"
             );
             Console.WriteLine($"--- content: {content}");
