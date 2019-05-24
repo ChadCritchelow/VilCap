@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Amazon.Lambda.Core;
+using BrickBridge.Lambda.VilCap;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Gmail.v1;
 using Google.Apis.Services;
@@ -15,8 +16,9 @@ namespace VilcapSendMentorPrep
 {
     public class Function
     {
-        static readonly string[] Scopes = { GmailService.Scope.GmailCompose };
-        static readonly string ApplicationName = "BrickBridgeVilCapGmail";
+        static readonly string[] Scopes = { GmailService.Scope.MailGoogleCom };
+        static readonly string ApplicationName = "BrickBridgeVilcapGmail";
+        static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
 
         public void FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
         {
@@ -32,7 +34,7 @@ namespace VilcapSendMentorPrep
             //
             try
             {
-                google.SendEmail(gmail, "toolkit@vilcap.com", "SUB", "BOD", "toolkit@vilcap.com", "john@brickbridgeconsulting.com", "VilCap", "dev");
+                google.SendEmail(gmail, "vilcapgmailmanager@brickbridgevilcapgmail.iam.gserviceaccount.com", "SUB", "BOD", "toolkit@vilcap.com", "john@brickbridgeconsulting.com", "VilCap", "dev");
                 context.Logger.LogLine("--- Email sent.");
             }
             //
