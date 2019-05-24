@@ -202,7 +202,7 @@ namespace newVilcapCopyFileToGoogleDrive
         /// </summary>
         public void SendEmail(GmailService service, string _userId, string subject, string body, string from, string to, string fromAlias = "", string toAlias = "")
         {
-            //_userId = "me";
+            _userId = "me";
             Console.WriteLine("--- Starting SendEmail");
             var content = Base64UrlEncoder.Encode(
                 $"MIME - Version: 1.0\n" +
@@ -221,7 +221,8 @@ namespace newVilcapCopyFileToGoogleDrive
             Console.WriteLine($"--- messageId: {message.Id}");
             try
             {
-                var result = service.Users.Messages.Send(message, service.ApiKey).Execute();
+                //UsersResource.MessagesResource.SendRequest request = service.Users.Messages.Send(_userId)
+                var result = service.Users.Messages.Send(message, _userId).Execute();
                 Console.WriteLine($"--- result raw: {result.Raw}");
             }
             catch (Exception e)
