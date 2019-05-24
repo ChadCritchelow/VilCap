@@ -34,7 +34,8 @@ namespace VilcapSendMentorPrep
             //
             try
             {
-                google.SendEmail(gmail, "vilcapdrivemanager@brickbridgevilcap.iam.gserviceaccount.com", "SUB", "BOD", "vilcapdrivemanager@brickbridgevilcap.iam.gserviceaccount.com", "john@brickbridgeconsulting.com", "VilCap", "dev");
+                var gdriveLinks = "BODY: " + "https://docs.google.com/document/d/1tkVbKR0f4w-JKTGExNvNnWHwy2hPpFlDK_-ho30gtc4/export";
+                google.SendEmail(gmail, "vilcapdrivemanager@brickbridgevilcap.iam.gserviceaccount.com", "SUB", gdriveLinks, "vilcapdrivemanager@brickbridgevilcap.iam.gserviceaccount.com", "john@brickbridgeconsulting.com", "VilCap", "dev");
                 context.Logger.LogLine("--- Email sent.");
             }
             //

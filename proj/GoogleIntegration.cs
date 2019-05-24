@@ -214,6 +214,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 $"Content - Type: text / plain; charset = \"UTF-8\" \r\n" +
                 $"\r\n" +
                 $"{body}";
+
             Console.WriteLine($"--- content: {content}");
             content = Base64UrlEncoder.Encode(content.ToString());
             Console.WriteLine($"--- content (encoded): {content}");
