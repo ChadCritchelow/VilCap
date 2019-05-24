@@ -202,7 +202,7 @@ namespace newVilcapCopyFileToGoogleDrive
         /// </summary>
         public void SendEmail(GmailService service, string _userId, string subject, string body, string from, string to, string fromAlias = "", string toAlias = "")
         {
-            //_userId = "toolkit@vilcap.com";
+            _userId = "me";
             Console.WriteLine("--- Starting SendEmail");
             var content = Base64UrlEncoder.Encode(
                 $"MIME - Version: 1.0\n" +
@@ -214,7 +214,8 @@ namespace newVilcapCopyFileToGoogleDrive
                 $"{body}"
             );
             Console.WriteLine($"--- content: {content}");
-            var message = new Message
+            var message = new Message();
+            message = new Message
             {
                 Raw = content
             };
