@@ -204,16 +204,17 @@ namespace newVilcapCopyFileToGoogleDrive
         {
             //_userId = "me";
             Console.WriteLine("--- Starting SendEmail");
-            var content = Base64UrlEncoder.Encode(
+            var content =
                 $"MIME - Version: 1.0\n" +
                 $"Subject: {subject}\n" +
                 $"From: {fromAlias}<{from}>\n" +
                 $"To: {toAlias}<{to}>\n" +
                 $"Content - Type: text / plain; charset = \"UTF-8\" \n" +
                 $"\n" +
-                $"{body}"
-            );
+                $"{body}";
             Console.WriteLine($"--- content: {content}");
+            content = Base64UrlEncoder.Encode(content);
+            Console.WriteLine($"--- content (encoded): {content}");
             try
             {
                 Message message = new Message
