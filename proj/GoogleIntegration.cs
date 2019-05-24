@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Task = System.Threading.Tasks.Task;
 using Microsoft.IdentityModel.Tokens;
+
+using System.Net;
 //using PdfSharp;
 
 namespace newVilcapCopyFileToGoogleDrive
@@ -205,15 +207,15 @@ namespace newVilcapCopyFileToGoogleDrive
             //_userId = "me";
             Console.WriteLine($"--- Starting SendEmail with userId {_userId}");
             var content =
-                $"MIME - Version: 1.0\n" +
-                $"Subject: {subject}\n" +
-                $"From: {fromAlias}<{from}>\n" +
-                $"To: {toAlias}<{to}>\n" +
-                $"Content - Type: text / plain; charset = \"UTF-8\" \n" +
-                $"\n" +
+                $"MIME - Version: 1.0\r\n" +
+                $"Subject: {subject}\r\n" +
+                $"From: {fromAlias}<{from}>\r\n" +
+                $"To: {toAlias}<{to}>\r\n" +
+                $"Content - Type: text / plain; charset = \"UTF-8\" \r\n" +
+                $"\r\n" +
                 $"{body}";
             Console.WriteLine($"--- content: {content}");
-            content = Base64UrlEncoder.Encode(content);
+            content = Base64UrlEncoder.Encode(content.ToString());
             Console.WriteLine($"--- content (encoded): {content}");
             try
             {
@@ -222,9 +224,10 @@ namespace newVilcapCopyFileToGoogleDrive
                     Raw = content
                 };
                 Console.WriteLine($"--- messageId: {message.Id}");
-           
+
                 //UsersResource.MessagesResource.SendRequest request = service.Users.Messages.Send(_userId)
                 var result = service.Users.Messages.Send(message, _userId).Execute();
+                
                 Console.WriteLine($"--- result raw: {result.Raw}");
             }
             catch (Exception e)
