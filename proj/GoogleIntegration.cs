@@ -203,7 +203,7 @@ namespace newVilcapCopyFileToGoogleDrive
         public void SendEmail(GmailService service, string _userId, string subject, string body, string from, string to, string fromAlias = "", string toAlias = "")
         {
             //_userId = "me";
-            Console.WriteLine("--- Starting SendEmail");
+            Console.WriteLine($"--- Starting SendEmail with userId {_userId}");
             var content =
                 $"MIME - Version: 1.0\n" +
                 $"Subject: {subject}\n" +
