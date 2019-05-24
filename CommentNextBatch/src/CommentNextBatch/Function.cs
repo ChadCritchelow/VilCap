@@ -33,9 +33,15 @@ namespace CommentNextBatch
 		public string version { get; set; }
 		public string appId { get; set; }
 	}
-	public class Function
+
+    /// <summary>
+    /// Admin|comment.create -->
+    /// Increments the TL or WS batch counter
+    /// </summary>
+    public class Function
 	{
 		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
+
 		public async System.Threading.Tasks.Task FunctionHandler(RoutedCommentEvent e, ILambdaContext context)
 		{
 			#region //Required code for all Vilcap Lambda Functions//

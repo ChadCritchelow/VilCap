@@ -14,9 +14,15 @@ using Saasafras;
 
 namespace VilcapCreateSetDefaults
 {
-    public class Function
+    
+
+    public class Function 
     {
 		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
+        /// <summary>
+        /// Company Profile|item.create -->
+        /// Pull data from Application & Create Entrepreneurs
+        /// </summary>
 		public async System.Threading.Tasks.Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
 		{
 			var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
@@ -27,8 +33,6 @@ namespace VilcapCreateSetDefaults
 			var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
 			string lockValue;
 			GetIds ids = new GetIds(dictChild, dictMaster, e.environmentId);
-			//Make sure to implement by checking to see if Deploy Curriculum has just changed
-			//Deploy Curriculum field
 			string functionName = "VilcapCreateSetDefaults";
 			lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
 			try
