@@ -30,10 +30,11 @@ namespace VilcapSendMentorPrep
                 HttpClientInitializer = cred,
                 ApplicationName = ApplicationName,
             });
+            
             //
             try
             {
-                google.SendEmail(gmail, "vilcapgmailmanager@brickbridgevilcapgmail.iam.gserviceaccount.com", "SUB", "BOD", "toolkit@vilcap.com", "john@brickbridgeconsulting.com", "VilCap", "dev");
+                google.SendEmail(gmail, "me", "SUB", "BOD", "vilcapsaasafras@brickbridgevilcapgmail.iam.gserviceaccount.com", "john@brickbridgeconsulting.com", "VilCap", "dev");
                 context.Logger.LogLine("--- Email sent.");
             }
             //
