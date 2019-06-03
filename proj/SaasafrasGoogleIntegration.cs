@@ -12,6 +12,8 @@ using System.Linq;
 using Task = System.Threading.Tasks.Task;
 using Microsoft.IdentityModel.Tokens;
 
+using Saasafras.Lambda.Google;
+
 using System.Net;
 //using PdfSharp;
 
@@ -60,31 +62,22 @@ namespace newVilcapCopyFileToGoogleDrive
 			}
 		}
 
-		public async Task UpdateOneEmbed(DriveService ds, Embed embed, List<Embed> embeds, string subfolderId, Podio podio, RoutedPodioEvent e)
+		public async Task UpdateOneEmbed(SaasafrasGoogleDriveService saasyDrive, Embed embed, List<Embed> embeds, string subfolderId, Podio podio, RoutedPodioEvent e)
 		{
 			try
 			{
-				//Console.WriteLine($"{e.podioEvent.item_id} - Old Embed Link (resolved): {embed.ResolvedUrl}");
-				var id = GetDriveId(embed.OriginalUrl, e);
-				File original = GetFileByTitle(ds, id, e);
+				var id = saasyDrive.GetFileId(embed.OriginalUrl);
+                var original = await saasyDrive.GetFileMicro(id, "name, parents");
+
 				if (original.Parents == null)
 					original.Parents = new List<string>();
-				Console.WriteLine($"{e.podioEvent.item_id} -Old File ID: {original.Id}, Name: {original.Name}");
+				Console.WriteLine($"{e.podioEvent.item_id} - Old File ID: {original.Id}, Name: {original.Name}");
 				original.Parents.Clear();
 				original.Parents.Add(subfolderId);
 				original.Name = e.environmentId + " " + original.Name;
 
-				File clone = ds.Files.Copy(original, id).Execute();
-
-				await Task.Run(() =>
-				{
-					Permission p = new Permission
-					{
-						Role = "writer",
-						Type = "anyone"
-					};
-					new PermissionsResource.CreateRequest(ds, p, clone.Id).Execute();
-				});
+                var clone = await saasyDrive.CopyFile(id);
+                bool permissionsAdded = await saasyDrive.SetPermissions(id, "writer", "anyone");
 
 				await Task.Run(() =>
 				{
@@ -128,7 +121,7 @@ namespace newVilcapCopyFileToGoogleDrive
         {
             try
             {
-                var id = GetDriveId(embed.OriginalUrl, e);
+                var id = Saas GetDriveId(embed.OriginalUrl, e);
                 File original = GetFileByTitle(ds, id, e);
                 return original;
             }
@@ -155,29 +148,6 @@ namespace newVilcapCopyFileToGoogleDrive
                 Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
             }
         }
-
-        public string GetDriveId(string url, RoutedPodioEvent e)
-		{
-			try
-			{
-				string[] substr = url.Split(new char[] { '=', '/', '?' });
-				foreach (string s in substr)
-				{
-					if (s.Length == 44 || s.Length == 33)
-					{
-						//Console.WriteLine($"{e.podioEvent.item_id} - Found ID: {s} from url: {url}");
-						return s;
-					}
-				}
-				Console.WriteLine($"{e.podioEvent.item_id} - Could not find ID for url: {url}");
-				return null;
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
-				return null;
-			}
-		}
 
 		public File GetFileByTitle(DriveService ds, string id, RoutedPodioEvent e)
 		{
