@@ -64,15 +64,17 @@ namespace VilcapCreateCompanyProfile
                                 submittedApplication.Field<EmailItemField>(ids.GetFieldId("Applications|Email")).Values;
                             companyProfile.Field<DateItemField>(ids.GetFieldId("Company Profiles|Company Founding Date")).Values =
                                 submittedApplication.Field<DateItemField>(ids.GetFieldId("Applications|Company Founding Date ")).Values; // " "
-                            companyProfile.Field<EmbedItemField>(ids.GetFieldId("Company Profiles|Website")).Values =
-                                submittedApplication.Field<EmbedItemField>(ids.GetFieldId("Applications|Website")).Values;
                             companyProfile.Field<TextItemField>(ids.GetFieldId("Company Profiles|Twitter Handle")).Value =
                                 submittedApplication.Field<TextItemField>(ids.GetFieldId("Applications|Twitter Handle")).Value;
                             companyProfile.Field<TextItemField>(ids.GetFieldId("Company Profiles|LinkedIn Page")).Value =
                                 submittedApplication.Field<TextItemField>(ids.GetFieldId("Applications|LinkedIn Page")).Value;
                             companyProfile.Field<TextItemField>(ids.GetFieldId("Company Profiles|Facebook Page")).Value =
                                 submittedApplication.Field<TextItemField>(ids.GetFieldId("Applications|Facebook Page")).Value;
-                            #endregion
+
+                            var embedField = companyProfile.Field<EmbedItemField>(ids.GetFieldId("Company Profiles|Website")); 
+                            var website = submittedApplication.Field<EmbedItemField>(ids.GetFieldId("Applications|Website")).Embeds.FirstOrDefault();
+                            embedField.AddEmbed(website.EmbedId);
+                           
                         }
                         catch (Exception ex)
                         {
@@ -80,7 +82,8 @@ namespace VilcapCreateCompanyProfile
                             throw ex;
 
                         }
-                        
+                        #endregion
+
                         await podio.CreateItem(companyProfile, ids.GetFieldId("Company Profiles"), true);
 					}
 				}
