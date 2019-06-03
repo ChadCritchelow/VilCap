@@ -63,7 +63,7 @@ namespace VilcapCreateCompanyProfile
                             companyProfile.Field<EmailItemField>(ids.GetFieldId("Company Profiles|Email")).Values =
                                 submittedApplication.Field<EmailItemField>(ids.GetFieldId("Applications|Email")).Values;
                             companyProfile.Field<DateItemField>(ids.GetFieldId("Company Profiles|Company Founding Date")).Values =
-                                submittedApplication.Field<DateItemField>(ids.GetFieldId("Applications|Company Founding Date")).Values;
+                                submittedApplication.Field<DateItemField>(ids.GetFieldId("Applications|Company Founding Date ")).Values; // " "
                             companyProfile.Field<EmbedItemField>(ids.GetFieldId("Company Profiles|Website")).Values =
                                 submittedApplication.Field<EmbedItemField>(ids.GetFieldId("Applications|Website")).Values;
                             companyProfile.Field<TextItemField>(ids.GetFieldId("Company Profiles|Twitter Handle")).Value =
