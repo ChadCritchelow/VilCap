@@ -32,6 +32,7 @@ namespace newVilcapCopyFileToGoogleDrive
 		Dictionary<string, string> fullNames;
 		RoutedPodioEvent ev;
 		string commentText=null;
+        
 
 		public static string StripHTML(string input)
 		{
@@ -65,7 +66,8 @@ namespace newVilcapCopyFileToGoogleDrive
 			context.Logger.LogLine($"App: {check.App.Name}");
 
 			GoogleIntegration google = new GoogleIntegration();
-			PreSurvAndExp pre = new PreSurvAndExp();
+            var saasGoogleIntegration = new SaasafrasGoogleIntegration();
+            PreSurvAndExp pre = new PreSurvAndExp();
 			GetIds ids = new GetIds(dictChild,dictMaster,e.environmentId);
             CommentService comm = new CommentService(podio);
             Survey s = new Survey();

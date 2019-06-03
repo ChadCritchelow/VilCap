@@ -19,12 +19,6 @@ namespace VilcapDateAssignTask
 {
     public class Function
     {
-
-		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
-        Dictionary<string, string> dictChild;
-        Dictionary<string, string> dictMaster;
-        Dictionary<string, string> fullNames;
-
         public async Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
         {
             //var awsClient = new Amazon.Lambda.AmazonLambdaClient();
@@ -39,10 +33,10 @@ namespace VilcapDateAssignTask
                 Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY")
             );
             var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
-            
+            var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
             GetIds ids = new GetIds(dictChild, dictMaster, e.environmentId);
 
-            string functionName = "VilcapDateAssignTask";
+            //string functionName = "VilcapDateAssignTask";
 
             var taskServ = new TaskService(podio);
             var itemServ = new ItemService(podio);
@@ -93,11 +87,6 @@ namespace VilcapDateAssignTask
                     await taskServ.AssignTask(Convert.ToInt32(task.TaskId),task.Responsible.UserId); //neccessary?
                     context.Logger.LogLine($"Assigned Task");
                 }
-
-
-
-
-                
 
                 var updateMe = new Item() { ItemId = item.ItemId };
                 var dupecheck = updateMe.Field<CategoryItemField>(ids.GetFieldId("Task List|Task Assigned?"));

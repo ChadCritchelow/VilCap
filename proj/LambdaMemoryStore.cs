@@ -9,7 +9,7 @@ namespace BrickBridge.Lambda.VilCap
     /// </summary>
     public class LambdaMemoryStore : Google.Apis.Util.Store.IDataStore
     {
-        private Dictionary<string, string> dictionary = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> dictionary = new Dictionary<string, string>();
         public Task ClearAsync()
         {
             return Task.Run(() => dictionary.Clear());

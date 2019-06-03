@@ -18,7 +18,6 @@ namespace VilcapCreateSetDefaults
 
     public class Function 
     {
-		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
         /// <summary>
         /// Company Profile|item.create -->
         /// Pull data from Application & Create Entrepreneurs
@@ -42,19 +41,19 @@ namespace VilcapCreateSetDefaults
 					context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
 					return;
 				}
-				//On Creation of a Company Profile:
+                // On Creation of a Company Profile:
 
-				//get referenced items from applications app:
-				Item checkApp = new Item();
+                #region>> Get referenced items from applications app >>
+                Item checkApp = new Item();
 				var itemRef = check.Field<AppItemField>(ids.GetFieldId("Company Profiles|Application"));
-				
 				Item updateApp = new Item() { ItemId = itemRef.Items.First().ItemId };
 				updateApp.Field<CategoryItemField>(ids.GetFieldId("Applications|Application Status")).OptionText = "Company Profile Created";
 				await podio.UpdateItem(updateApp, true);
-				checkApp = await podio.GetItem(itemRef.Items.First().ItemId);
-				context.Logger.LogLine($"Item ID in foreach: {itemRef.Items.First().ItemId}");
+                #endregion
 
-				context.Logger.LogLine($"Application ITem ID: {checkApp.ItemId}");
+                checkApp = await podio.GetItem(itemRef.Items.First().ItemId);
+				context.Logger.LogLine($"Item ID in foreach: {itemRef.Items.First().ItemId}");
+				context.Logger.LogLine($"Application Item ID: {checkApp.ItemId}");
 				Item updateCompanyProfile = new Item() { ItemId = check.ItemId };
 				updateCompanyProfile.Field<PhoneItemField>(ids.GetFieldId("Company Profiles|Phone")).Value =
 					checkApp.Field<PhoneItemField>(ids.GetFieldId("Applications|Phone")).Value;
@@ -70,9 +69,11 @@ namespace VilcapCreateSetDefaults
 				{
 					Item entrepreneur = new Item();
 					entrepreneur.Field<AppItemField>(ids.GetFieldId("Entrepreneurs|Company")).ItemId = check.ItemId;
-					List<EmailPhoneFieldResult> emailList = new List<EmailPhoneFieldResult>();
-					emailList.Add(email);
-					entrepreneur.Field<EmailItemField>(ids.GetFieldId("Entrepreneurs|Entrepreneur Email")).Value =emailList;
+                    List<EmailPhoneFieldResult> emailList = new List<EmailPhoneFieldResult>
+                    {
+                        email
+                    };
+                    entrepreneur.Field<EmailItemField>(ids.GetFieldId("Entrepreneurs|Entrepreneur Email")).Value =emailList;
 					await podio.CreateItem(entrepreneur, ids.GetFieldId("Entrepreneurs"), true);
 				}
 				await podio.UpdateItem(updateCompanyProfile, true);

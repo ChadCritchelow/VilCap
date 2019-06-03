@@ -17,7 +17,6 @@ namespace VilcapUpdateApplicationStatus
 {
     public class Function
     {
-		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
 		public async System.Threading.Tasks.Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
 		{
 			var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
@@ -71,10 +70,12 @@ namespace VilcapUpdateApplicationStatus
 							$"{check.Field<TextItemField>(ids.GetFieldId("Applications|Company Name")).Value} here: {check.Link}";
 
 						var date = DateTime.Now.AddDays(5);
-						TaskCreateUpdateRequest t = new TaskCreateUpdateRequest();
-						t.Description = title;
-						t.Text = "Details";
-						int cId=0;
+                        TaskCreateUpdateRequest t = new TaskCreateUpdateRequest
+                        {
+                            Description = title,
+                            Text = "Details"
+                        };
+                        int cId=0;
 
 						foreach (var contact in programAssociates.Contacts)
 						{

@@ -41,7 +41,7 @@ namespace VilcapSendMentorPrep
             //
             catch (System.Exception ex)
             {
-                context.Logger.LogLine(ex.Message);
+                context.Logger.LogLine($"{e.clientId} - {ex.Message}");
                 throw ex;
             }
             //
