@@ -17,8 +17,6 @@ namespace VilcapCreateFinalSelCards
 {
     public class Function
     {
-
-		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
 		public async System.Threading.Tasks.Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
 		{
 			var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);

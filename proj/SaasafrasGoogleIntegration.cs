@@ -84,9 +84,6 @@ namespace newVilcapCopyFileToGoogleDrive
 					EmbedService embedServ = new EmbedService(podio);;
 
 					Console.WriteLine($"{e.podioEvent.item_id} - CloneID: {clone.Id}");
-					var req = ds.Files.Get(clone.Id);
-					req.Fields = "webViewLink";
-					clone = req.Execute();
 					//runs 130x approx
 					int waitSeconds = 5;
 					CallPodio:
@@ -117,20 +114,6 @@ namespace newVilcapCopyFileToGoogleDrive
 			}
 		}
 
-        public File GetOneFile(DriveService ds, Embed embed, RoutedPodioEvent e)
-        {
-            try
-            {
-                var id = Saas GetDriveId(embed.OriginalUrl, e);
-                File original = GetFileByTitle(ds, id, e);
-                return original;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"{e.podioEvent.item_id} - {ex.Message} - {ex.StackTrace} - {ex.InnerException}");
-                return null;
-            }
-        }
 
         public void AppendOneFile(DriveService ds, RoutedPodioEvent e, File addMe, File book)
         {
