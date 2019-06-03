@@ -72,15 +72,17 @@ namespace VilcapCreateCompanyProfile
                                 submittedApplication.Field<TextItemField>(ids.GetFieldId("Applications|Facebook Page")).Value;
 
                             var embedField = companyProfile.Field<EmbedItemField>(ids.GetFieldId("Company Profiles|Website")); 
-                            var website = submittedApplication.Field<EmbedItemField>(ids.GetFieldId("Applications|Website")).Embeds.FirstOrDefault();
-                            embedField.AddEmbed(website.EmbedId);
-                           
+                            var website = submittedApplication.Field<EmbedItemField>(ids.GetFieldId("Applications|Website")).Embeds.FirstOrDefault().ResolvedUrl;
+                            Embed em = new Embed
+                            {
+                                OriginalUrl = website
+                            };
+                            embedField.Embeds.Append(em);
                         }
                         catch (Exception ex)
                         {
                             context.Logger.LogLine($"!!! Inner Exception: {ex.Message}");
                             throw ex;
-
                         }
                         #endregion
 
