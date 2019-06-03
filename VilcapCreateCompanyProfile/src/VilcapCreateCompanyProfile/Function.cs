@@ -54,24 +54,31 @@ namespace VilcapCreateCompanyProfile
                         companyProfile.Field<AppItemField>(ids.GetFieldId("Company Profiles|Application")).ItemId = submittedApplication.ItemId;
 
                         #region >>> Copy Values >>>
-                        companyProfile.Field<LocationItemField>(ids.GetFieldId("Company Profiles|Location")).Values = 
+                        try
+                        {
+                            companyProfile.Field<LocationItemField>(ids.GetFieldId("Company Profiles|Location")).Values =
                             submittedApplication.Field<LocationItemField>(ids.GetFieldId("Applications|Location")).Values;
-                        companyProfile.Field<PhoneItemField>(ids.GetFieldId("Company Profiles|Phone")).Values =
-                            submittedApplication.Field<PhoneItemField>(ids.GetFieldId("Applications|Phone")).Values;
-                        companyProfile.Field<EmailItemField>(ids.GetFieldId("Company Profiles|Email")).Values =
-                            submittedApplication.Field<EmailItemField>(ids.GetFieldId("Applications|Email")).Values;
-                        companyProfile.Field<DateItemField>(ids.GetFieldId("Company Profiles|Company Founding Date")).Values =
-                            submittedApplication.Field<DateItemField>(ids.GetFieldId("Applications|Company Founding Date")).Values;
-                        companyProfile.Field<EmbedItemField>(ids.GetFieldId("Company Profiles|Website")).Values =
-                            submittedApplication.Field<EmbedItemField>(ids.GetFieldId("Applications|Website")).Values;
-                        companyProfile.Field<TextItemField>(ids.GetFieldId("Company Profiles|Twitter Handle")).Value =
-                            submittedApplication.Field<TextItemField>(ids.GetFieldId("Applications|Twitter Handle")).Value;
-                        companyProfile.Field<TextItemField>(ids.GetFieldId("Company Profiles|LinkedIn Page")).Value =
-                            submittedApplication.Field<TextItemField>(ids.GetFieldId("Applications|LinkedIn Page")).Value;
-                        companyProfile.Field<TextItemField>(ids.GetFieldId("Company Profiles|Facebook Page")).Value =
-                            submittedApplication.Field<TextItemField>(ids.GetFieldId("Applications|Facebook Page")).Value;
-                        #endregion
-
+                            companyProfile.Field<PhoneItemField>(ids.GetFieldId("Company Profiles|Phone")).Values =
+                                submittedApplication.Field<PhoneItemField>(ids.GetFieldId("Applications|Phone")).Values;
+                            companyProfile.Field<EmailItemField>(ids.GetFieldId("Company Profiles|Email")).Values =
+                                submittedApplication.Field<EmailItemField>(ids.GetFieldId("Applications|Email")).Values;
+                            companyProfile.Field<DateItemField>(ids.GetFieldId("Company Profiles|Company Founding Date")).Values =
+                                submittedApplication.Field<DateItemField>(ids.GetFieldId("Applications|Company Founding Date")).Values;
+                            companyProfile.Field<EmbedItemField>(ids.GetFieldId("Company Profiles|Website")).Values =
+                                submittedApplication.Field<EmbedItemField>(ids.GetFieldId("Applications|Website")).Values;
+                            companyProfile.Field<TextItemField>(ids.GetFieldId("Company Profiles|Twitter Handle")).Value =
+                                submittedApplication.Field<TextItemField>(ids.GetFieldId("Applications|Twitter Handle")).Value;
+                            companyProfile.Field<TextItemField>(ids.GetFieldId("Company Profiles|LinkedIn Page")).Value =
+                                submittedApplication.Field<TextItemField>(ids.GetFieldId("Applications|LinkedIn Page")).Value;
+                            companyProfile.Field<TextItemField>(ids.GetFieldId("Company Profiles|Facebook Page")).Value =
+                                submittedApplication.Field<TextItemField>(ids.GetFieldId("Applications|Facebook Page")).Value;
+                            #endregion
+                        }
+                        catch (Exception ex)
+                        {
+                            throw ex;
+                        }
+                        
                         await podio.CreateItem(companyProfile, ids.GetFieldId("Company Profiles"), true);
 					}
 				}
