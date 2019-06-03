@@ -76,7 +76,9 @@ namespace VilcapCreateCompanyProfile
                         }
                         catch (Exception ex)
                         {
+                            context.Logger.LogLine($"!!! Inner Exception: {ex.Message}");
                             throw ex;
+
                         }
                         
                         await podio.CreateItem(companyProfile, ids.GetFieldId("Company Profiles"), true);
@@ -85,8 +87,9 @@ namespace VilcapCreateCompanyProfile
 			}
 			catch(Exception ex)
 			{
-				throw ex;
-			}
+                context.Logger.LogLine($"!!! Outer Exception: {ex.Message}");
+                throw ex;
+            }
 			finally
 			{
 				await saasafrasClient.UnlockFunction(functionName, submittedApplication.ItemId.ToString(), lockValue);
