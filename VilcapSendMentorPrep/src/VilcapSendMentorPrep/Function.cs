@@ -40,21 +40,13 @@ namespace VilcapSendMentorPrep
 
             try
             {
-                var gdriveLinks = "BODY: " + "https://docs.google.com/document/d/1tkVbKR0f4w-JKTGExNvNnWHwy2hPpFlDK_-ho30gtc4/export";
-                //saasyGmail.SendEmail(gmail, "vilcapdrivemanager@brickbridgevilcap.iam.gserviceaccount.com", "SUB", gdriveLinks, "vilcapdrivemanager@brickbridgevilcap.iam.gserviceaccount.com", "john@brickbridgeconsulting.com", "VilCap", "dev");
-                context.Logger.LogLine("--- Email sent.");
+                var gdriveLinks = "BODY: " + "https://docs.google.com/document/d/1tkVbKR0f4w-JKTGExNvNnWHwy2hPpFlDK_-ho30gtc4/export";             
+                var mailMessage = _saasyGmail.BuildMessage("toolkit2vilcap.com", new string[]{"john@brickbridgeconsulting.com"}, gdriveLinks, "~1010101~");
+                var success = _saasyGmail.SendEmail(mailMessage);
+                var result = success.Result;
 
-                //
-                var mailMessage = new System.Net.Mail.MailMessage
-                {
-                    From = new System.Net.Mail.MailAddress("service@brickbridgeconsulting.com")
-                };
-                mailMessage.To.Add("john@brickbridgeconsulting.com");
-                mailMessage.Subject = "~MENTOR~";
-                mailMessage.Body = gdriveLinks;
-                mailMessage.IsBodyHtml = false;
+                context.Logger.LogLine($"--- Email sent: {success}");
 
-                _saasyGmail.SendEmail(mailMessage);
             }
             //
             catch (System.Exception ex)
