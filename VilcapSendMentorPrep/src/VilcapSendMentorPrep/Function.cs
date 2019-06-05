@@ -20,7 +20,7 @@ namespace VilcapSendMentorPrep
     public class Function
     {
         static readonly string[] Scopes = { GmailService.Scope.GmailCompose };
-        static readonly string ApplicationName = "BrickBridgeVilcapGmail";
+        ///static readonly string ApplicationName = "BrickBridgeVilcapGmail";
         private IGmailService _saasyGmail;
         public Function()
         {
@@ -47,7 +47,7 @@ namespace VilcapSendMentorPrep
                 //
                 var mailMessage = new System.Net.Mail.MailMessage
                 {
-                    From = new System.Net.Mail.MailAddress("vilcapdrivemanager@brickbridgevilcap.iam.gserviceaccount.com")
+                    From = new System.Net.Mail.MailAddress("service@brickbridgeconsulting.com")
                 };
                 mailMessage.To.Add("john@brickbridgeconsulting.com");
                 mailMessage.Subject = "~MENTOR~";
