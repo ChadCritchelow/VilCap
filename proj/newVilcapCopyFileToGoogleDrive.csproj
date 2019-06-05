@@ -10,13 +10,14 @@
     <PackageReference Include="AWSSDK.S3" Version="3.3.102.6" />
     <PackageReference Include="Google.Apis.Gmail.v1" Version="1.40.0.1572" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="5.4.0" />
+    <PackageReference Include="PDFsharp" Version="1.50.5147" />
     <PackageReference Include="PodioCore.Async" Version="0.0.34" />
     <PackageReference Include="PodioCore.Comments" Version="0.0.7" />
     <PackageReference Include="PodioCore.Items" Version="0.0.24" />
     <PackageReference Include="Saasafras" Version="0.2.17" />
     <PackageReference Include="Saasafras.Database" Version="0.1.29" />
     <PackageReference Include="Google.Apis.Drive.v3" Version="1.40.0.1596" />
-    <PackageReference Include="Saasafras.Lambda.Google" Version="0.0.1" />
+    <PackageReference Include="Saasafras.Lambda.Google" Version="0.0.2" />
     <PackageReference Include="Saasafras.Model" Version="0.2.0" />
   </ItemGroup>
 
