@@ -20,10 +20,14 @@ namespace VilcapSendMentorPrep
     {
         static readonly string[] Scopes = { GmailService.Scope.GmailCompose };
         static readonly string ApplicationName = "BrickBridgeVilcapGmail";
+        private IGmailService _saasyGmail;
+        public Function()
+        {
+            _saasyGmail = new SaasafrasGmailService();
+        }
 
         public void FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
         {
-            //
             //string serviceAcccount = Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
             //var cred = GoogleCredential.FromJson(serviceAcccount).CreateScoped(Scopes).UnderlyingCredential;
             //var google = new GoogleIntegration();
@@ -35,7 +39,6 @@ namespace VilcapSendMentorPrep
 
             try
             {
-                var saasyGmail = new SaasafrasGmailService();
                 var gdriveLinks = "BODY: " + "https://docs.google.com/document/d/1tkVbKR0f4w-JKTGExNvNnWHwy2hPpFlDK_-ho30gtc4/export";
                 //saasyGmail.SendEmail(gmail, "vilcapdrivemanager@brickbridgevilcap.iam.gserviceaccount.com", "SUB", gdriveLinks, "vilcapdrivemanager@brickbridgevilcap.iam.gserviceaccount.com", "john@brickbridgeconsulting.com", "VilCap", "dev");
                 context.Logger.LogLine("--- Email sent.");
@@ -50,7 +53,7 @@ namespace VilcapSendMentorPrep
                 mailMessage.Body = gdriveLinks;
                 mailMessage.IsBodyHtml = false;
 
-                saasyGmail.SendEmail(mailMessage);
+                _saasyGmail.SendEmail(mailMessage);
             }
             //
             catch (System.Exception ex)
