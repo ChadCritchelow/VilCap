@@ -12,6 +12,7 @@ using newVilcapCopyFileToGoogleDrive;
 using Saasafras.Lambda.Google;
 using Saasafras.Lambda.Google.Interfaces;
 
+
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
 
 namespace VilcapSendMentorPrep
