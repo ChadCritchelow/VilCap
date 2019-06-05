@@ -41,7 +41,7 @@ namespace VilcapSendMentorPrep
             try
             {
                 var gdriveLinks = "BODY: " + "https://docs.google.com/document/d/1tkVbKR0f4w-JKTGExNvNnWHwy2hPpFlDK_-ho30gtc4/export";             
-                var mailMessage = _saasyGmail.BuildMessage("toolkit@vilcap.com", new string[]{"john@brickbridgeconsulting.com"}, gdriveLinks, "~1010101~");
+                var mailMessage = _saasyGmail.BuildMessage("toolkit@vilcap.com", new string[]{"john@brickbridgeconsulting.com"}, "~1010101~", gdriveLinks);
                 var success = _saasyGmail.SendEmail(mailMessage);
                 var result = success.Result;
 
