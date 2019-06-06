@@ -51,7 +51,9 @@ namespace VilcapApplicationPdf
                 context.Logger.LogLine($"--- Created PDFpage");
                 var graphics = XGraphics.FromPdfPage(page);
                 context.Logger.LogLine($"--- Created Xgraphic");
-                var font = new XFont("Arial", 20, XFontStyle.Bold);
+                var font = new System.Drawing.Font(System.Drawing.FontFamily.GenericMonospace, 10.0f);
+                context.Logger.LogLine($"--- Created Font");
+                var xfont = new XFont(font);
                 context.Logger.LogLine($"--- Created Xfont");
 
                 graphics.DrawString("Hello, World!", font, XBrushes.Black, new XRect(0, 0, page.Width, page.Height), XStringFormat.Center);
