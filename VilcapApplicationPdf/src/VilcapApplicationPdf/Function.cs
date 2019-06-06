@@ -43,13 +43,19 @@ namespace VilcapApplicationPdf
 
                 // TRIGGER DESCRIPTION ...
                 var exId = item.ExternalId;
+                context.Logger.LogLine($"--- Making PDFdoc for item with XID={exId}");
 
                 var pdf = new PdfSharp.Pdf.PdfDocument();
+                context.Logger.LogLine($"--- Created PDFdoc");
                 var page = pdf.AddPage();
+                context.Logger.LogLine($"--- Created PDFpage");
                 var graphics = XGraphics.FromPdfPage(page);
+                context.Logger.LogLine($"--- Created Xgraphic");
                 var font = new XFont("Arial", 20, XFontStyle.Bold);
+                context.Logger.LogLine($"--- Created Xfont");
 
                 graphics.DrawString("Hello, World!", font, XBrushes.Black, new XRect(0, 0, page.Width, page.Height), XStringFormat.Center);
+                context.Logger.LogLine($"--- Drew Something");
                 var filename = "TEST_FILE.pdf";
                 
                 var fileService = new PodioCore.Services.FileService(podio);
