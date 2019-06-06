@@ -22,7 +22,8 @@ namespace VilcapApplicationPdf
             #region >> Setup <<
             var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
             var podio = factory.ForClient(e.clientId, e.environmentId);
-            Item item = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
+            //Item item = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
+            Item item = await podio.GetItem(Convert.ToInt32("1131694213"));
             SaasafrasClient saasafrasClient = new SaasafrasClient(Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
             var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
             var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
