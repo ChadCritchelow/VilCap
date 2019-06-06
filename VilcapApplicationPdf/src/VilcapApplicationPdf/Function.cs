@@ -53,7 +53,8 @@ namespace VilcapApplicationPdf
                 context.Logger.LogLine($"--- Created PDFpage");
                 var graphics = XGraphics.FromPdfPage(page);
                 context.Logger.LogLine($"--- Created Xgraphic");
-                var font = new System.Drawing.Font(System.Drawing.FontFamily.GenericMonospace, 10.0f);
+                //var font = new System.Drawing.Font(System.Drawing.FontFamily.GenericMonospace, 10.0f);
+                var font = new System.Drawing.Font("Arial", 10.0f);
                 context.Logger.LogLine($"--- Created Font");
                 var xfont = new XFont(font);
                 context.Logger.LogLine($"--- Created Xfont");
