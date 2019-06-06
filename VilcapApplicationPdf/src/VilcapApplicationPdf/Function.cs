@@ -4,10 +4,12 @@ using System;
 using PodioCore.Items;
 using newVilcapCopyFileToGoogleDrive;
 using Saasafras;
-using PdfSharp.Drawing;
+using PdfSharp;
 using Saasafras.Lambda.Google;
 using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
+using PdfSharp.Drawing;
+
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
