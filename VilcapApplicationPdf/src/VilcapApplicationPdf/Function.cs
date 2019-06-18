@@ -8,7 +8,9 @@ using PdfSharp;
 using Saasafras.Lambda.Google;
 using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
+using Google.Apis.Docs.v1;
 using PdfSharp.Drawing;
+using Google.Apis.Docs.v1.Data;
 
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
@@ -25,12 +27,13 @@ namespace VilcapApplicationPdf
             var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
             var podio = factory.ForClient(e.clientId, e.environmentId);
             //Item item = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
-            Item item = await podio.GetItem(Convert.ToInt32("1131694213"));
-            SaasafrasClient saasafrasClient = new SaasafrasClient(Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
+            var item = await podio.GetItem(Convert.ToInt32("1131694213"));
+            var saasafrasClient = new SaasafrasClient(Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
             var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
             var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
             string lockValue;
-            GetIds ids = new GetIds(dictChild, dictMaster, e.environmentId);
+            var ids = new GetIds(dictChild, dictMaster, e.environmentId);
+            var saasyDocs = new SaasafrasGoogleDocsService();
 
             string functionName = "VilcapApplicationPdf";
             lockValue = await saasafrasClient.LockFunction(functionName, item.ItemId.ToString());
@@ -43,7 +46,7 @@ namespace VilcapApplicationPdf
                     return;
                 }
 
-                // TRIGGER DESCRIPTION ...
+                // USING PDFSHARP
                 var exId = item.ExternalId;
                 context.Logger.LogLine($"--- Making PDFdoc for item with XID={exId}");
 
@@ -53,7 +56,7 @@ namespace VilcapApplicationPdf
                 context.Logger.LogLine($"--- Created PDFpage");
                 var graphics = XGraphics.FromPdfPage(page);
                 context.Logger.LogLine($"--- Created Xgraphic");
-                //var font = new System.Drawing.Font(System.Drawing.FontFamily.GenericMonospace, 10.0f);
+                //var font = new System.Drawing.Font(System.Drawing.FontFamily.GenericMonospace, 10.0f); Gets this far
                 var font = new System.Drawing.Font("Arial", 10.0f);
                 context.Logger.LogLine($"--- Created Font");
                 var xfont = new XFont(font);
@@ -62,10 +65,16 @@ namespace VilcapApplicationPdf
                 graphics.DrawString("Hello, World!", font, XBrushes.Black, new XRect(0, 0, page.Width, page.Height), XStringFormat.Center);
                 context.Logger.LogLine($"--- Drew Something");
                 var filename = "TEST_FILE.pdf";
+
+                //var fileService = new PodioCore.Services.FileService(podio);
+                //var attachment = await fileService.UploadFile(filename, pdf.AcroForm.Stream.Value, "application/pdf");
+                //item.Files.Add(attachment);
+
+                // USING GDRIVE
+                var document = new Document();
+                //document.
                 
-                var fileService = new PodioCore.Services.FileService(podio);
-                var attachment = await fileService.UploadFile(filename, pdf.AcroForm.Stream.Value, "application/pdf");
-                item.Files.Add(attachment);
+                
 
                 // END CONTENT
                 #region >> Closeout <<

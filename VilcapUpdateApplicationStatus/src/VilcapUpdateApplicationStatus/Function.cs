@@ -73,16 +73,20 @@ namespace VilcapUpdateApplicationStatus
                         TaskCreateUpdateRequest t = new TaskCreateUpdateRequest
                         {
                             Description = title,
-                            Text = "Details"
+                            Text = "Details",
+                            Private = false
                         };
+                        
                         int cId=0;
 
-						foreach (var contact in programAssociates.Contacts)
+                        Random random = new Random();
+                        var assignedTo = programAssociates.Contacts.ToArray()[random.Next(programAssociates.Contacts.Count() - 1)];
+                        foreach (var contact in programAssociates.Contacts)
 						{
 							context.Logger.LogLine($"Adding Contact: {contact.Mail.First()} with userID: {contact.UserId}");
 							cId=Convert.ToInt32(contact.UserId);
+                            t.Private = true;
 						}
-						t.Private = false;
 						t.RefType = "item";
 						t.Id = check.ItemId;
 						t.SetResponsible(cId);
