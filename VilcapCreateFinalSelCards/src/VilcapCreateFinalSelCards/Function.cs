@@ -15,6 +15,9 @@ using System.Collections.Generic;
 
 namespace VilcapCreateFinalSelCards
 {
+    /// <summary>
+    /// {ESO}|Company Profiles|Selection Process --> ITEM.UPDATE --> "Semi-Finalist" OR "Finalist"
+    /// </summary>
     public class Function
     {
 		public async System.Threading.Tasks.Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
@@ -28,7 +31,6 @@ namespace VilcapCreateFinalSelCards
 
 			string lockValue;
 			GetIds ids = new GetIds(dictChild, dictMaster, e.environmentId);
-			//Make sure to implement by checking to see if Deploy Curriculum has just changed
 			//Deploy Curriculum field
 			string functionName="VilcapCreateFinalSelCards";
 			lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
@@ -108,7 +110,7 @@ namespace VilcapCreateFinalSelCards
                             people.Add(person);
 
                             await serv.CreateGrant("item", check.ItemId, people, "rate", m);
-                            await serv.CreateGrant("item", card, people, "rate", m);
+                            // await serv.CreateGrant("item", card, people, "rate", m);
                         }
 					}
 				}

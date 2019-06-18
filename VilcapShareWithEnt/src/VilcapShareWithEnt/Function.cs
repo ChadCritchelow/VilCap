@@ -53,7 +53,7 @@ namespace VilcapShareWithEnt
 				people.Add(person);
 				var message = m;
 
-				await serv.CreateGrant("item", check.ItemId, people, "rate", message);
+				await serv.CreateGrant("item", check.ItemId, people, "view", message);
 			}
 			catch(Exception ex)
 			{

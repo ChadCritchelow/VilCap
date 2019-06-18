@@ -27,8 +27,7 @@ namespace VilcapShareWithCom
 			var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
 			string lockValue;
 			GetIds ids = new GetIds(dictChild, dictMaster, e.environmentId);
-			//Make sure to implement by checking to see if Deploy Curriculum has just changed
-			//Deploy Curriculum field
+			//
 			string functionName="VilcapShareWithCom";
 			lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
 			try
