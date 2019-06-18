@@ -80,7 +80,7 @@ namespace VilcapUpdateApplicationStatus
                         int cId=0;
 
                         Random random = new Random();
-                        var assignedTo = programAssociates.Contacts.ToArray()[random.Next(programAssociates.Contacts.Count()-1)];
+                        var assignedTo = programAssociates.Contacts.ToArray()[random.Next(programAssociates.Contacts.Count())];
                         context.Logger.LogLine($"Adding Contact: {assignedTo.Mail.First()} with userID: {assignedTo.UserId}");
                         cId = Convert.ToInt32(assignedTo.UserId);
                         t.Private = true;
