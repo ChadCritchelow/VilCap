@@ -81,12 +81,14 @@ namespace VilcapUpdateApplicationStatus
 
                         Random random = new Random();
                         var assignedTo = programAssociates.Contacts.ToArray()[random.Next(programAssociates.Contacts.Count()-1)];
-                        foreach (var contact in programAssociates.Contacts)
-						{
-							context.Logger.LogLine($"Adding Contact: {contact.Mail.First()} with userID: {contact.UserId}");
-							cId=Convert.ToInt32(contact.UserId);
-                            t.Private = true;
-						}
+                        context.Logger.LogLine($"Adding Contact: {assignedTo.Mail.First()} with userID: {assignedTo.UserId}");
+                        cId = Convert.ToInt32(assignedTo.UserId);
+                        t.Private = true;
+      //                  foreach (var contact in programAssociates.Contacts)
+						//{
+						//	context.Logger.LogLine($"Adding Contact: {contact.Mail.First()} with userID: {contact.UserId}");
+						//	cId=Convert.ToInt32(contact.UserId);
+						//}
 						t.RefType = "item";
 						t.Id = check.ItemId;
 						t.SetResponsible(cId);
