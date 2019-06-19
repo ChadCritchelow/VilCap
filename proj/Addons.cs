@@ -121,7 +121,8 @@ namespace newVilcapCopyFileToGoogleDrive
                 {
                     fieldId = ids.GetFieldId("Workshop Modules|Description");
                     var descChild = child.Field<TextItemField>(fieldId);
-                    descChild.Value = StripHTML(descMaster.Value);
+                    //descChild.Value = StripHTML(descMaster.Value);
+                    descChild.Value = descMaster.Value;
                 }
 
                 var offsetMaster = master.Field<NumericItemField>(ids.GetFieldId("VC Administration|Content Curation |Minute Offset"));
@@ -247,7 +248,8 @@ namespace newVilcapCopyFileToGoogleDrive
                     if (descrMasterT.Value != null)
                     {
                         var descrCloneT = cloneT.Field<TextItemField>(ids.GetFieldId("Task List|Description"));
-                        descrCloneT.Value = StripHTML(descrMasterT.Value);
+                        //descrCloneT.Value = StripHTML(descrMasterT.Value);
+                        descrCloneT.Value = descrMasterT.Value;
                     }
 
                     var priorityMasterT = masterT.Field<CategoryItemField>(ids.GetFieldId("VC Administration|Master Schedule|Priority"));

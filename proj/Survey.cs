@@ -56,8 +56,9 @@ namespace newVilcapCopyFileToGoogleDrive
 					{
 						fieldId = ids.GetFieldId("Surveys|Notes");
 						var notesChild = child.Field<TextItemField>(fieldId);
-						notesChild.Value = StripHTML(notesMaster.Value);
-					}
+						//notesChild.Value = StripHTML(notesMaster.Value);
+                        notesChild.Value = notesMaster.Value;
+                    }
 
 					fieldId = ids.GetFieldId("VC Administration|Survey|Related Workshop");
 					var relMaster = master.Field<CategoryItemField>(fieldId);

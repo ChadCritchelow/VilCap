@@ -136,8 +136,9 @@ namespace newVilcapCopyFileToGoogleDrive
 				{
 					fieldId = ids.GetFieldId("Task List|Description");
 					var descrChild = child.Field<TextItemField>(fieldId);
-					descrChild.Value = StripHTML(descrMaster.Value);
-				}
+                    //descrChild.Value = StripHTML(descrMaster.Value);
+                    descrChild.Value = descrMaster.Value;
+                }
 				context.Logger.LogLine($"Added field:{descrMaster.Label}");
 
 				fieldId = ids.GetFieldId("VC Administration|Master Schedule|Phase");
