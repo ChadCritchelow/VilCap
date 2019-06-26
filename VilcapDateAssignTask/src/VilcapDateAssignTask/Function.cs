@@ -1,16 +1,15 @@
-using Amazon.Lambda.Core;
-using PodioCore.Utils.ItemFields;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using PodioCore.Items;
-using BrickBridge.Lambda.VilCap;
+using Amazon.Lambda.Core;
 using newVilcapCopyFileToGoogleDrive;
-using Saasafras;
+using PodioCore.Items;
+using PodioCore.Models;
 using PodioCore.Models.Request;
 using PodioCore.Services;
+using PodioCore.Utils.ItemFields;
+using Saasafras;
 using Task = System.Threading.Tasks.Task;
-using PodioCore.Models;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
@@ -19,7 +18,7 @@ namespace VilcapDateAssignTask
 {
     public class Function
     {
-        public async Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
+        public async Task FunctionHandler( RoutedPodioEvent e, ILambdaContext context )
         {
             //var awsClient = new Amazon.Lambda.AmazonLambdaClient();
             //InvokeRequest request = new InvokeRequest { FunctionName = "FunctionHandler" };
@@ -28,13 +27,13 @@ namespace VilcapDateAssignTask
 
             var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
             var podio = factory.ForClient(e.clientId, e.environmentId);
-            SaasafrasClient saasafrasClient = new SaasafrasClient(
+            var saasafrasClient = new SaasafrasClient(
                 Environment.GetEnvironmentVariable("BBC_SERVICE_URL"),
                 Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY")
             );
             var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
             var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
-            GetIds ids = new GetIds(dictChild, dictMaster, e.environmentId);
+            var ids = new GetIds(dictChild, dictMaster, e.environmentId);
 
             //string functionName = "VilcapDateAssignTask";
 
@@ -48,14 +47,14 @@ namespace VilcapDateAssignTask
             context.Logger.LogLine("Got View Service ...");
             var views = await viewServ.GetViews(22708289);
             var view = from v in views
-                        where v.Name == "[TaskAutomation]"
-                        select v;
+                       where v.Name == "[TaskAutomation]"
+                       select v;
             context.Logger.LogLine($"Got View '[TaskAutomation]' ...");
             var op = new FilterOptions { Filters = view.First().Filters };
             var filter = await podio.FilterItems(22708289, op);
             context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
 
-            foreach (var item in filter.Items)
+            foreach( var item in filter.Items )
             {
                 var responsibleMember = item.Field<ContactItemField>(ids.GetFieldId("Task List|Responsible Member"));
                 var title = item.Field<TextItemField>(ids.GetFieldId("Task List|Title"));
@@ -73,7 +72,7 @@ namespace VilcapDateAssignTask
                 };
 
                 IEnumerable<int> cIds = new List<int>();
-                foreach (var contact in responsibleMember.Contacts)
+                foreach( var contact in responsibleMember.Contacts )
                 {
                     cIds.Append(Convert.ToInt32(contact.UserId));
                 }
@@ -81,10 +80,10 @@ namespace VilcapDateAssignTask
                 //t.SetResponsible(cIds);
 
                 var tasks = await taskServ.CreateTask(t);
-                
-                foreach (PodioCore.Models.Task task in tasks)
+
+                foreach( var task in tasks )
                 {
-                    await taskServ.AssignTask(Convert.ToInt32(task.TaskId),task.Responsible.UserId); //neccessary?
+                    await taskServ.AssignTask(Convert.ToInt32(task.TaskId), task.Responsible.UserId); //neccessary?
                     context.Logger.LogLine($"Assigned Task");
                 }
 

@@ -1,16 +1,11 @@
-using Amazon.Lambda.Core;
-using PodioCore.Models;
 using System;
-using PodioCore.Items;
-using newVilcapCopyFileToGoogleDrive;
-using Saasafras;
-using PdfSharp;
-using Saasafras.Lambda.Google;
-using Google.Apis.Drive.v3;
-using Google.Apis.Drive.v3.Data;
-using Google.Apis.Docs.v1;
-using PdfSharp.Drawing;
+using Amazon.Lambda.Core;
 using Google.Apis.Docs.v1.Data;
+using newVilcapCopyFileToGoogleDrive;
+using PdfSharp.Drawing;
+using PodioCore.Items;
+using Saasafras;
+using Saasafras.Lambda.Google;
 
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
@@ -21,7 +16,7 @@ namespace VilcapApplicationPdf
     public class Function
     {
         [Obsolete]
-        public async System.Threading.Tasks.Task FunctionHandler(RoutedPodioEvent e, ILambdaContext context)
+        public async System.Threading.Tasks.Task FunctionHandler( RoutedPodioEvent e, ILambdaContext context )
         {
             #region >> Setup <<
             var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
@@ -35,12 +30,12 @@ namespace VilcapApplicationPdf
             var ids = new GetIds(dictChild, dictMaster, e.environmentId);
             var saasyDocs = new SaasafrasGoogleDocsService();
 
-            string functionName = "VilcapApplicationPdf";
+            var functionName = "VilcapApplicationPdf";
             lockValue = await saasafrasClient.LockFunction(functionName, item.ItemId.ToString());
             #endregion
             try
             {
-                if (string.IsNullOrEmpty(lockValue))
+                if( string.IsNullOrEmpty(lockValue) )
                 {
                     context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {item.ItemId}");
                     return;
@@ -64,7 +59,6 @@ namespace VilcapApplicationPdf
 
                 graphics.DrawString("Hello, World!", font, XBrushes.Black, new XRect(0, 0, page.Width, page.Height), XStringFormat.Center);
                 context.Logger.LogLine($"--- Drew Something");
-                var filename = "TEST_FILE.pdf";
 
                 //var fileService = new PodioCore.Services.FileService(podio);
                 //var attachment = await fileService.UploadFile(filename, pdf.AcroForm.Stream.Value, "application/pdf");
@@ -73,13 +67,13 @@ namespace VilcapApplicationPdf
                 // USING GDRIVE
                 var document = new Document();
                 //document.
-                
-                
+
+
 
                 // END CONTENT
                 #region >> Closeout <<
             }
-            catch (Exception ex)
+            catch( Exception ex )
             {
                 context.Logger.LogLine($"!!! Outer Exception: {ex.Message}");
                 throw ex;
