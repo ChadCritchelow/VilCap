@@ -58,11 +58,18 @@ namespace VilcapCreateSetDefaults
                     checkApp.Field<PhoneItemField>(ids.GetFieldId("Applications|Phone")).Value;
                 updateCompanyProfile.Field<EmailItemField>(ids.GetFieldId("Company Profiles|Email")).Value =
                     checkApp.Field<EmailItemField>(ids.GetFieldId("Applications|Email")).Value;
+
                 if( checkApp.Field<DateItemField>(ids.GetFieldId("Applications|Company Founding Date ")).Start != null )
                 {
-                    updateCompanyProfile.Field<DateItemField>(ids.GetFieldId("Company Profiles|Company Founding Date")).Start =
-                        checkApp.Field<DateItemField>(ids.GetFieldId("Applications|Company Founding Date ")).Start;
+                    updateCompanyProfile.Field<DateItemField>(ids.GetFieldId("Company Profiles|Company Founding Date")).Start = // BECOMING OBSOLETE
+                        checkApp.Field<DateItemField>(ids.GetFieldId("Applications|Company Founding Date ")).Start; // BECOMING OBSOLETE
                 }
+                else if( checkApp.Field<DateItemField>(ids.GetFieldId("Applications|Company Founding Date")).Start != null )
+                {
+                    updateCompanyProfile.Field<DateItemField>(ids.GetFieldId("Company Profiles|Company Founding Date")).Start =
+                        checkApp.Field<DateItemField>(ids.GetFieldId("Applications|Company Founding Date")).Start;
+                }
+
                 var emails = checkApp.Field<EmailItemField>(ids.GetFieldId("Applications|Email")).Value;
                 foreach( var email in emails )
                 {
