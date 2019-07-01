@@ -1,6 +1,10 @@
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
+using System;
 using Amazon.Lambda.Core;
+using newVilcapCopyFileToGoogleDrive;
 using PodioCore.Items;
+using PodioCore.Models;
+using PodioCore.Utils.ItemFields;
 using Saasafras;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
