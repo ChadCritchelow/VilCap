@@ -44,7 +44,7 @@ namespace UpdateDeployCurriculum
                 {
                     context.Logger.LogLine("User 'https://podio.com/users/" + check.CurrentRevision.CreatedBy.Id.GetValueOrDefault()+ "' is not authorized to perform this action.");
                     await new CommentService(podio).AddCommentToObject("item", check.ItemId,
-                        $":loudspeaker: User 'https://podio.com/users/" + check.CurrentRevision.CreatedBy.Id.GetValueOrDefault() + "' is not authorized to perform this action.", hook: false);
+                        $":loudspeaker: User ' https://podio.com/users/" + check.CurrentRevision.CreatedBy.Id.GetValueOrDefault() + " ' is not authorized to perform this action.", hook: false);
                     return;
                 }
                 switch( firstRevision.Label )

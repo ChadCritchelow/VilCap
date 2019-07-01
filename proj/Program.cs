@@ -82,9 +82,7 @@ namespace newVilcapCopyFileToGoogleDrive
             context.Logger.LogLine($"Item updated by {buttonPresser.Name} (Should be 'Vilcap Admin')");
             if (buttonPresser.Id.GetValueOrDefault() != 4610903)
             {
-                context.Logger.LogLine("User 'https://podio.com/users/"+buttonPresser.Id+"' is not authorized to perform this action.");
-                await comm.AddCommentToObject("item", check.ItemId, 
-                    $":loudspeaker: User 'https://podio.com/users/" + buttonPresser.Id + "' is not authorized to perform this action.", hook: false);
+                context.Logger.LogLine("User ' https://podio.com/users/"+buttonPresser.Id+" ' is not authorized to perform this action.");
                 return;
             }
 
