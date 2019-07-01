@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Amazon.Lambda.Core;
 using newVilcapCopyFileToGoogleDrive;
+using PodioCore.Comments;
 using PodioCore.Items;
 using PodioCore.Models;
 using PodioCore.Utils.ItemFields;
@@ -16,6 +17,7 @@ namespace UpdateDeployCurriculum
     {
         public async System.Threading.Tasks.Task FunctionHandler( RoutedPodioEvent e, ILambdaContext context )
         {
+            const int ADMIN_ID = 4610903;
             var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
             var podio = factory.ForClient(e.clientId, e.environmentId);
             var check = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
@@ -38,6 +40,13 @@ namespace UpdateDeployCurriculum
 
                 var revision = await podio.GetRevisionDifference(Convert.ToInt32(check.ItemId), check.CurrentRevision.Revision - 1, check.CurrentRevision.Revision);
                 var firstRevision = revision.First();
+                if(check.CurrentRevision.CreatedBy.Id.GetValueOrDefault() != ADMIN_ID)
+                {
+                    context.Logger.LogLine("User 'https://podio.com/users/" + check.CurrentRevision.CreatedBy.Id.GetValueOrDefault()+ "' is not authorized to perform this action.");
+                    await new CommentService(podio).AddCommentToObject("item", check.ItemId,
+                        $":loudspeaker: User 'https://podio.com/users/" + check.CurrentRevision.CreatedBy.Id.GetValueOrDefault() + "' is not authorized to perform this action.", hook: false);
+                    return;
+                }
                 switch( firstRevision.Label )
                 {
                     case "Deploy Task List":
