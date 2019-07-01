@@ -4,7 +4,6 @@ using PodioCore.Utils.ItemFields;
 using System;
 using System.Linq;
 using PodioCore.Items;
-using BrickBridge.Lambda.VilCap;
 using newVilcapCopyFileToGoogleDrive;
 using Saasafras;
 using System.Text.RegularExpressions;
@@ -40,8 +39,6 @@ namespace CommentNextBatch
     /// </summary>
     public class Function
 	{
-		static LambdaMemoryStore memoryStore = new LambdaMemoryStore();
-
 		public async System.Threading.Tasks.Task FunctionHandler(RoutedCommentEvent e, ILambdaContext context)
 		{
 			#region //Required code for all Vilcap Lambda Functions//

@@ -13,8 +13,6 @@ using Task = System.Threading.Tasks.Task;
 using Microsoft.IdentityModel.Tokens;
 
 using Saasafras.Lambda.Google;
-
-using System.Net;
 //using PdfSharp;
 
 namespace newVilcapCopyFileToGoogleDrive

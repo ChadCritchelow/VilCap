@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Amazon.Lambda.Core;
-using BrickBridge.Lambda.VilCap;
 using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
 using newVilcapCopyFileToGoogleDrive;

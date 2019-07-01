@@ -1,9 +1,7 @@
 
 using Amazon.Lambda.Core;
-using Google.Apis.Gmail.v1;
 using newVilcapCopyFileToGoogleDrive;
 using Saasafras.Lambda.Google;
-using Saasafras.Lambda.Google.Interfaces;
 
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]

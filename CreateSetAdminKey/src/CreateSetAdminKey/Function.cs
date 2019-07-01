@@ -1,12 +1,3 @@
-using System;
-using Amazon.Lambda.Core;
-using BrickBridge.Lambda.VilCap;
-using newVilcapCopyFileToGoogleDrive;
-using PodioCore.Items;
-using PodioCore.Models;
-using PodioCore.Utils.ItemFields;
-using Saasafras;
-
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
 

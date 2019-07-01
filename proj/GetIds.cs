@@ -31,8 +31,10 @@ namespace newVilcapCopyFileToGoogleDrive
 				return Convert.ToInt32(dictChild[$"{dictChild[$"{envId}-FN"]}|{key}"]);
 			}
 			else
-				return Convert.ToInt32(dictMaster[key]);
-		}
+            {
+                return Convert.ToInt32(dictMaster[key]);
+            }
+        }
 		public string GetLongName(string key)
 		{
 			return dictChild[key];
