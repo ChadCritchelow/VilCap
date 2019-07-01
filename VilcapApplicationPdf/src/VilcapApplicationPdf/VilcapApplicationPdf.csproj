@@ -7,9 +7,8 @@
   <ItemGroup>
     <PackageReference Include="Amazon.Lambda.Core" Version="1.1.0" />
     <PackageReference Include="Amazon.Lambda.Serialization.Json" Version="1.5.0" />
-    <PackageReference Include="Google.Apis.Docs.v1" Version="1.40.1.1610" />
+    <PackageReference Include="Google.Apis.Docs.v1" Version="1.40.2.1629" />
     <PackageReference Include="PDFsharpNetStandard2" Version="1.51.4845" />
-    <PackageReference Include="EPPlus" Version="4.5.3.1" />
     <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
   </ItemGroup>
   <ItemGroup>
