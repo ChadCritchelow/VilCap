@@ -27,9 +27,9 @@ namespace newVilcapCopyFileToGoogleDrive
 			try
 			{
 				//Console.WriteLine($"{e.podioEvent.item_id} - EnvID: {e.environmentId}");
-				FilesResource.ListRequest listReq = ds.Files.List();
+				var listReq = ds.Files.List();
 				listReq.Q = "name='" + e.environmentId + "'";
-				string folderId = "";
+				var folderId = "";
 
 				if (listReq.Execute().Files.Any())
 				{
@@ -37,12 +37,12 @@ namespace newVilcapCopyFileToGoogleDrive
 				}
 				else if (folderId == "")
 				{
-					File folder = new File
+					var folder = new File
 					{
 						Name = e.environmentId,
 						MimeType = "application/vnd.google-apps.folder",
 					};
-                    File F = new File();
+                    var F = new File();
                     //F.Name = e.environmentId; // test
                     //F.MimeType = "application/vnd.google-apps.folder"; // test
                     folder.Parents.Add(parentFolder);
@@ -66,7 +66,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			{
 				//Console.WriteLine($"{e.podioEvent.item_id} - Old Embed Link (resolved): {embed.ResolvedUrl}");
 				var id = GetDriveId(embed.OriginalUrl, e);
-				File original = GetFileByTitle(ds, id, e);
+				var original = GetFileByTitle(ds, id, e);
 				if (original.Parents == null)
 					original.Parents = new List<string>();
 				Console.WriteLine($"{e.podioEvent.item_id} -Old File ID: {original.Id}, Name: {original.Name}");
@@ -74,11 +74,11 @@ namespace newVilcapCopyFileToGoogleDrive
 				original.Parents.Add(subfolderId);
 				original.Name = e.environmentId + " " + original.Name;
 
-				File clone = ds.Files.Copy(original, id).Execute();
+				var clone = ds.Files.Copy(original, id).Execute();
 
 				await Task.Run(() =>
 				{
-					Permission p = new Permission
+					var p = new Permission
 					{
 						Role = "writer",
 						Type = "anyone"
@@ -88,14 +88,14 @@ namespace newVilcapCopyFileToGoogleDrive
 
 				await Task.Run(() =>
 				{
-					EmbedService embedServ = new EmbedService(podio);;
+					var embedServ = new EmbedService(podio);;
 
 					Console.WriteLine($"{e.podioEvent.item_id} - CloneID: {clone.Id}");
 					var req = ds.Files.Get(clone.Id);
 					req.Fields = "webViewLink";
 					clone = req.Execute();
 					//runs 130x approx
-					int waitSeconds = 5;
+					var waitSeconds = 5;
 					CallPodio:
 					Embed em;
 					try
@@ -106,7 +106,7 @@ namespace newVilcapCopyFileToGoogleDrive
 					{
 						Console.WriteLine($"{ex.Message}");
 						Console.WriteLine($"Trying again in {waitSeconds} seconds.");
-						for (int i = 0; i < waitSeconds; i++)
+						for (var i = 0; i < waitSeconds; i++)
 						{
 							System.Threading.Thread.Sleep(1000);
 							Console.WriteLine(".");
@@ -129,7 +129,7 @@ namespace newVilcapCopyFileToGoogleDrive
             try
             {
                 var id = GetDriveId(embed.OriginalUrl, e);
-                File original = GetFileByTitle(ds, id, e);
+                var original = GetFileByTitle(ds, id, e);
                 return original;
             }
             catch (Exception ex)
@@ -160,8 +160,8 @@ namespace newVilcapCopyFileToGoogleDrive
 		{
 			try
 			{
-				string[] substr = url.Split(new char[] { '=', '/', '?' });
-				foreach (string s in substr)
+				var substr = url.Split(new char[] { '=', '/', '?' });
+				foreach (var s in substr)
 				{
 					if (s.Length == 44 || s.Length == 33)
 					{
@@ -219,7 +219,7 @@ namespace newVilcapCopyFileToGoogleDrive
             Console.WriteLine($"--- content (encoded): {content}");
             try
             {
-                Message message = new Message
+                var message = new Message
                 {
                     Raw = content
                 };

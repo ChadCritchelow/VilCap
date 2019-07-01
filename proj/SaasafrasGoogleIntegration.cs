@@ -27,9 +27,9 @@ namespace newVilcapCopyFileToGoogleDrive
 			try
 			{
 				//Console.WriteLine($"{e.podioEvent.item_id} - EnvID: {e.environmentId}");
-				FilesResource.ListRequest listReq = ds.Files.List();
+				var listReq = ds.Files.List();
 				listReq.Q = "name='" + e.environmentId + "'";
-				string folderId = "";
+				var folderId = "";
 
 				if (listReq.Execute().Files.Any())
 				{
@@ -37,12 +37,12 @@ namespace newVilcapCopyFileToGoogleDrive
 				}
 				else if (folderId == "")
 				{
-					File folder = new File
+					var folder = new File
 					{
 						Name = e.environmentId,
 						MimeType = "application/vnd.google-apps.folder",
 					};
-                    File F = new File();
+                    var F = new File();
                     //F.Name = e.environmentId; // test
                     //F.MimeType = "application/vnd.google-apps.folder"; // test
                     folder.Parents.Add(parentFolder);
@@ -75,15 +75,15 @@ namespace newVilcapCopyFileToGoogleDrive
 				original.Name = e.environmentId + " " + original.Name;
 
                 var clone = await saasyDrive.CopyFile(id);
-                bool permissionsAdded = await saasyDrive.SetPermissions(id, "writer", "anyone");
+                var permissionsAdded = await saasyDrive.SetPermissions(id, "writer", "anyone");
 
 				await Task.Run(() =>
 				{
-					EmbedService embedServ = new EmbedService(podio);;
+					var embedServ = new EmbedService(podio);;
 
 					Console.WriteLine($"{e.podioEvent.item_id} - CloneID: {clone.Id}");
 					//runs 130x approx
-					int waitSeconds = 5;
+					var waitSeconds = 5;
 					CallPodio:
 					Embed em;
 					try
@@ -94,7 +94,7 @@ namespace newVilcapCopyFileToGoogleDrive
 					{
 						Console.WriteLine($"{ex.Message}");
 						Console.WriteLine($"Trying again in {waitSeconds} seconds.");
-						for (int i = 0; i < waitSeconds; i++)
+						for (var i = 0; i < waitSeconds; i++)
 						{
 							System.Threading.Thread.Sleep(1000);
 							Console.WriteLine(".");
@@ -170,7 +170,7 @@ namespace newVilcapCopyFileToGoogleDrive
             Console.WriteLine($"--- content (encoded): {content}");
             try
             {
-                Message message = new Message
+                var message = new Message
                 {
                     Raw = content
                 };

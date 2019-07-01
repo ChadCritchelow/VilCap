@@ -33,12 +33,12 @@ namespace newVilcapCopyFileToGoogleDrive
             const int LIMIT = 25;
             const int MAX_BATCHES = 10;
             const int MASTER_SCHEDULE_APP = 21310276;
-            int batchNum = -1;
+            var batchNum = -1;
 
-            CommentService comm = new CommentService(podio);
+            var comm = new CommentService(podio);
             string commentText;
-            int count = 0;
-            int fieldId = 0;
+            var count = 0;
+            var fieldId = 0;
             var batchId = ids.GetFieldId("Admin|TL Batch");
             var batch = check.Field<CategoryItemField>(batchId).Options.First().Text;
             int.TryParse(batch, out batchNum);
@@ -48,7 +48,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
             // Generate a rough calendar based on dates in the Admin app  //
 
-            Scheduler scheduler = new Scheduler(context, podio, check, e, ids, PARTITIONS);
+            var scheduler = new Scheduler(context, podio, check, e, ids, PARTITIONS);
 
             // Get/Create View //
 
@@ -110,7 +110,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 count += 1;
                 context.Logger.LogLine($"On item #{count} ...");
-                Item child = new Item();
+                var child = new Item();
 
                 //--- Assign Fields ---//	
 
@@ -175,7 +175,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 {
                     continue;
                 }
-                Int32.TryParse(assignment.Options.First().Text, out int assignmentVal);
+                Int32.TryParse(assignment.Options.First().Text, out var assignmentVal);
                 child = scheduler.SetDate(child, ids, phaseMaster.Options.First().Text, assignmentVal, durMaster);
 
                 // GDrive Integration //
@@ -184,8 +184,8 @@ namespace newVilcapCopyFileToGoogleDrive
                 var embedMaster = master.Field<EmbedItemField>(fieldId);
                 fieldId = ids.GetFieldId("Task List|Linked Files");
                 var embedChild = child.Field<EmbedItemField>(fieldId);
-                List<Embed> embeds = new List<Embed>();
-                string parentFolderId = Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
+                var embeds = new List<Embed>();
+                var parentFolderId = Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
                 var cloneFolderId = google.GetSubfolderId(service, podio, e, parentFolderId);//TODO:
 
                 foreach (var em in embedMaster.Embeds)
@@ -210,7 +210,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 // Child Item Creation //
 
                 var taskListAppId = ids.GetFieldId("Task List");
-                int waitSeconds = 5;
+                var waitSeconds = 5;
             CallPodio:
                 try
                 {
@@ -219,7 +219,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 catch (PodioUnavailableException ex)
                 {
                     context.Logger.LogLine($"EXCEPTION '{ex.Message}'! Trying again in {waitSeconds} seconds ...");
-                    for (int i = 0; i < waitSeconds; i++)
+                    for (var i = 0; i < waitSeconds; i++)
                     {
                         System.Threading.Thread.Sleep(1000);
                         context.Logger.LogLine(".");

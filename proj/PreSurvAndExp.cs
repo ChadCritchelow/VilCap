@@ -28,7 +28,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
 			try
 			{
-				int fieldId = 0;
+				var fieldId = 0;
 				context.Logger.LogLine("Creating Expenditures and Pre WS Surveys");
 				//--- Create Program Budget Template (Expendatures) ---//
 				viewServ = new ViewService(podio);
@@ -38,13 +38,15 @@ namespace newVilcapCopyFileToGoogleDrive
 						   where v.Name == "Workshop Associations"
 						   select v;
 				context.Logger.LogLine("Got View");
-				var op = new FilterOptions();
-				op.Filters = view.First().Filters;
-				op.Limit = 500;
-				var filter = await podio.FilterItems(21481130, op);
+                var op = new FilterOptions
+                {
+                    Filters = view.First().Filters,
+                    Limit = 500
+                };
+                var filter = await podio.FilterItems(21481130, op);
 				foreach (var master in filter.Items)
 				{
-					Item child = new Item();
+					var child = new Item();
 
 					fieldId = ids.GetFieldId("VC Administration|Expenditures Curation |Purpose");
 					var purposeMaster = master.Field<TextItemField>(fieldId);
@@ -87,7 +89,7 @@ namespace newVilcapCopyFileToGoogleDrive
 					{
 						fieldId = ids.GetFieldId("Expenditures|Spender");
 						var managerChild = child.Field<ContactItemField>(fieldId);
-						List<int> cs = new List<int>();
+						var cs = new List<int>();
 						foreach (var contact in managerMaster.Contacts)
 						{
 							cs.Add(contact.ProfileId);
@@ -97,7 +99,7 @@ namespace newVilcapCopyFileToGoogleDrive
 					fieldId = ids.GetFieldId("Expenditures|Status");
 					var status = child.Field<CategoryItemField>(fieldId);
 					status.OptionText = "Template";
-					int waitSeconds = 5;
+					var waitSeconds = 5;
 					CallPodio:
 					try
 					{
@@ -107,7 +109,7 @@ namespace newVilcapCopyFileToGoogleDrive
 					{
 						context.Logger.LogLine($"{ex.Message}");
 						context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
-						for (int i = 0; i < waitSeconds; i++)
+						for (var i = 0; i < waitSeconds; i++)
 						{
 							System.Threading.Thread.Sleep(1000);
 							context.Logger.LogLine(".");
@@ -127,14 +129,16 @@ namespace newVilcapCopyFileToGoogleDrive
 					   where v.Name == "PreWS"
 					   select v;
 				context.Logger.LogLine("Got View");
-				op = new FilterOptions();
-				op.Filters = view.First().Filters;
-				op.Limit = 500;
-				filter = await podio.FilterItems(21389770, op);
+                op = new FilterOptions
+                {
+                    Filters = view.First().Filters,
+                    Limit = 500
+                };
+                filter = await podio.FilterItems(21389770, op);
 
 				foreach (var master in filter.Items)
 				{
-					Item child = new Item();
+					var child = new Item();
 					fieldId = ids.GetFieldId("VC Administration|Survey|Title");
 					var titleMaster = master.Field<TextItemField>(fieldId);
 					if (titleMaster.Value != null)
@@ -167,8 +171,8 @@ namespace newVilcapCopyFileToGoogleDrive
 					var embedMaster = master.Field<EmbedItemField>(fieldId);
 					fieldId = ids.GetFieldId("Surveys|Link to Survey");
 					var embedChild = child.Field<EmbedItemField>(fieldId);
-					List<Embed> embeds = new List<Embed>();
-					string parentFolderId = Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
+					var embeds = new List<Embed>();
+					var parentFolderId = Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
 					var cloneFolderId = google.GetSubfolderId(service, podio, e, parentFolderId);
 					foreach (var em in embedMaster.Embeds)
 					{
@@ -178,7 +182,7 @@ namespace newVilcapCopyFileToGoogleDrive
 						}
 						else          // Hold for 2.0 //
 						{
-							NonGdriveLinks nonG = new NonGdriveLinks();
+							var nonG = new NonGdriveLinks();
 							await nonG.NonGDriveCopy(em, embeds, podio, e);
 						}
 					}
@@ -186,7 +190,7 @@ namespace newVilcapCopyFileToGoogleDrive
 					{
 						embedChild.AddEmbed(embed.EmbedId);
 					}
-					int waitSeconds = 5;
+					var waitSeconds = 5;
 					CallPodio:
 					try
 					{
@@ -196,7 +200,7 @@ namespace newVilcapCopyFileToGoogleDrive
 					{
 						context.Logger.LogLine($"{ex.Message}");
 						context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
-						for (int i = 0; i < waitSeconds; i++)
+						for (var i = 0; i < waitSeconds; i++)
 						{
 							System.Threading.Thread.Sleep(1000);
 							context.Logger.LogLine(".");

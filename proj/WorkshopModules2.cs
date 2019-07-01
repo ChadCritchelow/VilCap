@@ -36,31 +36,31 @@ namespace newVilcapCopyFileToGoogleDrive
             const int MASTER_CONTENT_APP = 21310273;
             const string SORT_ID_FIELD = "188139930"; // Local_Sorting;          "185391072" = Package
             const int MAX_BATCHES = 8;
-            int batchNum = -1;
+            var batchNum = -1;
 
-            string commentText = "";
-            int fieldId = 0;
-            int count = 0;
+            var commentText = "";
+            var fieldId = 0;
+            var count = 0;
             var workshopAppId = ids.GetFieldId("Workshop Modules");
             var tasklistAppId = ids.GetFieldId("Task List");
-            int waitSeconds = 5;
+            var waitSeconds = 5;
             
 
-            int day = 0;
-            TimeSpan timeFromStart = new TimeSpan(0);
+            var day = 0;
+            var timeFromStart = new TimeSpan(0);
             #endregion
 
             #region // Admin app values //
 
             var batchId = ids.GetFieldId("Admin|WS Batch");
-            string batch = check.Field<CategoryItemField>(batchId).Options.First().Text;
+            var batch = check.Field<CategoryItemField>(batchId).Options.First().Text;
             Int32.TryParse(batch, out batchNum);
 
             var startDateId = ids.GetFieldId("Admin|Program Start Date");
-            DateTime startDate = new DateTime(check.Field<DateItemField>(startDateId).Start.Value.Ticks);
+            var startDate = new DateTime(check.Field<DateItemField>(startDateId).Start.Value.Ticks);
 
             var packageId = ids.GetFieldId("Admin|Curriculum Package");
-            string package = check.Field<CategoryItemField>(packageId).Options.First().Text;
+            var package = check.Field<CategoryItemField>(packageId).Options.First().Text;
             context.Logger.LogLine($"Curriculum Batch '{batch}'");
 
             #endregion  
@@ -111,7 +111,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 // Setup //
                 count += 1;
                 context.Logger.LogLine($"On item #: {count}");
-                Item child = new Item();
+                var child = new Item();
 
                 #region // Check for new Day //
 
@@ -119,7 +119,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 var dayMaster = master.Field<CategoryItemField>(fieldId);
                 if (dayMaster.Values != null)
                 {
-                    Int32.TryParse(dayMaster.Options.First().Text.Split("Day ")[1], out int dayMasterVal);
+                    Int32.TryParse(dayMaster.Options.First().Text.Split("Day ")[1], out var dayMasterVal);
                     var color = child.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Calendar Color"));
                     var dayChild = child.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Day Number"));
                     dayChild.OptionText = dayMaster.Options.First().Text.Split(" ")[dayMaster.Options.First().Text.Split(" ").Length-1];
@@ -209,8 +209,8 @@ namespace newVilcapCopyFileToGoogleDrive
                     var durChild = child.Field<DurationItemField>(fieldId);
                     durChild.Value = durMaster.Value.Value.Duration(); // durChild.Value.Value.Add(durMaster.Value.Value);? durChild.Value = durMaster.Value;?
 
-                    DateTime childDateTimeStart = startDate.Add(timeFromStart);
-                    DateTime childDateTimeEnd = childDateTimeStart.Add(durChild.Value.Value.Duration());
+                    var childDateTimeStart = startDate.Add(timeFromStart);
+                    var childDateTimeEnd = childDateTimeStart.Add(durChild.Value.Value.Duration());
                     //context.Logger.LogLine($"Scheduling for {childDateTimeStart.ToString()} - {childDateTimeEnd.ToString()}");
                     timeFromStart = timeFromStart.Add(durChild.Value.Value.Duration());
 
@@ -228,9 +228,9 @@ namespace newVilcapCopyFileToGoogleDrive
                 var embedMaster = master.Field<EmbedItemField>(fieldId);
                 fieldId = ids.GetFieldId("Workshop Modules|Link to Material");
                 var embedChild = child.Field<EmbedItemField>(fieldId);
-                List<Embed> embeds = new List<Embed>();
+                var embeds = new List<Embed>();
 
-				string parentFolderId = Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
+				var parentFolderId = Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
 				var cloneFolderId = google.GetSubfolderId(service, podio, e, parentFolderId);//TODO:
 
 				foreach (var em in embedMaster.Embeds)
@@ -256,11 +256,11 @@ namespace newVilcapCopyFileToGoogleDrive
                 // Dependent Tasks Generation//
                 foreach (var masterTask in masterTasks.Items)
                 {
-                    Item masterT = new Item();
+                    var masterT = new Item();
                     context.Logger.LogLine("Creating empty master item");
                     masterT = await podio.GetItem(masterTask.ItemId);
                     context.Logger.LogLine("Got master item");
-                    Item cloneT = new Item();
+                    var cloneT = new Item();
 
                     #region // Assign Dep. Task Fields //
 
@@ -333,8 +333,8 @@ namespace newVilcapCopyFileToGoogleDrive
                     var embedMasterT = masterT.Field<EmbedItemField>(fieldId);
                     fieldId = ids.GetFieldId("Task List|Linked Files");
                     var embedChildT = cloneT.Field<EmbedItemField>(fieldId);
-                    List<Embed> embedsT = new List<Embed>();
-                    string parentFolderIdT = Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
+                    var embedsT = new List<Embed>();
+                    var parentFolderIdT = Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
                     var cloneFolderIdT = google.GetSubfolderId(service, podio, e, parentFolderId);//TODO:
 
                     foreach (var em in embedMasterT.Embeds)
@@ -367,7 +367,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     {
                         context.Logger.LogLine($"{ex.Message}");
                         context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
-                        for (int i = 0; i < waitSeconds; i++)
+                        for (var i = 0; i < waitSeconds; i++)
                         {
                             System.Threading.Thread.Sleep(1000);
                             context.Logger.LogLine(".");
@@ -396,7 +396,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 {
                     context.Logger.LogLine($"{ex.Message}");
                     context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
-                    for (int i = 0; i < waitSeconds; i++)
+                    for (var i = 0; i < waitSeconds; i++)
                     {
                         System.Threading.Thread.Sleep(1000);
                         context.Logger.LogLine(".");

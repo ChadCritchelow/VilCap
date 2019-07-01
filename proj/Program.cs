@@ -46,16 +46,16 @@ namespace newVilcapCopyFileToGoogleDrive
 			var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
 			var podio = factory.ForClient(e.clientId, e.environmentId);
 			context.Logger.LogLine("Getting Podio Instance");
-			Item check = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
+			var check = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
 			context.Logger.LogLine($"Got item with ID: {check.ItemId}");
-            SaasafrasClient saasafrasClient = new SaasafrasClient(Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
+            var saasafrasClient = new SaasafrasClient(Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
             context.Logger.LogLine("Getting BBC Client Instance");
 			dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
 			dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
 			context.Logger.LogLine("Got dictionary");
 			var functionName = "newVilcapCopyFileToGoogleDrive";
 		
-			string serviceAcccount = Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
+			var serviceAcccount = Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
 			var cred = GoogleCredential.FromJson(serviceAcccount).CreateScoped(Scopes).UnderlyingCredential;
 			var service = new DriveService(new BaseClientService.Initializer()
 			{
@@ -65,18 +65,28 @@ namespace newVilcapCopyFileToGoogleDrive
 			context.Logger.LogLine("Established google connection");
 			context.Logger.LogLine($"App: {check.App.Name}");
 
-			GoogleIntegration google = new GoogleIntegration();
+			var google = new GoogleIntegration();
             var saasGoogleIntegration = new SaasafrasGoogleIntegration();
-            PreSurvAndExp pre = new PreSurvAndExp();
-			GetIds ids = new GetIds(dictChild,dictMaster,e.environmentId);
-            CommentService comm = new CommentService(podio);
-            Survey s = new Survey();
+            var pre = new PreSurvAndExp();
+			var ids = new GetIds(dictChild,dictMaster,e.environmentId);
+            var comm = new CommentService(podio);
+            var s = new Survey();
 
             // Main Process //
 
             var revision = await podio.GetRevisionDifference(Convert.ToInt32(check.ItemId), check.CurrentRevision.Revision - 1, check.CurrentRevision.Revision);
             var firstRevision = revision.First();
             context.Logger.LogLine($"Last Revision field: {firstRevision.Label}");
+
+            var buttonPresser = check.CurrentRevision.CreatedBy;
+            context.Logger.LogLine($"Item updated by {buttonPresser.Name} (Should be 'Vilcap Admin')");
+            if (buttonPresser.Id.GetValueOrDefault() != 4610903)
+            {
+                context.Logger.LogLine("User 'https://podio.com/users"+buttonPresser.Id+"' is not authorized to perform this action.");
+                await comm.AddCommentToObject("item", check.ItemId, 
+                    $":loudspeaker: User 'https://podio.com/users" + buttonPresser.Id + "' is not authorized to perform this action.", hook: false);
+                return;
+            }
 
             switch (firstRevision.Label)
             {
@@ -87,7 +97,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     if (check.Field<CategoryItemField>(wsBatchId).Options.Any())
                     {
                         context.Logger.LogLine($"Running 'WS Batch {check.Field<CategoryItemField>(wsBatchId).Options.First().Text}'");
-                        int nextBatch = -1;
+                        var nextBatch = -1;
                         lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
 
                         try
@@ -99,7 +109,7 @@ namespace newVilcapCopyFileToGoogleDrive
                             }
                             context.Logger.LogLine($"Lock Value: {lockValue}");
                                     
-                            WorkshopModules2 wm = new WorkshopModules2();
+                            var wm = new WorkshopModules2();
                             nextBatch = await wm.CreateWorkshopModules2(context, podio, check, e, service, ids, google, pre);
                                     
                             if (nextBatch > 1)
@@ -139,7 +149,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     if (check.Field<CategoryItemField>(aoBatchId).Options.Any())
                     {
                         context.Logger.LogLine($"Running 'WS Batch {check.Field<CategoryItemField>(aoBatchId).Options.First().Text}'");
-                        int nextBatch = -1;
+                        var nextBatch = -1;
                         lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
 
                         try
@@ -151,7 +161,7 @@ namespace newVilcapCopyFileToGoogleDrive
                             }
                             context.Logger.LogLine($"Lock Value: {lockValue}");
 
-                            Addons ao = new Addons();
+                            var ao = new Addons();
                             nextBatch = await ao.CreateAddons(context, podio, check, e, service, ids, google, pre);
                             break;
                         }
@@ -183,7 +193,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     if (check.Field<CategoryItemField>(tlBatchId).Options.Any())
                     {
                         context.Logger.LogLine($"Running 'TL Batch {check.Field<CategoryItemField>(tlBatchId).Options.First().Text}'");
-                        int nextBatch = -1;
+                        var nextBatch = -1;
                         lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
                         try
                         {
@@ -194,7 +204,7 @@ namespace newVilcapCopyFileToGoogleDrive
                             }
                             context.Logger.LogLine($"Lock Value: {lockValue}");
 
-                            TaskList2 tl = new TaskList2();
+                            var tl = new TaskList2();
                             nextBatch = await tl.CreateTaskLists(context, podio, check, e, service, ids, google, pre);
 
                             if (nextBatch > 1)

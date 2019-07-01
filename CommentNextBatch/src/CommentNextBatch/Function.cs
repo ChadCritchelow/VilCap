@@ -46,13 +46,13 @@ namespace CommentNextBatch
 			context.Logger.LogLine(Newtonsoft.Json.JsonConvert.SerializeObject(e));
 			var factory = new AuditedPodioClientFactory(e.appId, e.version, e.clientId, e.currentEnvironment.environmentId);
 			var podio = factory.ForClient(e.clientId, e.currentEnvironment.environmentId);
-			Item check = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
-			SaasafrasClient saasafrasClient = new SaasafrasClient(Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
+			var check = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
+			var saasafrasClient = new SaasafrasClient(Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
 			var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.currentEnvironment.environmentId, e.appId, e.version);
 			var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
 			string lockValue;
-			GetIds ids = new GetIds(dictChild, dictMaster, e.currentEnvironment.environmentId);
-			string functionName="CommentNextBatch";
+			var ids = new GetIds(dictChild, dictMaster, e.currentEnvironment.environmentId);
+			var functionName="CommentNextBatch";
 			lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
 			#endregion
 			try
@@ -64,14 +64,14 @@ namespace CommentNextBatch
 					return;
 				}
 				#endregion
-				CommentService serve = new CommentService(podio);
+				var serve = new CommentService(podio);
 				var commentToCheck = await serve.GetComment(int.Parse(e.podioEvent.comment_id));
-				int fieldId = 0;
+				var fieldId = 0;
 				var commentPieces = commentToCheck.Value.Split(" ");
 				var type = commentPieces[0];
 				var batch = commentPieces[2];
-				bool isNum = Regex.IsMatch(batch, @"^\d+$");
-				Item updateMe = new Item() { ItemId = check.ItemId };
+				var isNum = Regex.IsMatch(batch, @"^\d+$");
+				var updateMe = new Item() { ItemId = check.ItemId };
 				int currentBatch;
 				if (isNum)
 				{

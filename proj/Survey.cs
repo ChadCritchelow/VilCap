@@ -21,15 +21,17 @@ namespace newVilcapCopyFileToGoogleDrive
 		}
 		public async System.Threading.Tasks.Task CreateSurveys(CategoryItemField checkType, GetIds ids,Podio podio,GoogleIntegration google,DriveService service,RoutedPodioEvent e,ILambdaContext context)
 		{
-			int fieldId = 0;
+			var fieldId = 0;
 			var parts = checkType.Options.First().Text.Split('/');
 			if (parts[1].Trim() == "Day 1")
 			{
-				string filterValue = parts[0].Trim();
-				var op = new FilterOptions();
-				op.Limit = 500;
+				var filterValue = parts[0].Trim();
+                var op = new FilterOptions
+                {
+                    Limit = 500
+                };
 
-				var filterConditions = new Dictionary<string, string>
+                var filterConditions = new Dictionary<string, string>
 							{
 								{ids.GetFieldId("VC Administration|Survey|[WS]").ToString(), filterValue }
 							};
@@ -40,7 +42,7 @@ namespace newVilcapCopyFileToGoogleDrive
 				foreach (var master in filter.Items)
 				{
 
-					Item child = new Item();
+					var child = new Item();
 					fieldId = ids.GetFieldId("VC Administration|Survey|Title");
 					var titleMaster = master.Field<TextItemField>(fieldId);
 					if (titleMaster.Value != null)
@@ -84,7 +86,7 @@ namespace newVilcapCopyFileToGoogleDrive
 						}
 						else          // Hold for 2.0 //
 						{
-							NonGdriveLinks nonG = new NonGdriveLinks();
+							var nonG = new NonGdriveLinks();
 							await nonG.NonGDriveCopy(em, embeds, podio, e);
 						}
 					}
@@ -94,7 +96,7 @@ namespace newVilcapCopyFileToGoogleDrive
 					}
 					//embed fields
 
-					int waitSeconds = 5;
+					var waitSeconds = 5;
 					CallPodio:
 					try
 					{
@@ -104,7 +106,7 @@ namespace newVilcapCopyFileToGoogleDrive
 					{
 						context.Logger.LogLine($"{ex.Message}");
 						context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
-						for (int i = 0; i < waitSeconds; i++)
+						for (var i = 0; i < waitSeconds; i++)
 						{
 							System.Threading.Thread.Sleep(1000);
 							context.Logger.LogLine(".");

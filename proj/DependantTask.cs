@@ -87,8 +87,8 @@ namespace NewVilcapCopyFileToGoogleDrive
             var embedMaster = master.Field<EmbedItemField>(fieldId);
             fieldId = ids.GetFieldId("Task List|Linked Files");
             var embedChild = child.Field<EmbedItemField>(fieldId);
-            List<Embed> embeds = new List<Embed>();
-            string parentFolderId = Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
+            var embeds = new List<Embed>();
+            var parentFolderId = Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
             var cloneFolderId = google.GetSubfolderId(service, podio, e, parentFolderId); //TODO:
 
             foreach (var em in embedMaster.Embeds)
@@ -107,7 +107,7 @@ namespace NewVilcapCopyFileToGoogleDrive
             // Create the actual Podio Item //
 
             var taskListAppId = ids.GetFieldId("Task List");
-            int waitSeconds = 5;
+            var waitSeconds = 5;
             CallPodio:
             try
             {
@@ -116,7 +116,7 @@ namespace NewVilcapCopyFileToGoogleDrive
             catch (PodioUnavailableException ex)
             {
                 context.Logger.LogLine($"EXCEPTION '{ex.Message}'! Trying again in {waitSeconds} seconds ...");
-                for (int i = 0; i < waitSeconds; i++)
+                for (var i = 0; i < waitSeconds; i++)
                 {
                     System.Threading.Thread.Sleep(1000);
                     context.Logger.LogLine(".");

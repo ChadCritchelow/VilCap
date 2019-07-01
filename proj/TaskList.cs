@@ -30,7 +30,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			var startDateId = ids.GetFieldId("Admin|Program Start Date");
             //var packageId = ids.GetFieldId("Admin|Curriculum Package");
             //string packageName = check.Field<CategoryItemField>(packageId).Options.First().Text;
-            int fieldId = 0;
+            var fieldId = 0;
 
 			context.Logger.LogLine("Satisfied conditions, Task List Function");
 			var viewServ = new ViewService(podio);
@@ -112,12 +112,12 @@ namespace newVilcapCopyFileToGoogleDrive
                 commentText = "";
             }
 			context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
-            int count = 0;
+            var count = 0;
 			foreach (var masterItem in filter.Items)
 			{
                 count += 1;
 				context.Logger.LogLine($"On item #: {count}");
-				Item child = new Item();
+				var child = new Item();
                 
 
 				//--- Assign Fields ---//	
@@ -224,8 +224,8 @@ namespace newVilcapCopyFileToGoogleDrive
 				var embedMaster = masterItem.Field<EmbedItemField>(fieldId);
 				fieldId = ids.GetFieldId("Task List|Linked Files");
 				var embedChild = child.Field<EmbedItemField>(fieldId);
-				List<Embed> embeds = new List<Embed>();
-				string parentFolderId = Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
+				var embeds = new List<Embed>();
+				var parentFolderId = Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
 				var cloneFolderId = google.GetSubfolderId(service, podio, e, parentFolderId);//TODO:
 				foreach (var em in embedMaster.Embeds)
 				{
@@ -245,7 +245,7 @@ namespace newVilcapCopyFileToGoogleDrive
 				}
 				context.Logger.LogLine($"Added field:{embedMaster.Label}");
 				var taskListAppId = ids.GetFieldId("Task List");
-				int waitSeconds = 5;
+				var waitSeconds = 5;
 				CallPodio:
 				try
 				{
@@ -255,7 +255,7 @@ namespace newVilcapCopyFileToGoogleDrive
 				{
 					context.Logger.LogLine($"{ex.Message}");
 					context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
-					for (int i = 0; i < waitSeconds; i++)
+					for (var i = 0; i < waitSeconds; i++)
 					{
 						System.Threading.Thread.Sleep(1000);
 						context.Logger.LogLine(".");
@@ -265,7 +265,7 @@ namespace newVilcapCopyFileToGoogleDrive
 				}
 				context.Logger.LogLine($"Created item #{count}");
 			}
-			CommentService comm = new CommentService(podio);
+			var comm = new CommentService(podio);
 			if (check.Field<CategoryItemField>(TlStatusId).Options.First().Text == "1")
 			{
 				await pre.CreateExpendituresAndPreWSSurvs(context,podio,viewServ,check,e,service,ids,google);

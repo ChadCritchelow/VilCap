@@ -1,4 +1,8 @@
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
+using Amazon.Lambda.Core;
+using PodioCore.Items;
+using Saasafras;
+
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
 
 namespace CreateSetAdminKey
