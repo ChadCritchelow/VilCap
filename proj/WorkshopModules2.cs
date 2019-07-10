@@ -43,6 +43,7 @@ namespace newVilcapCopyFileToGoogleDrive
             var count = 0;
             var workshopAppId = ids.GetFieldId("Workshop Modules");
             var tasklistAppId = ids.GetFieldId("Task List");
+            var materialsAppId = ids.GetFieldId("Materials");
             var waitSeconds = 5;
             
 
@@ -190,9 +191,21 @@ namespace newVilcapCopyFileToGoogleDrive
                 var childTasks = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Dependent Task"));
                 var masterTasks = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task"));
                 var taskOffset = master.Field<DurationItemField>(ids.GetFieldId("VC Administration|Content Curation |Dependent Task Offset"));
-                //var masterMats = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |Auxillary Materials")); // PLACEHOLDER
+                var mMaterials = master.Field<AppItemField>(ids.GetFieldId("VC Administration|Content Curation |All Attached Materials")); // PLACEHOLDER
                 //var childMats = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Auxillary Materials")); // PLACEHOLDER
-                
+                var cEntrepreneurMaterials = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Entrepreneur Prep"));
+                //var cEntrepreneurMaterials = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Entrepreneur Prep"));
+                #endregion
+
+                #region// Auxillary Material Generation //
+
+                foreach( var mMaterial in mMaterials.Items )
+                {
+                    var newMaterial = Materials.Copy(mMaterial, null, ids, podio, )
+                   cEntrepreneurMaterials.Items = cEntrepreneurMaterials.Items.Append()
+
+                    /////////////////   TODO
+                }
                 #endregion
 
                 #region // Date Calcs //
@@ -372,20 +385,20 @@ namespace newVilcapCopyFileToGoogleDrive
                             System.Threading.Thread.Sleep(1000);
                             context.Logger.LogLine(".");
                         }
-                        waitSeconds = waitSeconds * 2;
+                        waitSeconds *= 2;
                         goto CallPodioTasks;
                     }
                     #endregion
                 }
 
                 // Aux Material Generation//
-                //foreach (var masterMat in masterMats.Items)
+                //foreach( var masterMat in masterMats.Items )
                 //{
                 //    //await AuxMats.CreateAuxMats(context, podio, check, e, service, ids, google, masterMat);      
                 //}
 
-             #region // Create WorkshopModule Podio Item //
-                    context.Logger.LogLine($"Calling Podio");
+                #region // Create WorkshopModule Podio Item //
+                context.Logger.LogLine($"Calling Podio");
                 CallPodio:
                 try
                 {

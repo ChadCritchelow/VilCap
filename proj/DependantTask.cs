@@ -21,10 +21,6 @@ namespace NewVilcapCopyFileToGoogleDrive
         int fieldId;
         Item child = new Item();
 
-		public static string StripHTML(string input)
-		{
-			return Regex.Replace(input, "<.*?>", String.Empty);
-		}
 
         public async System.Threading.Tasks.Task CreateDependantTask(ILambdaContext context, Podio podio, Item trigger, Item master, RoutedPodioEvent e, DriveService service, GetIds ids, GoogleIntegration google)
         {
