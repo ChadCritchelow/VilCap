@@ -201,10 +201,9 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 foreach( var mMaterial in mMaterials.Items )
                 {
-                    var newMaterial = Materials.Copy(mMaterial, null, ids, podio, )
-                   cEntrepreneurMaterials.Items = cEntrepreneurMaterials.Items.Append()
-
-                    /////////////////   TODO
+                    var newMaterial = Materials.Copy(mMaterial, null, ids, podio, materialsAppId);
+                    cEntrepreneurMaterials.Values.Add(newMaterial);
+                        /////////////////   TODO
                 }
                 #endregion
 
