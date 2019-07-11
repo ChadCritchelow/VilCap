@@ -203,6 +203,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 {
                     var newMaterial = Materials.Copy(mMaterial, null, ids, podio, materialsAppId);
                     cEntrepreneurMaterials.Values.Add(newMaterial);
+                    context.Logger.LogLine($"Created Material #{newMaterial.Id}");
                         /////////////////   TODO
                 }
                 #endregion
