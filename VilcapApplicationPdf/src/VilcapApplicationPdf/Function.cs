@@ -2,7 +2,6 @@ using System;
 using Amazon.Lambda.Core;
 using Google.Apis.Docs.v1.Data;
 using newVilcapCopyFileToGoogleDrive;
-using PdfSharp.Drawing;
 using PodioCore.Items;
 using Saasafras;
 using Saasafras.Lambda.Google;
@@ -42,23 +41,23 @@ namespace VilcapApplicationPdf
                 }
 
                 // USING PDFSHARP
-                var exId = item.ExternalId;
-                context.Logger.LogLine($"--- Making PDFdoc for item with XID={exId}");
+                //var exId = item.ExternalId;
+                //context.Logger.LogLine($"--- Making PDFdoc for item with XID={exId}");
 
-                var pdf = new PdfSharp.Pdf.PdfDocument();
-                context.Logger.LogLine($"--- Created PDFdoc");
-                var page = pdf.AddPage();
-                context.Logger.LogLine($"--- Created PDFpage");
-                var graphics = XGraphics.FromPdfPage(page);
-                context.Logger.LogLine($"--- Created Xgraphic");
-                //var font = new System.Drawing.Font(System.Drawing.FontFamily.GenericMonospace, 10.0f); Gets this far
-                var font = new System.Drawing.Font("Arial", 10.0f);
-                context.Logger.LogLine($"--- Created Font");
-                var xfont = new XFont(font);
-                context.Logger.LogLine($"--- Created Xfont");
+                //var pdf = new PdfSharp.Pdf.PdfDocument();
+                //context.Logger.LogLine($"--- Created PDFdoc");
+                //var page = pdf.AddPage();
+                //context.Logger.LogLine($"--- Created PDFpage");
+                //var graphics = XGraphics.FromPdfPage(page);
+                //context.Logger.LogLine($"--- Created Xgraphic");
+                ////var font = new System.Drawing.Font(System.Drawing.FontFamily.GenericMonospace, 10.0f); Gets this far
+                //var font = new System.Drawing.Font("Arial", 10.0f);
+                //context.Logger.LogLine($"--- Created Font");
+                //var xfont = new XFont(font);
+                //context.Logger.LogLine($"--- Created Xfont");
 
-                graphics.DrawString("Hello, World!", font, XBrushes.Black, new XRect(0, 0, page.Width, page.Height), XStringFormat.Center);
-                context.Logger.LogLine($"--- Drew Something");
+                //graphics.DrawString("Hello, World!", font, XBrushes.Black, new XRect(0, 0, page.Width, page.Height), XStringFormat.Center);
+                //context.Logger.LogLine($"--- Drew Something");
 
                 //var fileService = new PodioCore.Services.FileService(podio);
                 //var attachment = await fileService.UploadFile(filename, pdf.AcroForm.Stream.Value, "application/pdf");

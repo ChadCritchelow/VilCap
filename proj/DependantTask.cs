@@ -8,7 +8,6 @@ using PodioCore.Items;
 using PodioCore.Models;
 using PodioCore.Utils.ItemFields;
 using System.Linq;
-using System.Text.RegularExpressions;
 using newVilcapCopyFileToGoogleDrive;
 
 namespace NewVilcapCopyFileToGoogleDrive

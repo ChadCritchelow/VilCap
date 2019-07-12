@@ -7,7 +7,6 @@ using System.Linq;
 using Amazon.Lambda.Core;
 using PodioCore.Utils.ItemFields;
 using PodioCore.Items;
-using PodioCore.Models;
 using BrickBridge.Lambda.VilCap;
 using Task = System.Threading.Tasks.Task;
 using System.Text.RegularExpressions;
