@@ -14,18 +14,10 @@ using System.Text.RegularExpressions;
 
 namespace newVilcapCopyFileToGoogleDrive
 {
-    class PreSurvAndExp
+    public class PreSurvAndExp
 	{
-		
-		public static string StripHTML(string input)
-		{
-			return Regex.Replace(input, "<.*?>", String.Empty);
-		}
-
 		public async System.Threading.Tasks.Task CreateExpendituresAndPreWSSurvs(ILambdaContext context, Podio podio, ViewService viewServ, Item check, RoutedPodioEvent e, DriveService service,GetIds ids,GoogleIntegration google)
 		{
-
-
 			try
 			{
 				var fieldId = 0;
