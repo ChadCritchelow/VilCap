@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Amazon.Lambda.Core;
 using newVilcapCopyFileToGoogleDrive;
@@ -40,19 +41,22 @@ namespace UpdateDeployCurriculum
 
                 var revision = await podio.GetRevisionDifference(Convert.ToInt32(check.ItemId), check.CurrentRevision.Revision - 1, check.CurrentRevision.Revision);
                 var firstRevision = revision.First();
-                if(check.CurrentRevision.CreatedBy.Id.GetValueOrDefault() != ADMIN_ID)
+                if( check.CurrentRevision.CreatedBy.Id.GetValueOrDefault() != ADMIN_ID )
                 {
-                    context.Logger.LogLine("User 'https://podio.com/users/" + check.CurrentRevision.CreatedBy.Id.GetValueOrDefault()+ "' is not authorized to perform this action.");
+                    context.Logger.LogLine("User 'https://podio.com/users/" + check.CurrentRevision.CreatedBy.Id.GetValueOrDefault() + "' is not authorized to perform this action.");
                     await new CommentService(podio).AddCommentToObject("item", check.ItemId,
                         $":loudspeaker: User ' https://podio.com/users/" + check.CurrentRevision.CreatedBy.Id.GetValueOrDefault() + " ' is not authorized to perform this action.", hook: false);
                     return;
                 }
+
                 switch( firstRevision.Label )
                 {
+
                     case "Deploy Task List":
                         var deployField = check.Field<CategoryItemField>(ids.GetFieldId("Admin|Deploy Task List"));
                         if( firstRevision.FieldId == deployField.FieldId && deployField.Options.Any() && deployField.Options.First().Text == "Deploy" )
                         {
+                            context.Logger.LogLine("Updating an Item or something");
                             var update = new Item() { ItemId = check.ItemId };
                             var tlBatch = update.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch"));
                             if( tlBatch.Options.First().Text == "1" )
@@ -64,23 +68,32 @@ namespace UpdateDeployCurriculum
                             tlBatch.OptionText = "1";
                             await podio.UpdateItem(update, true);
                         }
+                        else { context.Logger.LogLine("Nothing to do."); }
                         break;
+
                     case "Deploy Curriculum":
                         deployField = check.Field<CategoryItemField>(ids.GetFieldId("Admin|Deploy Curriculum"));
                         if( firstRevision.FieldId == deployField.FieldId && deployField.Options.Any() && deployField.Options.First().Text == "Deploy" )
                         {
+                            context.Logger.LogLine("Updating an Item or something");
                             var update = new Item() { ItemId = check.ItemId };
+                            context.Logger.LogLine("Created 'update' ");
                             var wsBatch = update.Field<CategoryItemField>(ids.GetFieldId("Admin|WS Batch"));
-                            if (wsBatch.Options.First().Text == "1")
+                            var currentWS = check.Field<CategoryItemField>(ids.GetFieldId("Admin|WS Batch"));
+                            context.Logger.LogLine("Created 'update|WS Batch' ");
+                            if( currentWS.Options.First().Text == "1" )
                             {
                                 context.Logger.LogLine("... Reseting batch # field ... ");
-                                wsBatch.OptionText = null;
+                                wsBatch.OptionTexts = new List<string> { };
                                 await podio.UpdateItem(update, false);
                             }
+                            context.Logger.LogLine("No reset ");
                             wsBatch.OptionText = "1";
                             await podio.UpdateItem(update, true);
                         }
+                        else { context.Logger.LogLine("Nothing to do."); }
                         break;
+
                 }
             }
             catch( Exception ex )

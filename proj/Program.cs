@@ -85,6 +85,14 @@ namespace newVilcapCopyFileToGoogleDrive
                 return;
             }
 
+            lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+            if( string.IsNullOrEmpty(lockValue) )
+            {
+                context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
+                return;
+            }
+            context.Logger.LogLine($"Lock Value: {lockValue}");
+
             switch( firstRevision.Label )
             {
 
@@ -95,17 +103,10 @@ namespace newVilcapCopyFileToGoogleDrive
                     {
                         context.Logger.LogLine($"Running 'WS Batch {check.Field<CategoryItemField>(wsBatchId).Options.First().Text}'");
                         var nextBatch = -1;
-                        lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+                        //lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
 
                         try
                         {
-                            if( string.IsNullOrEmpty(lockValue) )
-                            {
-                                context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
-                                return;
-                            }
-                            context.Logger.LogLine($"Lock Value: {lockValue}");
-
                             var wm = new WorkshopModules2();
                             nextBatch = await wm.CreateWorkshopModules2(this);
 
@@ -149,16 +150,11 @@ namespace newVilcapCopyFileToGoogleDrive
                     {
                         context.Logger.LogLine($"Running 'WS Batch {check.Field<CategoryItemField>(aoBatchId).Options.First().Text}'");
                         var nextBatch = -1;
-                        lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+                        //lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
 
                         try
                         {
-                            if( string.IsNullOrEmpty(lockValue) )
-                            {
-                                context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
-                                return;
-                            }
-                            context.Logger.LogLine($"Lock Value: {lockValue}");
+                            
 
                             var ao = new Addons();
                             nextBatch = await ao.CreateAddons(context, podio, check, e, service, ids, google, pre);
@@ -193,16 +189,9 @@ namespace newVilcapCopyFileToGoogleDrive
                     {
                         context.Logger.LogLine($"Running 'TL Batch {check.Field<CategoryItemField>(tlBatchId).Options.First().Text}'");
                         var nextBatch = -1;
-                        lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+                        //lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
                         try
                         {
-                            if( string.IsNullOrEmpty(lockValue) )
-                            {
-                                context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
-                                return;
-                            }
-                            context.Logger.LogLine($"Lock Value: {lockValue}");
-
                             var tl = new TaskList2();
                             nextBatch = await tl.CreateTaskLists(context, podio, check, e, service, ids, google, pre);
 
