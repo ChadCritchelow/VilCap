@@ -52,27 +52,29 @@ namespace VilcapCreateView
                                 where v.Name.Split(" Batch")[0] == $"{package.Text}"
                                 where v.Name.Split(" Batch").Count() == 2
                                 select v;
-                    if( !match.Any() )
+                    if( match.Any() ) { continue; }
+                    var filteredItems = await podio.FilterItems(CONTENT_CURATION, new FilterOptions
+                    {
+                        Filters = new Dictionary<string, object> { { CONTENT_PACKAGE_FIELD.ToString(), new int[] { package.Id.Value } } }
+                    });
+                    var batchNum = 1;
+                    for( var c = 1 ; c <= filteredItems.Total ; c += LIMIT )
                     {
                         var request = new ViewCreateUpdateRequest // ~ var op = new FilterOptions
                         {
-                            //Layout = ???,
-                            //Fields = new Dictionary<string, object>
-                            //{
-                            //    {CONTENT_SORT_ID_FIELD, new string[]{ package.Text }}
-                            //},
-                            Name = $"入 {package.Text} Batch #",
+                            Name = $"入 {package.Text} Batch {batchNum}",
                             Private = true,
                             SortDesc = false,
                             SortBy = CONTENT_SORT_ID_FIELD,
                             Filters = new Dictionary<string, object>
                             {
-                                {CONTENT_PACKAGE_FIELD.ToString(), new int[]{ package.Id.Value }}
+                                { CONTENT_PACKAGE_FIELD.ToString(), new int[]{ package.Id.Value } },
+                                { CONTENT_SORT_ID_FIELD.ToString(), new { from = c, to = c + LIMIT} }
                             }
                         };
                         var newViewId = await viewServ.CreateView(CONTENT_CURATION, request);
                         context.Logger.LogLine($"Created View with Id {newViewId}");
-                        //context.Logger.LogLine($"Created View with Id #####");
+                        batchNum++;
                     }
                 }
             }

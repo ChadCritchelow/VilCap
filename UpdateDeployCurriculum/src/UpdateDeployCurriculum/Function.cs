@@ -55,6 +55,12 @@ namespace UpdateDeployCurriculum
                         {
                             var update = new Item() { ItemId = check.ItemId };
                             var tlBatch = update.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch"));
+                            if( tlBatch.Options.First().Text == "1" )
+                            {
+                                context.Logger.LogLine("... Reseting batch # field ... ");
+                                tlBatch.OptionText = null;
+                                await podio.UpdateItem(update, false);
+                            }
                             tlBatch.OptionText = "1";
                             await podio.UpdateItem(update, true);
                         }
@@ -65,6 +71,12 @@ namespace UpdateDeployCurriculum
                         {
                             var update = new Item() { ItemId = check.ItemId };
                             var wsBatch = update.Field<CategoryItemField>(ids.GetFieldId("Admin|WS Batch"));
+                            if (wsBatch.Options.First().Text == "1")
+                            {
+                                context.Logger.LogLine("... Reseting batch # field ... ");
+                                wsBatch.OptionText = null;
+                                await podio.UpdateItem(update, false);
+                            }
                             wsBatch.OptionText = "1";
                             await podio.UpdateItem(update, true);
                         }
