@@ -4,12 +4,23 @@ using PodioCore.Models;
 using PodioCore.Services;
 using PodioCore.Utils.ItemFields;
 using newVilcapCopyFileToGoogleDrive;
-
+using Saasafras;
+using PodioCore.Items;
+using System;
 
 namespace newVilcapCopyFileToGoogleDrive
 {
     public class Util
     {
+        public static void Init( RoutedPodioEvent e )
+        {
+            //var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
+            //var podio = factory.ForClient(e.clientId, e.environmentId);
+            //var item = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
+            //var saasafrasClient = new SaasafrasClient(Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
+            //var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
+            //var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
+        }
         public static void MatchFields(Item to, Item from, GetIds ids)
         {
             foreach( var textField in to.Fields.OfType<TextItemField>() )
@@ -30,7 +41,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
         }
 
-        public static async void GetBatch(WorkshopModules2 workshop, newVilcapCopyFileToGoogleDrive vilcap)
+        public static void GetBatch( WorkshopModules2 workshop, newVilcapCopyFileToGoogleDrive vilcap )
         {
             //var batchId = ids.GetFieldId("Admin|WS Batch");
             //var batch = check.Field<CategoryItemField>(batchId).Options.First().Text;
