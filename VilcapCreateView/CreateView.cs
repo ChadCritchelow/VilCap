@@ -57,18 +57,22 @@ namespace VilcapCreateView
                         var request = new ViewCreateUpdateRequest // ~ var op = new FilterOptions
                         {
                             //Layout = ???,
-                            //Fields = ???,
+                            //Fields = new Dictionary<string, object>
+                            //{
+                            //    {CONTENT_SORT_ID_FIELD, new string[]{ package.Text }}
+                            //},
                             Name = $"入 {package.Text} Batch #",
                             Private = true,
                             SortDesc = false,
                             SortBy = CONTENT_SORT_ID_FIELD,
                             Filters = new Dictionary<string, object>
                             {
-                                {CONTENT_SORT_ID_FIELD, new string[]{ package.Text }}
+                                {CONTENT_PACKAGE_FIELD.ToString(), new int[]{ package.Id.Value }}
                             }
                         };
                         var newViewId = await viewServ.CreateView(CONTENT_CURATION, request);
                         context.Logger.LogLine($"Created View with Id {newViewId}");
+                        //context.Logger.LogLine($"Created View with Id #####");
                     }
                 }
             }
