@@ -47,6 +47,15 @@ namespace VilcapShareWorkshopWithMentor
                 var serv = new GrantService(podio);
                 //Send email
 
+                var relationshipFieldId = ids.GetFieldId("Program Support|Workshop Sessions");
+                var relationshipField = check.Field<AppItemField>(relationshipFieldId);
+                List<Item> items = (List<Item>)relationshipField.Items;
+
+                foreach (var item in items)
+                {
+                    var itemId = item.ItemId;
+                }
+
                 var people = new List<Ref>();
                 var person = new Ref
                 {
