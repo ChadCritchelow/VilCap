@@ -79,11 +79,12 @@ namespace newVilcapCopyFileToGoogleDrive
                 context.Logger.LogLine("User ' https://podio.com/users/" + buttonPresser.Id + " ' is not authorized to perform this action.");
                 return;
             }
-
-            var lockValue = await saasafrasClient.LockFunction(functionName, item.ItemId.ToString());
+            var toValue = item.Field<CategoryItemField>(firstRevision.FieldId.Value.ToString()).Options.First().Text;
+            var lockString = item.ItemId.ToString() + "_" + toValue;
+            var lockValue = await saasafrasClient.LockFunction(functionName, lockString);
             if( string.IsNullOrEmpty(lockValue) )
             {
-                context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {item.ItemId}");
+                context.Logger.LogLine($"Failed to acquire lock for {functionName} | {lockString}");
                 return;
             }
             context.Logger.LogLine($"Lock Value: {lockValue}");
@@ -109,7 +110,7 @@ namespace newVilcapCopyFileToGoogleDrive
                             {
                                 commentText = $"WS Batch {nextBatch - 1} Completed.";
                                 item.Field<CategoryItemField>(ids.GetFieldId("Admin|WS Batch")).OptionText = $"{nextBatch}";
-                                await saasafrasClient.UnlockFunction(functionName, item.ItemId.ToString(), lockValue);
+                                await saasafrasClient.UnlockFunction(functionName, lockString, lockValue);
                                 await comm.AddCommentToObject("item", item.ItemId, commentText, hook: true);
                                 //await podio.UpdateItem(item, hook: true);
                                 return;
@@ -132,7 +133,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
                         finally
                         {
-                            await saasafrasClient.UnlockFunction(functionName, item.ItemId.ToString(), lockValue);
+                            await saasafrasClient.UnlockFunction(functionName, lockString, lockValue);
                         }
                     }
                     break;
@@ -166,7 +167,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
                         finally
                         {
-                            await saasafrasClient.UnlockFunction(functionName, item.ItemId.ToString(), lockValue);
+                            await saasafrasClient.UnlockFunction(functionName, lockString, lockValue);
                         }
                     }
                     break;
@@ -194,7 +195,7 @@ namespace newVilcapCopyFileToGoogleDrive
                             {
                                 commentText = $"TL Batch {nextBatch - 1} Completed.";
                                 item.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch")).OptionText = $"{nextBatch}";
-                                await saasafrasClient.UnlockFunction(functionName, item.ItemId.ToString(), lockValue);
+                                await saasafrasClient.UnlockFunction(functionName, lockString, lockValue);
                                 await comm.AddCommentToObject("item", item.ItemId, commentText, hook: true);
                                 //await podio.UpdateItem(item, hook: true);
                                 return;
@@ -214,7 +215,7 @@ namespace newVilcapCopyFileToGoogleDrive
                         }
                         finally
                         {
-                            await saasafrasClient.UnlockFunction(functionName, item.ItemId.ToString(), lockValue);
+                            await saasafrasClient.UnlockFunction(functionName, lockString, lockValue);
                         }
                     }
                     break;
@@ -222,6 +223,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 default:
                     context.Logger.LogLine($"NO ACTION: Value '{firstRevision.Label}' not Recognized.");
+                    await saasafrasClient.UnlockFunction(functionName, lockString, lockValue);
                     break;
             }
         }
