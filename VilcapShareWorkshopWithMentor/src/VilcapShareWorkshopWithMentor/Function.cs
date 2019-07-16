@@ -43,18 +43,13 @@ namespace VilcapShareWorkshopWithMentor
 
                 //When an item is created in Entrepreneurs:
                 var email = check.Field<EmailItemField>(ids.GetFieldId("Program Support|Email")).Value.First().Value;
-                var m = $"Event attendance confirmation: {check.Field<AppItemField>(ids.GetFieldId("Program Support|Workshop Sessions")).Items.First().Title}";
+                var m = $"Event Attendance Confirmation: {check.Field<AppItemField>(ids.GetFieldId("Program Support|Workshop Sessions")).Items.First().Title}";
                 var serv = new GrantService(podio);
                 //Send email
 
                 var relationshipFieldId = ids.GetFieldId("Program Support|Workshop Sessions");
                 var relationshipField = check.Field<AppItemField>(relationshipFieldId);
                 List<Item> items = (List<Item>)relationshipField.Items;
-
-                foreach (var item in items)
-                {
-                    var itemId = item.ItemId;
-                }
 
                 var people = new List<Ref>();
                 var person = new Ref
@@ -65,7 +60,16 @@ namespace VilcapShareWorkshopWithMentor
                 people.Add(person);
                 var message = m;
 
-                await serv.CreateGrant("item", check.ItemId, people, "view", message);
+                if (items.Any() == false)
+                {
+                    context.Logger.LogLine("No workshop session listed.");
+                }
+
+                foreach (var item in items)
+                {
+                    var itemId = item.ItemId;
+                    await serv.CreateGrant("item", check.ItemId, people, "view", message);
+                }
             }
 
             catch (Exception ex)
