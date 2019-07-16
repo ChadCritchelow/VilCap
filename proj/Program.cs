@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Amazon.Lambda.Core;
 using Google.Apis.Auth.OAuth2;
@@ -9,6 +8,7 @@ using PodioCore;
 using PodioCore.Comments;
 using PodioCore.Items;
 using PodioCore.Models;
+using PodioCore.Services;
 using PodioCore.Utils.ItemFields;
 using Saasafras;
 using Task = System.Threading.Tasks.Task;
@@ -25,59 +25,50 @@ namespace newVilcapCopyFileToGoogleDrive
         // private
         private static readonly string[] Scopes = { DriveService.Scope.Drive };
         private static readonly string ApplicationName = "BrickBridgeVilCap";
-        private Dictionary<string, string> dictChild;
-        private Dictionary<string, string> dictMaster;
+        //private Dictionary<string, string> dictChild;
+        //private Dictionary<string, string> dictMaster;
         private string commentText = null;
+
         // public 
         public ILambdaContext context { get; set; }
         public Podio podio { get; set; }
-        public Item check { get; set; }
+        public Item item { get; set; }
         public RoutedPodioEvent e { get; set; }
         public DriveService service { get; set; }
         public GetIds ids { get; set; }
         public GoogleIntegration google { get; set; }
         public PreSurvAndExp pre { get; set; }
+        public ViewService viewServ { get; set; }
         #endregion
 
         public async Task FunctionHandler( RoutedPodioEvent e, ILambdaContext context )
         {
-            string lockValue;
-            var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
-            podio = factory.ForClient(e.clientId, e.environmentId);
-            //context.Logger.LogLine("Getting Podio Instance");
-            check = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
-            context.Logger.LogLine($"Got item with ID: {check.ItemId}");
+            podio = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId).ForClient(e.clientId, e.environmentId);
+            item = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
+            //context.Logger.LogLine($"Got item with ID: {item.ItemId}");
             var saasafrasClient = new SaasafrasClient(Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
-            //context.Logger.LogLine("Getting BBC Client Instance");
-            dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
-            dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
-            //context.Logger.LogLine("Got dictionary");
-            var functionName = "newVilcapCopyFileToGoogleDrive";
+            var functionName = "VilcapDeploy";
 
-            var serviceAcccount = Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT");
-            var cred = GoogleCredential.FromJson(serviceAcccount).CreateScoped(Scopes).UnderlyingCredential;
-            service = new DriveService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = cred,
-                ApplicationName = ApplicationName,
-            });
-            //context.Logger.LogLine("Established google connection");
-            //context.Logger.LogLine($"App: {check.App.Name}");
+            var cred = GoogleCredential.FromJson(Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT")).CreateScoped(Scopes).UnderlyingCredential;
+            service = new DriveService(new BaseClientService.Initializer() { HttpClientInitializer = cred, ApplicationName = ApplicationName });
 
             google = new GoogleIntegration();
-            var saasGoogleIntegration = new SaasafrasGoogleIntegration();
+            //var saasGoogleIntegration = new SaasafrasGoogleIntegration();
             pre = new PreSurvAndExp();
-            ids = new GetIds(dictChild, dictMaster, e.environmentId);
+            ids = new GetIds(
+                await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version),
+                await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0"),
+                e.environmentId);
             var comm = new CommentService(podio);
-            var s = new Survey();
+            viewServ = new ViewService(podio);
 
             // Main Process //
 
-            var revision = await podio.GetRevisionDifference(Convert.ToInt32(check.ItemId), check.CurrentRevision.Revision - 1, check.CurrentRevision.Revision);
+            var revision = await podio.GetRevisionDifference(Convert.ToInt32(item.ItemId), item.CurrentRevision.Revision - 1, item.CurrentRevision.Revision);
             var firstRevision = revision.First();
             context.Logger.LogLine($"Last Revision field: {firstRevision.Label}");
 
-            var buttonPresser = check.CurrentRevision.CreatedBy;
+            var buttonPresser = item.CurrentRevision.CreatedBy;
             //context.Logger.LogLine($"Item updated by {buttonPresser.Name} (Should be 'Vilcap Admin')");
             if( buttonPresser.Id.GetValueOrDefault() != 4610903 )
             {
@@ -85,10 +76,10 @@ namespace newVilcapCopyFileToGoogleDrive
                 return;
             }
 
-            lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+            var lockValue = await saasafrasClient.LockFunction(functionName, item.ItemId.ToString());
             if( string.IsNullOrEmpty(lockValue) )
             {
-                context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
+                context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {item.ItemId}");
                 return;
             }
             context.Logger.LogLine($"Lock Value: {lockValue}");
@@ -99,11 +90,11 @@ namespace newVilcapCopyFileToGoogleDrive
                 case "WS Batch":
                     #region // Create Workshops //
                     var wsBatchId = ids.GetFieldId("Admin|WS Batch");
-                    if( check.Field<CategoryItemField>(wsBatchId).Options.Any() )
+                    if( item.Field<CategoryItemField>(wsBatchId).Options.Any() )
                     {
-                        context.Logger.LogLine($"Running 'WS Batch {check.Field<CategoryItemField>(wsBatchId).Options.First().Text}'");
+                        context.Logger.LogLine($"Running 'WS Batch {item.Field<CategoryItemField>(wsBatchId).Options.First().Text}'");
                         var nextBatch = -1;
-                        //lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+                        //lockValue = await saasafrasClient.LockFunction(functionName, item.ItemId.ToString());
 
                         try
                         {
@@ -113,16 +104,16 @@ namespace newVilcapCopyFileToGoogleDrive
                             if( nextBatch > 1 )
                             {
                                 commentText = $"WS Batch {nextBatch - 1} Completed.";
-                                check.Field<CategoryItemField>(ids.GetFieldId("Admin|WS Batch")).OptionText = $"{nextBatch}";
-                                await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
-                                await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);
-                                //await podio.UpdateItem(check, hook: true);
+                                item.Field<CategoryItemField>(ids.GetFieldId("Admin|WS Batch")).OptionText = $"{nextBatch}";
+                                await saasafrasClient.UnlockFunction(functionName, item.ItemId.ToString(), lockValue);
+                                await comm.AddCommentToObject("item", item.ItemId, commentText, hook: true);
+                                //await podio.UpdateItem(item, hook: true);
                                 return;
                             }
                             else if( nextBatch == -1 )
                             {
                                 commentText = $":loudspeaker: All WS Batches Completed!";
-                                await comm.AddCommentToObject("item", check.ItemId, commentText, hook: false);
+                                await comm.AddCommentToObject("item", item.ItemId, commentText, hook: false);
                             }
                         }
 
@@ -131,13 +122,13 @@ namespace newVilcapCopyFileToGoogleDrive
                             context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
                                 $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
                             commentText = "Sorry, something went wrong. Please try again in 5 minutes or contact the administrator.";
-                            await comm.AddCommentToObject("item", check.ItemId, $":loudspeaker: {commentText}", hook: false);
+                            await comm.AddCommentToObject("item", item.ItemId, $":loudspeaker: {commentText}", hook: false);
 
                         }
 
                         finally
                         {
-                            await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
+                            await saasafrasClient.UnlockFunction(functionName, item.ItemId.ToString(), lockValue);
                         }
                     }
                     break;
@@ -146,18 +137,18 @@ namespace newVilcapCopyFileToGoogleDrive
                 case "Deploy Addons":
                     #region // Deploy Addon Modules //
                     var aoBatchId = ids.GetFieldId("Admin|Deploy Addons");
-                    if( check.Field<CategoryItemField>(aoBatchId).Options.Any() )
+                    if( item.Field<CategoryItemField>(aoBatchId).Options.Any() )
                     {
-                        context.Logger.LogLine($"Running 'WS Batch {check.Field<CategoryItemField>(aoBatchId).Options.First().Text}'");
+                        context.Logger.LogLine($"Running 'WS Batch {item.Field<CategoryItemField>(aoBatchId).Options.First().Text}'");
                         var nextBatch = -1;
-                        //lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+                        //lockValue = await saasafrasClient.LockFunction(functionName, item.ItemId.ToString());
 
                         try
                         {
-                            
+
 
                             var ao = new Addons();
-                            nextBatch = await ao.CreateAddons(context, podio, check, e, service, ids, google, pre);
+                            nextBatch = await ao.CreateAddons(context, podio, item, e, service, ids, google, pre);
                             break;
                         }
 
@@ -166,12 +157,12 @@ namespace newVilcapCopyFileToGoogleDrive
                             context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
                                 $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
                             commentText = "Sorry, something went wrong. Please try again in 5 minutes or contact the administrator.";
-                            await comm.AddCommentToObject("item", check.ItemId, $":loudspeaker: {commentText}", hook: false);
+                            await comm.AddCommentToObject("item", item.ItemId, $":loudspeaker: {commentText}", hook: false);
                         }
 
                         finally
                         {
-                            await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
+                            await saasafrasClient.UnlockFunction(functionName, item.ItemId.ToString(), lockValue);
                         }
                     }
                     break;
@@ -179,35 +170,35 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 //case "Deploy Task List":
                 //    var deploy = ids.GetFieldId("Admin|Deploy Task List");
-                //    if (check.Field<CategoryItemField>(deploy).Options.Any());
+                //    if (item.Field<CategoryItemField>(deploy).Options.Any());
                 //    break;
 
                 case "TL Batch":
                     #region // Create Task List //
                     var tlBatchId = ids.GetFieldId("Admin|TL Batch");
-                    if( check.Field<CategoryItemField>(tlBatchId).Options.Any() )
+                    if( item.Field<CategoryItemField>(tlBatchId).Options.Any() )
                     {
-                        context.Logger.LogLine($"Running 'TL Batch {check.Field<CategoryItemField>(tlBatchId).Options.First().Text}'");
+                        context.Logger.LogLine($"Running 'TL Batch {item.Field<CategoryItemField>(tlBatchId).Options.First().Text}'");
                         var nextBatch = -1;
-                        //lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+                        //lockValue = await saasafrasClient.LockFunction(functionName, item.ItemId.ToString());
                         try
                         {
                             var tl = new TaskList2();
-                            nextBatch = await tl.CreateTaskLists(context, podio, check, e, service, ids, google, pre);
+                            nextBatch = await tl.CreateTaskLists(context, podio, item, e, service, ids, google, pre);
 
                             if( nextBatch > 1 )
                             {
                                 commentText = $"TL Batch {nextBatch - 1} Completed.";
-                                check.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch")).OptionText = $"{nextBatch}";
-                                await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
-                                await comm.AddCommentToObject("item", check.ItemId, commentText, hook: true);
-                                //await podio.UpdateItem(check, hook: true);
+                                item.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch")).OptionText = $"{nextBatch}";
+                                await saasafrasClient.UnlockFunction(functionName, item.ItemId.ToString(), lockValue);
+                                await comm.AddCommentToObject("item", item.ItemId, commentText, hook: true);
+                                //await podio.UpdateItem(item, hook: true);
                                 return;
                             }
                             else if( nextBatch == -1 )
                             {
                                 commentText = $":loudspeaker: All TL Batches Completed!";
-                                await comm.AddCommentToObject("item", check.ItemId, commentText, hook: false);
+                                await comm.AddCommentToObject("item", item.ItemId, commentText, hook: false);
                             }
                         }
                         catch( Exception ex )
@@ -215,11 +206,11 @@ namespace newVilcapCopyFileToGoogleDrive
                             context.Logger.LogLine($"Exception Details: {ex} - {ex.Data} - {ex.HelpLink} - {ex.HResult} - {ex.InnerException} " +
                                 $"- {ex.Message} - {ex.Source} - {ex.StackTrace} - {ex.TargetSite}");
                             commentText = "Sorry, something went wrong. Please try again in 5 minutes or contact the administrator.";
-                            await comm.AddCommentToObject("item", check.ItemId, $":loudspeaker: {commentText}", hook: false);
+                            await comm.AddCommentToObject("item", item.ItemId, $":loudspeaker: {commentText}", hook: false);
                         }
                         finally
                         {
-                            await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
+                            await saasafrasClient.UnlockFunction(functionName, item.ItemId.ToString(), lockValue);
                         }
                     }
                     break;

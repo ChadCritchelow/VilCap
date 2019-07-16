@@ -1,12 +1,6 @@
 ﻿using System.Linq;
-using PodioCore;
 using PodioCore.Models;
-using PodioCore.Services;
 using PodioCore.Utils.ItemFields;
-using newVilcapCopyFileToGoogleDrive;
-using Saasafras;
-using PodioCore.Items;
-using System;
 
 namespace newVilcapCopyFileToGoogleDrive
 {

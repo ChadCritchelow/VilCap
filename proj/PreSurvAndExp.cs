@@ -10,76 +10,78 @@ using PodioCore.Utils.ItemFields;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
+using Task = System.Threading.Tasks.Task;
+using newVilcapCopyFileToGoogleDrive;
 
 namespace newVilcapCopyFileToGoogleDrive
 {
     public class PreSurvAndExp
 	{
-		public async System.Threading.Tasks.Task CreateExpendituresAndPreWSSurvs(ILambdaContext context, Podio podio, ViewService viewServ, Item check, RoutedPodioEvent e, DriveService service,GetIds ids,GoogleIntegration google)
-		{
+        
+        public static async Task CreateExpendituresAndPreWSSurvs( newVilcapCopyFileToGoogleDrive vilcap )
+        {
 			try
 			{
 				var fieldId = 0;
-				context.Logger.LogLine("Creating Expenditures and Pre WS Surveys");
+				vilcap.context.Logger.LogLine("Creating Expenditures and Pre WS Surveys");
 				//--- Create Program Budget Template (Expendatures) ---//
-				viewServ = new ViewService(podio);
-				context.Logger.LogLine("Got View Service");
-				var views = await viewServ.GetViews(21481130); //VC Admin Master Schedule App
+				vilcap.viewServ = new ViewService(vilcap.podio);
+				vilcap.context.Logger.LogLine("Got View Service");
+				var views = await vilcap.viewServ.GetViews(21481130); //VC Admin Master Schedule App
 				var view = from v in views
 						   where v.Name == "Workshop Associations"
 						   select v;
-				context.Logger.LogLine("Got View");
+				vilcap.context.Logger.LogLine("Got View");
                 var op = new FilterOptions
                 {
                     Filters = view.First().Filters,
                     Limit = 500
                 };
-                var filter = await podio.FilterItems(21481130, op);
+                var filter = await vilcap.podio.FilterItems(21481130, op);
 				foreach (var master in filter.Items)
 				{
 					var child = new Item();
 
-					fieldId = ids.GetFieldId("VC Administration|Expenditures Curation |Purpose");
+					fieldId = vilcap.ids.GetFieldId("VC Administration|Expenditures Curation |Purpose");
 					var purposeMaster = master.Field<TextItemField>(fieldId);
 					if (purposeMaster.Value != null)
 					{
-						fieldId = ids.GetFieldId("Expenditures|Purpose");
+						fieldId = vilcap.ids.GetFieldId("Expenditures|Purpose");
 						var purposeChild = child.Field<TextItemField>(fieldId);
 						purposeChild.Value = purposeMaster.Value;
 					}
 
-					fieldId = ids.GetFieldId("VC Administration|Expenditures Curation |Workshop Associations");
+					fieldId = vilcap.ids.GetFieldId("VC Administration|Expenditures Curation |Workshop Associations");
 					var waMaster = master.Field<CategoryItemField>(fieldId);
 					if (waMaster.Options.Any())
 					{
-						fieldId = ids.GetFieldId("Expenditures|Workshop Associations");
+						fieldId = vilcap.ids.GetFieldId("Expenditures|Workshop Associations");
 						var waChild = child.Field<CategoryItemField>(fieldId);
 						waChild.OptionText = waMaster.Options.First().Text;
 					}
 
-					fieldId = ids.GetFieldId("VC Administration|Expenditures Curation |Expense Type");
+					fieldId = vilcap.ids.GetFieldId("VC Administration|Expenditures Curation |Expense Type");
 					var expMaster = master.Field<CategoryItemField>(fieldId);
 					if (expMaster.Options.Any())
 					{
-						fieldId = ids.GetFieldId("Expenditures|Expense Type");
+						fieldId = vilcap.ids.GetFieldId("Expenditures|Expense Type");
 						var expChild = child.Field<CategoryItemField>(fieldId);
 						expChild.OptionText = expMaster.Options.First().Text;
 					}
 
-					fieldId = ids.GetFieldId("VC Administration|Expenditures Curation |Amount");
+					fieldId = vilcap.ids.GetFieldId("VC Administration|Expenditures Curation |Amount");
 					var amountMaster = master.Field<MoneyItemField>(fieldId);
 					if (amountMaster.Value.HasValue)
 					{
-						fieldId = ids.GetFieldId("Expenditures|Amount");
+						fieldId = vilcap.ids.GetFieldId("Expenditures|Amount");
 						var amountChild = child.Field<MoneyItemField>(fieldId);
 						amountChild.Value = amountMaster.Value;
 					}
-					fieldId = ids.GetFieldId("Admin|Program Manager");
-					var managerMaster = check.Field<ContactItemField>(fieldId);
+					fieldId = vilcap.ids.GetFieldId("Admin|Program Manager");
+					var managerMaster = vilcap.item.Field<ContactItemField>(fieldId);
 					if (managerMaster.Contacts.Any())
 					{
-						fieldId = ids.GetFieldId("Expenditures|Spender");
+						fieldId = vilcap.ids.GetFieldId("Expenditures|Spender");
 						var managerChild = child.Field<ContactItemField>(fieldId);
 						var cs = new List<int>();
 						foreach (var contact in managerMaster.Contacts)
@@ -88,23 +90,23 @@ namespace newVilcapCopyFileToGoogleDrive
 							managerChild.ContactIds = cs;
 						}
 					}
-					fieldId = ids.GetFieldId("Expenditures|Status");
+					fieldId = vilcap.ids.GetFieldId("Expenditures|Status");
 					var status = child.Field<CategoryItemField>(fieldId);
 					status.OptionText = "Template";
 					var waitSeconds = 5;
 					CallPodio:
 					try
 					{
-						await podio.CreateItem(child, ids.GetFieldId($"Expenditures"), false);
+						await vilcap.podio.CreateItem(child, vilcap.ids.GetFieldId($"Expenditures"), false);
 					}
 					catch (PodioUnavailableException ex)
 					{
-						context.Logger.LogLine($"{ex.Message}");
-						context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
+						vilcap.context.Logger.LogLine($"{ex.Message}");
+						vilcap.context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
 						for (var i = 0; i < waitSeconds; i++)
 						{
 							System.Threading.Thread.Sleep(1000);
-							context.Logger.LogLine(".");
+							vilcap.context.Logger.LogLine(".");
 						}
 						waitSeconds = waitSeconds * 2;
 						goto CallPodio;
@@ -113,69 +115,68 @@ namespace newVilcapCopyFileToGoogleDrive
 				}
 
 				//--- Create Pre-Workshop Surveys ---//
-				context.Logger.LogLine("Creating surveys");
-				viewServ = new ViewService(podio);
-				context.Logger.LogLine("Got View Service");
-				views = await viewServ.GetViews(21389770); //VC Admin Master Schedule App
+				vilcap.context.Logger.LogLine("Creating surveys");
+				vilcap.context.Logger.LogLine("Got View Service");
+				views = await vilcap.viewServ.GetViews(21389770); //VC Admin Master Schedule App
 				view = from v in views
 					   where v.Name == "PreWS"
 					   select v;
-				context.Logger.LogLine("Got View");
+				vilcap.context.Logger.LogLine("Got View");
                 op = new FilterOptions
                 {
                     Filters = view.First().Filters,
                     Limit = 500
                 };
-                filter = await podio.FilterItems(21389770, op);
+                filter = await vilcap.podio.FilterItems(21389770, op);
 
 				foreach (var master in filter.Items)
 				{
 					var child = new Item();
-					fieldId = ids.GetFieldId("VC Administration|Survey|Title");
+					fieldId = vilcap.ids.GetFieldId("VC Administration|Survey|Title");
 					var titleMaster = master.Field<TextItemField>(fieldId);
 					if (titleMaster.Value != null)
 					{
-						fieldId = ids.GetFieldId("Surveys|Title");
+						fieldId = vilcap.ids.GetFieldId("Surveys|Title");
 						var titleChild = child.Field<TextItemField>(fieldId);
 						titleChild.Value = titleMaster.Value;
 					}
 
-					fieldId = ids.GetFieldId("VC Administration|Survey|Notes");
+					fieldId = vilcap.ids.GetFieldId("VC Administration|Survey|Notes");
 					var notesMaster = master.Field<TextItemField>(fieldId);
 					if (notesMaster.Value != null)
 					{
-						fieldId = ids.GetFieldId("Surveys|Notes");
+						fieldId = vilcap.ids.GetFieldId("Surveys|Notes");
 						var notesChild = child.Field<TextItemField>(fieldId);
                         //notesChild.Value = StripHTML(notesMaster.Value);
                         notesChild.Value = notesMaster.Value;
                     }
 
-					fieldId = ids.GetFieldId("VC Administration|Survey|Related Workshop");
+					fieldId = vilcap.ids.GetFieldId("VC Administration|Survey|Related Workshop");
 					var relMaster = master.Field<CategoryItemField>(fieldId);
 					if (relMaster.Options.Any())
 					{
-						fieldId = ids.GetFieldId("Surveys|Related Workshop");
+						fieldId = vilcap.ids.GetFieldId("Surveys|Related Workshop");
 						var relChild = child.Field<CategoryItemField>(fieldId);
 						relChild.OptionText = relMaster.Options.First().Text;
 					}
 
-					fieldId = ids.GetFieldId("VC Administration|Survey|Gdrive Survey");
+					fieldId = vilcap.ids.GetFieldId("VC Administration|Survey|Gdrive Survey");
 					var embedMaster = master.Field<EmbedItemField>(fieldId);
-					fieldId = ids.GetFieldId("Surveys|Link to Survey");
+					fieldId = vilcap.ids.GetFieldId("Surveys|Link to Survey");
 					var embedChild = child.Field<EmbedItemField>(fieldId);
 					var embeds = new List<Embed>();
 					var parentFolderId = Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
-					var cloneFolderId = google.GetSubfolderId(service, podio, e, parentFolderId);
+					var cloneFolderId = vilcap.google.GetSubfolderId(vilcap.service, vilcap.podio, vilcap.e, parentFolderId);
 					foreach (var em in embedMaster.Embeds)
 					{
-						if (em.OriginalUrl.Contains(".google."))
+						if (em.OriginalUrl.Contains(".vilcap.google."))
 						{
-							await google.UpdateOneEmbed(service, em, embeds, cloneFolderId, podio, e);
+							await vilcap.google.UpdateOneEmbed(vilcap.service, em, embeds, cloneFolderId, vilcap.podio, vilcap.e);
 						}
 						else          // Hold for 2.0 //
 						{
 							var nonG = new NonGdriveLinks();
-							await nonG.NonGDriveCopy(em, embeds, podio, e);
+							await nonG.NonGDriveCopy(em, embeds, vilcap.podio, vilcap.e);
 						}
 					}
 					foreach (var embed in embeds)
@@ -186,18 +187,18 @@ namespace newVilcapCopyFileToGoogleDrive
 					CallPodio:
 					try
 					{
-						await podio.CreateItem(child, ids.GetFieldId("Surveys"), false);
+						await vilcap.podio.CreateItem(child, vilcap.ids.GetFieldId("Surveys"), false);
 					}
 					catch (PodioUnavailableException ex)
 					{
-						context.Logger.LogLine($"{ex.Message}");
-						context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
+						vilcap.context.Logger.LogLine($"{ex.Message}");
+						vilcap.context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
 						for (var i = 0; i < waitSeconds; i++)
 						{
 							System.Threading.Thread.Sleep(1000);
-							context.Logger.LogLine(".");
+							vilcap.context.Logger.LogLine(".");
 						}
-						waitSeconds = waitSeconds * 2;
+						waitSeconds *= 2;
 						goto CallPodio;
 					}
 
@@ -205,7 +206,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			}
 			catch (Exception ex)
 			{
-				context.Logger.LogLine(ex.Message);
+				vilcap.context.Logger.LogLine(ex.Message);
 			}
 		}
 	}
