@@ -8,20 +8,18 @@ using PodioCore.Items;
 using PodioCore.Models;
 using PodioCore.Utils.ItemFields;
 using System.Linq;
-using newVilcapCopyFileToGoogleDrive;
+using Task = System.Threading.Tasks.Task;
 
-namespace NewVilcapCopyFileToGoogleDrive
+namespace newVilcapCopyFileToGoogleDrive
 {
-
     class DependantTask
     {
-
         // Public Vars //
         int fieldId;
         Item child = new Item();
 
 
-        public async System.Threading.Tasks.Task CreateDependantTask(ILambdaContext context, Podio podio, Item trigger, Item master, RoutedPodioEvent e, DriveService service, GetIds ids, GoogleIntegration google)
+        public async Task CreateDependantTask(ILambdaContext context, Podio podio, Item trigger, Item master, RoutedPodioEvent e, DriveService service, GetIds ids, GoogleIntegration google)
         {
 
             //--- Assign Fields ---//	
@@ -116,7 +114,7 @@ namespace NewVilcapCopyFileToGoogleDrive
                     System.Threading.Thread.Sleep(1000);
                     context.Logger.LogLine(".");
                 }
-                waitSeconds = waitSeconds * 2;
+                waitSeconds *= 2;
                 goto CallPodio;
             }
         }

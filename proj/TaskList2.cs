@@ -1,7 +1,4 @@
-﻿using Amazon.Lambda.Core;
-using Google.Apis.Drive.v3;
-using PodioCore;
-using PodioCore.Comments;
+﻿using PodioCore.Comments;
 using PodioCore.Exceptions;
 using PodioCore.Items;
 using PodioCore.Models;
@@ -12,7 +9,6 @@ using PodioCore.Utils.ItemFields;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using newVilcapCopyFileToGoogleDrive;
 
 namespace newVilcapCopyFileToGoogleDrive
 {

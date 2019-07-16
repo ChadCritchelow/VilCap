@@ -10,7 +10,6 @@ using PodioCore.Models.Request;
 using PodioCore.Services;
 using PodioCore.Utils.ItemFields;
 using System.Linq;
-using System.Text.RegularExpressions;
 using PodioCore.Utils;
 
 namespace newVilcapCopyFileToGoogleDrive
