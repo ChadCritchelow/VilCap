@@ -79,8 +79,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 context.Logger.LogLine("User ' https://podio.com/users/" + buttonPresser.Id + " ' is not authorized to perform this action.");
                 return;
             }
-            var toValue = item.Field<CategoryItemField>(firstRevision.FieldId.Value.ToString()).Options.First().Text;
-            var lockString = item.ItemId.ToString() + "_" + toValue;
+            var lockString = item.ItemId.ToString() + "_" + firstRevision.Label;
             var lockValue = await saasafrasClient.LockFunction(functionName, lockString);
             if( string.IsNullOrEmpty(lockValue) )
             {
