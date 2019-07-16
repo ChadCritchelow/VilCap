@@ -60,6 +60,8 @@ namespace VilcapShareWorkshopWithMentor
                 people.Add(person);
                 var message = m;
 
+                context.Logger.LogLine("Successfully got to line 63");
+
                 if (items.Any() == false)
                 {
                     context.Logger.LogLine("No workshop session listed.");
