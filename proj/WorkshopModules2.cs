@@ -400,7 +400,9 @@ namespace newVilcapCopyFileToGoogleDrive
             if( check.Field<CategoryItemField>(batchId).Options.First().Text == "1" ) { await PreSurvAndExp.CreateExpendituresAndPreWSSurvs(vilcap); }
 
             // Return the next Batch #, or -1 if all Items have been completed
-            return count != 0 ? ++batchNum : -1;
+            if( count == 0 ) return -1;
+            return ++batchNum;
+            //return count != 0 ? ++batchNum : -1;
         }
     }
 }

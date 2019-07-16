@@ -87,7 +87,11 @@ namespace UpdateDeployCurriculum
                                 wsBatch.OptionTexts = new List<string> { };
                                 await podio.UpdateItem(update, false);
                             }
-                            context.Logger.LogLine("No reset ");
+                            else
+                            {
+                                context.Logger.LogLine("No reset ");
+                            }
+                            
                             wsBatch.OptionText = "1";
                             await podio.UpdateItem(update, true);
                         }
