@@ -66,7 +66,7 @@ namespace VilcapShareWorkshopWithMentor
 
                 foreach (var item in items)
                 {
-                    var message = $"Event Attendance Confirmation: {item.Field<TextItemField>(ids.GetFieldId("Workshop Module|Title")).Value}";
+                    var message = $"Event Attendance Confirmation: {item.Field<TextItemField>(ids.GetFieldId("Workshop Modules|Title")).Value}";
                     var itemId = item.ItemId;
                     await serv.CreateGrant("item", item.ItemId, people, "view", message);
                 }
