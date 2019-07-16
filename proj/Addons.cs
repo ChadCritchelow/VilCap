@@ -19,10 +19,6 @@ namespace newVilcapCopyFileToGoogleDrive
 	{
 
 		PodioCollection<Item> filter;
-		public static string StripHTML(string input)
-		{
-			return Regex.Replace(input, "<.*?>", string.Empty);
-		}
 
 		public async System.Threading.Tasks.Task<int> CreateAddons(ILambdaContext context, Podio podio, Item check, RoutedPodioEvent e, DriveService service, GetIds ids, GoogleIntegration google,PreSurvAndExp pre)
 		{

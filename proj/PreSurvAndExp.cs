@@ -1,55 +1,39 @@
-﻿using Amazon.Lambda.Core;
-using Google.Apis.Drive.v3;
-using PodioCore;
-using PodioCore.Exceptions;
+﻿using PodioCore.Exceptions;
 using PodioCore.Items;
 using PodioCore.Models;
 using PodioCore.Models.Request;
-using PodioCore.Services;
 using PodioCore.Utils.ItemFields;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Task = System.Threading.Tasks.Task;
-using newVilcapCopyFileToGoogleDrive;
 
 namespace newVilcapCopyFileToGoogleDrive
 {
     public class PreSurvAndExp
-	{
-        
+	{        
         public static async Task CreateExpendituresAndPreWSSurvs( newVilcapCopyFileToGoogleDrive vilcap )
         {
-			try
+            vilcap.context.Logger.LogLine("Creating Expenditures and Pre WS Surveys");
+            try
 			{
 				var fieldId = 0;
-				vilcap.context.Logger.LogLine("Creating Expenditures and Pre WS Surveys");
 				//--- Create Program Budget Template (Expendatures) ---//
-				vilcap.viewServ = new ViewService(vilcap.podio);
-				vilcap.context.Logger.LogLine("Got View Service");
-				var views = await vilcap.viewServ.GetViews(21481130); //VC Admin Master Schedule App
+				var views = await vilcap.viewServ.GetViews(newVilcapCopyFileToGoogleDrive.MASTER_SCHEDULE_APP);
 				var view = from v in views
 						   where v.Name == "Workshop Associations"
 						   select v;
-				vilcap.context.Logger.LogLine("Got View");
-                var op = new FilterOptions
+                var filter = await vilcap.podio.FilterItems(21481130, new FilterOptions
                 {
                     Filters = view.First().Filters,
                     Limit = 500
-                };
-                var filter = await vilcap.podio.FilterItems(21481130, op);
+                });
 				foreach (var master in filter.Items)
 				{
 					var child = new Item();
 
 					fieldId = vilcap.ids.GetFieldId("VC Administration|Expenditures Curation |Purpose");
-					var purposeMaster = master.Field<TextItemField>(fieldId);
-					if (purposeMaster.Value != null)
-					{
-						fieldId = vilcap.ids.GetFieldId("Expenditures|Purpose");
-						var purposeChild = child.Field<TextItemField>(fieldId);
-						purposeChild.Value = purposeMaster.Value;
-					}
+                    child.Field<TextItemField>(vilcap.ids.GetFieldId("Expenditures|Purpose")).Value = master.Field<TextItemField>(fieldId).Value ;
 
 					fieldId = vilcap.ids.GetFieldId("VC Administration|Expenditures Curation |Workshop Associations");
 					var waMaster = master.Field<CategoryItemField>(fieldId);
@@ -108,7 +92,7 @@ namespace newVilcapCopyFileToGoogleDrive
 							System.Threading.Thread.Sleep(1000);
 							vilcap.context.Logger.LogLine(".");
 						}
-						waitSeconds = waitSeconds * 2;
+						waitSeconds *= 2;
 						goto CallPodio;
 					}
 
@@ -116,18 +100,15 @@ namespace newVilcapCopyFileToGoogleDrive
 
 				//--- Create Pre-Workshop Surveys ---//
 				vilcap.context.Logger.LogLine("Creating surveys");
-				vilcap.context.Logger.LogLine("Got View Service");
-				views = await vilcap.viewServ.GetViews(21389770); //VC Admin Master Schedule App
+				views = await vilcap.viewServ.GetViews(newVilcapCopyFileToGoogleDrive.MASTER_SURVEY_APP);
 				view = from v in views
 					   where v.Name == "PreWS"
 					   select v;
-				vilcap.context.Logger.LogLine("Got View");
-                op = new FilterOptions
+                filter = await vilcap.podio.FilterItems(newVilcapCopyFileToGoogleDrive.MASTER_SURVEY_APP, new FilterOptions
                 {
                     Filters = view.First().Filters,
                     Limit = 500
-                };
-                filter = await vilcap.podio.FilterItems(21389770, op);
+                });
 
 				foreach (var master in filter.Items)
 				{

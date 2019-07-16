@@ -30,6 +30,10 @@ namespace newVilcapCopyFileToGoogleDrive
         private string commentText = null;
 
         // public 
+
+        public static readonly int MASTER_SCHEDULE_APP = 21481130;
+        public static readonly int MASTER_CONTENT_APP = 21310273;
+        public static readonly int MASTER_SURVEY_APP = 21389770;
         public ILambdaContext context { get; set; }
         public Podio podio { get; set; }
         public Item item { get; set; }
@@ -184,7 +188,7 @@ namespace newVilcapCopyFileToGoogleDrive
                         try
                         {
                             var tl = new TaskList2();
-                            nextBatch = await tl.CreateTaskLists(context, podio, item, e, service, ids, google, pre);
+                            nextBatch = await tl.CreateTaskLists(this);
 
                             if( nextBatch > 1 )
                             {

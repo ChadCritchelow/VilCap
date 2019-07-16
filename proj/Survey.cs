@@ -9,17 +9,13 @@ using PodioCore.Models;
 using PodioCore.Models.Request;
 using PodioCore.Utils.ItemFields;
 using System.Linq;
-using System.Text.RegularExpressions;
+using Task = System.Threading.Tasks.Task;
 
 namespace newVilcapCopyFileToGoogleDrive
 {
     class Survey
 	{
-		public static string StripHTML(string input)
-		{
-			return Regex.Replace(input, "<.*?>", String.Empty);
-		}
-		public async System.Threading.Tasks.Task CreateSurveys(CategoryItemField checkType, GetIds ids,Podio podio,GoogleIntegration google,DriveService service,RoutedPodioEvent e,ILambdaContext context)
+		public async Task CreateSurveys(CategoryItemField checkType, GetIds ids,Podio podio,GoogleIntegration google,DriveService service,RoutedPodioEvent e,ILambdaContext context)
 		{
 			var fieldId = 0;
 			var parts = checkType.Options.First().Text.Split('/');
@@ -32,9 +28,9 @@ namespace newVilcapCopyFileToGoogleDrive
                 };
 
                 var filterConditions = new Dictionary<string, string>
-							{
-								{ids.GetFieldId("VC Administration|Survey|[WS]").ToString(), filterValue }
-							};
+				{
+					{ids.GetFieldId("VC Administration|Survey|[WS]").ToString(), filterValue }
+				};
 				op.Filters = filterConditions;
 
 				var filter = await podio.FilterItems(21389770, op);

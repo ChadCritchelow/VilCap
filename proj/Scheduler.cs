@@ -1,6 +1,4 @@
 ﻿using System;
-using Amazon.Lambda.Core;
-using PodioCore;
 using PodioCore.Models;
 using PodioCore.Utils.ItemFields;
 
@@ -19,7 +17,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
         // Store derived values from the {client WS}|Admin app 
 
-        public Scheduler(ILambdaContext context, Podio podio, Item check, RoutedPodioEvent e, GetIds ids, int PARTITIONS)
+        public Scheduler(Item check, RoutedPodioEvent e, GetIds ids, int PARTITIONS)
         {
             var pId = ids.GetFieldId("Admin|Program Design");
             pStart = new DateTime(check.Field<DateItemField>(pId).Start.Value.Ticks);
