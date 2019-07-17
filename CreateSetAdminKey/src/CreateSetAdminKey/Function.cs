@@ -11,6 +11,7 @@ using Saasafras;
 
 namespace CreateSetAdminKey
 {
+    [Obsolete]
     public class Function
     {
         public async System.Threading.Tasks.Task FunctionHandler( RoutedPodioEvent e, ILambdaContext context )

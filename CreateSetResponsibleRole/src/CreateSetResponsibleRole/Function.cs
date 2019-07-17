@@ -10,7 +10,6 @@ using PodioCore.Models.Request;
 using PodioCore.Utils.ItemFields;
 using Saasafras;
 
-
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
 
 namespace CreateSetResponsibleRole
@@ -19,80 +18,49 @@ namespace CreateSetResponsibleRole
     {
         public async System.Threading.Tasks.Task FunctionHandler( RoutedPodioEvent e, ILambdaContext context )
         {
+            #region // Generic Setup //
             var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
             var podio = factory.ForClient(e.clientId, e.environmentId);
-            var check = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
+            var item = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
             var saasafrasClient = new SaasafrasClient(Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
             var dictChild = await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version);
             var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
             string lockValue;
             var ids = new GetIds(dictChild, dictMaster, e.environmentId);
             var functionName = "CreateSetResponsibleRole";
-            lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
+            lockValue = await saasafrasClient.LockFunction(functionName, item.ItemId.ToString());
+            if( string.IsNullOrEmpty(lockValue) )
+            {
+                context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {item.ItemId}");
+                return;
+            }
+            #endregion
+
             try
             {
-                if( string.IsNullOrEmpty(lockValue) )
-                {
-                    context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
-                    return;
-                }
-                var fieldIdToSearch = ids.GetFieldId("Admin");
-
-                var newOptions = new FilterOptions
-                {
-                    Limit = 1
-                };
-                context.Logger.LogLine("Checking for duplicates");
-
-                var items = await podio.FilterItems(ids.GetFieldId("Admin"), newOptions);
+                //context.Logger.LogLine("Checking for duplicates");
+                var items = await podio.FilterItems(ids.GetFieldId("Admin"), new FilterOptions { Limit = 1 });
                 var AdminOptionToCheck = await podio.GetItem(items.Items.First().ItemId);
-                var CheckScheduleItem = check;
-                var UpdateScheduleItem = new Item() { ItemId = check.ItemId };
                 var contactids = new List<int>();
-                var esoMemberRole = CheckScheduleItem.Field<CategoryItemField>(ids.GetFieldId("Task List|ESO Member Role"));
+                var esoMemberRole = item.Field<CategoryItemField>(ids.GetFieldId("Task List|ESO Member Role"));
                 if( esoMemberRole.Options.Any() )
                 {
-                    var responsibleMember = UpdateScheduleItem.Field<ContactItemField>(ids.GetFieldId("Task List|Responsible Member"));
+                    var responsibleMember = new Item() { ItemId = item.ItemId }.Field<ContactItemField>(ids.GetFieldId("Task List|Responsible Member"));
                     var esoValue = esoMemberRole.Options.First().Text;
                     switch( esoValue )
                     {
+                        default:
+                            break;
                         case "Programs Associate":
-
-                            var programAssociates = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Program Associate"));
-                            foreach( var contact in programAssociates.Contacts )
-                            {
-                                contactids.Add(contact.ProfileId);
-                            }
-                            responsibleMember.ContactIds = contactids;
-                            break;
                         case "Investment Analyst":
-                            var InvestmentsAnalysts = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Investments Analyst"));
-                            foreach( var contact in InvestmentsAnalysts.Contacts )
-                            {
-                                contactids.Add(contact.ProfileId);
-                            }
-                            responsibleMember.ContactIds = contactids;
-                            break;
                         case "Program Manager":
-                            var programManagers = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Program Manager"));
-                            foreach( var contact in programManagers.Contacts )
-                            {
-                                contactids.Add(contact.ProfileId);
-                            }
-                            responsibleMember.ContactIds = contactids;
-                            break;
                         case "Program Director":
-                            var programDirectors = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Program Director"));
-                            foreach( var contact in programDirectors.Contacts )
-                            {
-                                contactids.Add(contact.ProfileId);
-                            }
-                            responsibleMember.ContactIds = contactids;
+                            responsibleMember.ContactIds =
+                                AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId($"Admin|{esoValue}")).Contacts.Select(X => X.ProfileId);
                             break;
                     }
-                    await podio.UpdateItem(UpdateScheduleItem, true);
+                    await podio.UpdateItem(new Item() { ItemId = item.ItemId }, true);
                 }
-
             }
             catch( Exception ex )
             {
@@ -100,7 +68,7 @@ namespace CreateSetResponsibleRole
             }
             finally
             {
-                await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue);
+                await saasafrasClient.UnlockFunction(functionName, item.ItemId.ToString(), lockValue);
             }
         }
     }
