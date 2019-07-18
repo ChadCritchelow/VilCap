@@ -41,8 +41,8 @@ namespace VilcapShareWorkshopWithMentor
                 }
 
                 //When an item is created in Entrepreneurs:
-                var email = check.Field<EmailItemField>(ids.GetFieldId("Program Support|Email")).Value.First().Value;
-                var m = $"Event attendance confirmation: {check.Field<AppItemField>(ids.GetFieldId("Program Support|Workshop Sessions")).Items.First().Title}";
+                var email = check.Field<EmailItemField>(ids.Get("Program Support|Email")).Value.First().Value;
+                var m = $"Event attendance confirmation: {check.Field<AppItemField>(ids.Get("Program Support|Workshop Sessions")).Items.First().Title}";
                 var serv = new GrantService(podio);
                 //Send email
 

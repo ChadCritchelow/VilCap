@@ -29,7 +29,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 var filterConditions = new Dictionary<string, string>
 				{
-					{ids.GetFieldId("VC Administration|Survey|[WS]").ToString(), filterValue }
+					{ids.Get("VC Administration|Survey|[WS]").ToString(), filterValue }
 				};
 				op.Filters = filterConditions;
 
@@ -39,37 +39,37 @@ namespace newVilcapCopyFileToGoogleDrive
 				{
 
 					var child = new Item();
-					fieldId = ids.GetFieldId("VC Administration|Survey|Title");
+					fieldId = ids.Get("VC Administration|Survey|Title");
 					var titleMaster = master.Field<TextItemField>(fieldId);
 					if (titleMaster.Value != null)
 					{
-						fieldId = ids.GetFieldId("Surveys|Title");
+						fieldId = ids.Get("Surveys|Title");
 						var titleChild = child.Field<TextItemField>(fieldId);
 						titleChild.Value = titleMaster.Value;
 					}
 
-					fieldId = ids.GetFieldId("VC Administration|Survey|Notes");
+					fieldId = ids.Get("VC Administration|Survey|Notes");
 					var notesMaster = master.Field<TextItemField>(fieldId);
 					if (notesMaster.Value != null)
 					{
-						fieldId = ids.GetFieldId("Surveys|Notes");
+						fieldId = ids.Get("Surveys|Notes");
 						var notesChild = child.Field<TextItemField>(fieldId);
 						//notesChild.Value = StripHTML(notesMaster.Value);
                         notesChild.Value = notesMaster.Value;
                     }
 
-					fieldId = ids.GetFieldId("VC Administration|Survey|Related Workshop");
+					fieldId = ids.Get("VC Administration|Survey|Related Workshop");
 					var relMaster = master.Field<CategoryItemField>(fieldId);
 					if (relMaster.Options.Any())
 					{
-						fieldId = ids.GetFieldId("Surveys|Related Workshop");
+						fieldId = ids.Get("Surveys|Related Workshop");
 						var relChild = child.Field<CategoryItemField>(fieldId);
 						relChild.OptionText = relMaster.Options.First().Text;
 					}
 
-					fieldId = ids.GetFieldId("VC Administration|Survey|Gdrive Survey");
+					fieldId = ids.Get("VC Administration|Survey|Gdrive Survey");
 					var embedMaster = master.Field<EmbedItemField>(fieldId);
-					fieldId = ids.GetFieldId("Surveys|Link to Survey");
+					fieldId = ids.Get("Surveys|Link to Survey");
 					var embedChild = child.Field<EmbedItemField>(fieldId);
 					var embeds = new List<Embed>();
 					var parentFolderId = Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
@@ -96,7 +96,7 @@ namespace newVilcapCopyFileToGoogleDrive
 					CallPodio:
 					try
 					{
-						await podio.CreateItem(child, ids.GetFieldId("Surveys"), false);
+						await podio.CreateItem(child, ids.Get("Surveys"), false);
 					}
 					catch (PodioUnavailableException ex)
 					{

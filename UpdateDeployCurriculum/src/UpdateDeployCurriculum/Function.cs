@@ -53,12 +53,12 @@ namespace UpdateDeployCurriculum
                 {
 
                     case "Deploy Task List":
-                        var deployField = check.Field<CategoryItemField>(ids.GetFieldId("Admin|Deploy Task List"));
+                        var deployField = check.Field<CategoryItemField>(ids.Get("Admin|Deploy Task List"));
                         if( firstRevision.FieldId == deployField.FieldId && deployField.Options.Any() && deployField.Options.First().Text == "Deploy" )
                         {
                             context.Logger.LogLine("Updating an Item or something");
                             var update = new Item() { ItemId = check.ItemId };
-                            var tlBatch = update.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch"));
+                            var tlBatch = update.Field<CategoryItemField>(ids.Get("Admin|TL Batch"));
                             if( tlBatch.Options.First().Text == "1" )
                             {
                                 context.Logger.LogLine("... Reseting batch # field ... ");
@@ -72,14 +72,14 @@ namespace UpdateDeployCurriculum
                         break;
 
                     case "Deploy Curriculum":
-                        deployField = check.Field<CategoryItemField>(ids.GetFieldId("Admin|Deploy Curriculum"));
+                        deployField = check.Field<CategoryItemField>(ids.Get("Admin|Deploy Curriculum"));
                         if( firstRevision.FieldId == deployField.FieldId && deployField.Options.Any() && deployField.Options.First().Text == "Deploy" )
                         {
                             context.Logger.LogLine("Updating an Item or something");
                             var update = new Item() { ItemId = check.ItemId };
                             context.Logger.LogLine("Created 'update' ");
-                            var wsBatch = update.Field<CategoryItemField>(ids.GetFieldId("Admin|WS Batch"));
-                            var currentWS = check.Field<CategoryItemField>(ids.GetFieldId("Admin|WS Batch"));
+                            var wsBatch = update.Field<CategoryItemField>(ids.Get("Admin|WS Batch"));
+                            var currentWS = check.Field<CategoryItemField>(ids.Get("Admin|WS Batch"));
                             context.Logger.LogLine("Created 'update|WS Batch' ");
                             if( currentWS.Options.First().Text == "1" )
                             {

@@ -38,8 +38,8 @@ namespace VilcapShareWithEnt
                     return;
                 }
                 //When an item is created in Entrepreneurs:
-                var email = check.Field<EmailItemField>(ids.GetFieldId("Entrepreneurs|Entrepreneur Email")).Value.First().Value;
-                var m = $"Please create an account and tell us about your time at {check.Field<AppItemField>(ids.GetFieldId("Entrepreneurs|Company")).Items.First().Title}";
+                var email = check.Field<EmailItemField>(ids.Get("Entrepreneurs|Entrepreneur Email")).Value.First().Value;
+                var m = $"Please create an account and tell us about your time at {check.Field<AppItemField>(ids.Get("Entrepreneurs|Company")).Items.First().Title}";
                 var serv = new GrantService(podio);
                 //Send email
 

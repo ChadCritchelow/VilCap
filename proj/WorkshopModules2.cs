@@ -35,9 +35,9 @@ namespace newVilcapCopyFileToGoogleDrive
             var commentText = "";
             var fieldId = 0;
             var count = 0;
-            var workshopAppId = vilcap.ids.GetFieldId("Workshop Modules");
-            var tasklistAppId = vilcap.ids.GetFieldId("Task List");
-            var materialsAppId = vilcap.ids.GetFieldId("Materials");
+            var workshopAppId = vilcap.ids.Get("Workshop Modules");
+            var tasklistAppId = vilcap.ids.Get("Task List");
+            var materialsAppId = vilcap.ids.Get("Materials");
             var waitSeconds = 5;
             var day = 0;
             var timeFromStart = new TimeSpan(0);
@@ -45,14 +45,14 @@ namespace newVilcapCopyFileToGoogleDrive
 
             #region // Admin app values //
 
-            var batchId = vilcap.ids.GetFieldId("Admin|WS Batch");
+            var batchId = vilcap.ids.Get("Admin|WS Batch");
             var batch = check.Field<CategoryItemField>(batchId).Options.First().Text;
             int.TryParse(batch, out batchNum);
 
-            var startDateId = vilcap.ids.GetFieldId("Admin|Program Start Date");
+            var startDateId = vilcap.ids.Get("Admin|Program Start Date");
             var startDate = new DateTime(check.Field<DateItemField>(startDateId).Start.Value.Ticks);
 
-            var packageId = vilcap.ids.GetFieldId("Admin|Curriculum Package");
+            var packageId = vilcap.ids.Get("Admin|Curriculum Package");
             var package = check.Field<CategoryItemField>(packageId).Options.First().Text;
             vilcap.context.Logger.LogLine($"Curriculum Batch '{batch}'");
             #endregion
@@ -106,13 +106,13 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 #region // Check for new Day //
 
-                fieldId = (vilcap.ids).GetFieldId("VC Administration|Content Curation |Workshop Day");
+                fieldId = (vilcap.ids).Get("VC Administration|Content Curation |Workshop Day");
                 var dayMaster = master.Field<CategoryItemField>(fieldId);
                 if( dayMaster.Values != null )
                 {
                     int.TryParse(dayMaster.Options.First().Text.Split("Day ")[1], out var dayMasterVal);
-                    var color = child.Field<CategoryItemField>(vilcap.ids.GetFieldId("Workshop Modules|Calendar Color"));
-                    var dayChild = child.Field<CategoryItemField>(vilcap.ids.GetFieldId("Workshop Modules|Day Number"));
+                    var color = child.Field<CategoryItemField>(vilcap.ids.Get("Workshop Modules|Calendar Color"));
+                    var dayChild = child.Field<CategoryItemField>(vilcap.ids.Get("Workshop Modules|Day Number"));
                     dayChild.OptionText = dayMaster.Options.First().Text.Split(" ")[dayMaster.Options.First().Text.Split(" ").Length - 1];
 
                     if( (dayMasterVal != day) && (dayMasterVal != 0) ) // ie. Not a new Day
@@ -130,58 +130,58 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 #region // Assign Fields //
 
-                fieldId = vilcap.ids.GetFieldId("VC Administration|Content Curation |Module Name");
+                fieldId = vilcap.ids.Get("VC Administration|Content Curation |Module Name");
                 var titleMaster = master.Field<TextItemField>(fieldId);
                 if( titleMaster.Value != null )
                 {
-                    fieldId = (vilcap.ids).GetFieldId("Workshop Modules|Title");
+                    fieldId = (vilcap.ids).Get("Workshop Modules|Title");
                     var titleChild = child.Field<TextItemField>(fieldId);
                     titleChild.Value = titleMaster.Value;
                 }
 
-                fieldId = vilcap.ids.GetFieldId("VC Administration|Content Curation |Purpose");
+                fieldId = vilcap.ids.Get("VC Administration|Content Curation |Purpose");
                 var descMaster = master.Field<TextItemField>(fieldId);
                 if( descMaster.Value != null )
                 {
-                    fieldId = vilcap.ids.GetFieldId("Workshop Modules|Description");
+                    fieldId = vilcap.ids.Get("Workshop Modules|Description");
                     var descChild = child.Field<TextItemField>(fieldId);
                     //descChild.Value = StripHTML(descMaster.Value);
                     descChild.Value = descMaster.Value;
                 }
 
-                fieldId = vilcap.ids.GetFieldId("VC Administration|Content Curation |Entrepreneur Pre-Work Required");
+                fieldId = vilcap.ids.Get("VC Administration|Content Curation |Entrepreneur Pre-Work Required");
                 var workMaster = master.Field<TextItemField>(fieldId);
                 if( workMaster.Value != null )
                 {
-                    fieldId = vilcap.ids.GetFieldId("Workshop Modules|Entrepreneur Pre-work Required");
+                    fieldId = vilcap.ids.Get("Workshop Modules|Entrepreneur Pre-work Required");
                     var workChild = child.Field<TextItemField>(fieldId);
                     workChild.Value = workMaster.Value;
                 }
 
-                fieldId = vilcap.ids.GetFieldId("VC Administration|Content Curation |Materials Required");
+                fieldId = vilcap.ids.Get("VC Administration|Content Curation |Materials Required");
                 var matsMaster = master.Field<TextItemField>(fieldId);
                 if( matsMaster.Value != null )
                 {
-                    fieldId = vilcap.ids.GetFieldId("Workshop Modules|Additional Materials Required");
+                    fieldId = vilcap.ids.Get("Workshop Modules|Additional Materials Required");
                     var matsChild = child.Field<TextItemField>(fieldId);
                     matsChild.Value = matsMaster.Value;
                 }
 
-                fieldId = vilcap.ids.GetFieldId("VC Administration|Content Curation |Mentors Required");
+                fieldId = vilcap.ids.Get("VC Administration|Content Curation |Mentors Required");
                 var mentMaster = master.Field<TextItemField>(fieldId);
                 if( mentMaster.Value != null )
                 {
-                    fieldId = vilcap.ids.GetFieldId("Workshop Modules|Mentors Required");
+                    fieldId = vilcap.ids.Get("Workshop Modules|Mentors Required");
                     var mentChild = child.Field<TextItemField>(fieldId);
                     mentChild.Value = mentMaster.Value;
                 }
 
-                var childTasks = child.Field<AppItemField>(vilcap.ids.GetFieldId("Workshop Modules|Dependent Task"));
-                var masterTasks = master.Field<AppItemField>(vilcap.ids.GetFieldId("VC Administration|Content Curation |Dependent Task"));
-                var taskOffset = master.Field<DurationItemField>(vilcap.ids.GetFieldId("VC Administration|Content Curation |Dependent Task Offset"));
-                var mMaterials = master.Field<AppItemField>(vilcap.ids.GetFieldId("VC Administration|Content Curation |All Attached Materials")); // PLACEHOLDER
+                var childTasks = child.Field<AppItemField>(vilcap.ids.Get("Workshop Modules|Dependent Task"));
+                var masterTasks = master.Field<AppItemField>(vilcap.ids.Get("VC Administration|Content Curation |Dependent Task"));
+                var taskOffset = master.Field<DurationItemField>(vilcap.ids.Get("VC Administration|Content Curation |Dependent Task Offset"));
+                var mMaterials = master.Field<AppItemField>(vilcap.ids.Get("VC Administration|Content Curation |All Attached Materials")); // PLACEHOLDER
                 //var childMats = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Auxillary Materials")); // PLACEHOLDER
-                var cEntrepreneurMaterials = child.Field<AppItemField>(vilcap.ids.GetFieldId("Workshop Modules|Entrepreneur Prep"));
+                var cEntrepreneurMaterials = child.Field<AppItemField>(vilcap.ids.Get("Workshop Modules|Entrepreneur Prep"));
                 //var cEntrepreneurMaterials = child.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Entrepreneur Prep"));
                 #endregion
 
@@ -198,15 +198,15 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 #region // Date Calcs //
 
-                fieldId = vilcap.ids.GetFieldId("VC Administration|Content Curation |Package Sequence");
+                fieldId = vilcap.ids.Get("VC Administration|Content Curation |Package Sequence");
                 var seqMaster = master.Field<CategoryItemField>(fieldId);
 
-                fieldId = vilcap.ids.GetFieldId("VC Administration|Content Curation |Duration");
+                fieldId = vilcap.ids.Get("VC Administration|Content Curation |Duration");
                 var durMaster = master.Field<DurationItemField>(fieldId);
 
                 if( durMaster.Value != null )
                 {
-                    fieldId = vilcap.ids.GetFieldId("Workshop Modules|Duration");
+                    fieldId = vilcap.ids.Get("Workshop Modules|Duration");
                     var durChild = child.Field<DurationItemField>(fieldId);
                     durChild.Value = durMaster.Value.Value.Duration(); // durChild.Value.Value.Add(durMaster.Value.Value);? durChild.Value = durMaster.Value;?
 
@@ -215,7 +215,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     //context.Logger.LogLine($"Scheduling for {childDateTimeStart.ToString()} - {childDateTimeEnd.ToString()}");
                     timeFromStart = timeFromStart.Add(durChild.Value.Value.Duration());
 
-                    fieldId = vilcap.ids.GetFieldId("Workshop Modules|Date");
+                    fieldId = vilcap.ids.Get("Workshop Modules|Date");
                     var childTime = child.Field<DateItemField>(fieldId);
                     childTime.Start = childDateTimeStart;
                     childTime.End = childDateTimeEnd;
@@ -225,9 +225,9 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 #region // GDrive Integration //
 
-                fieldId = vilcap.ids.GetFieldId("VC Administration|Content Curation |GDrive Link");
+                fieldId = vilcap.ids.Get("VC Administration|Content Curation |GDrive Link");
                 var embedMaster = master.Field<EmbedItemField>(fieldId);
-                fieldId = vilcap.ids.GetFieldId("Workshop Modules|Link to Material");
+                fieldId = vilcap.ids.Get("Workshop Modules|Link to Material");
                 var embedChild = child.Field<EmbedItemField>(fieldId);
                 var embeds = new List<Embed>();
 
@@ -260,46 +260,46 @@ namespace newVilcapCopyFileToGoogleDrive
 
                     #region // Assign Dep. Task Fields //
 
-                    var nameMasterTValue = masterT.Field<TextItemField>(vilcap.ids.GetFieldId("VC Administration|Master Schedule|Task Name")).Value;
+                    var nameMasterTValue = masterT.Field<TextItemField>(vilcap.ids.Get("VC Administration|Master Schedule|Task Name")).Value;
                     if( nameMasterTValue != null )
                     {
-                        var nameCloneT = cloneT.Field<TextItemField>(vilcap.ids.GetFieldId("Task List|Title"));
+                        var nameCloneT = cloneT.Field<TextItemField>(vilcap.ids.Get("Task List|Title"));
                         nameCloneT.Value = $"{nameMasterTValue} ({titleMaster.Value})";
                     }
 
-                    var descrMasterT = masterT.Field<TextItemField>(vilcap.ids.GetFieldId("VC Administration|Master Schedule|Desciption"));
+                    var descrMasterT = masterT.Field<TextItemField>(vilcap.ids.Get("VC Administration|Master Schedule|Desciption"));
                     if( descrMasterT.Value != null )
                     {
-                        var descrCloneT = cloneT.Field<TextItemField>(vilcap.ids.GetFieldId("Task List|Description"));
+                        var descrCloneT = cloneT.Field<TextItemField>(vilcap.ids.Get("Task List|Description"));
                         //descrCloneT.Value = StripHTML(descrMasterT.Value);
                         descrCloneT.Value = descrMasterT.Value;
                     }
 
-                    var priorityMasterT = masterT.Field<CategoryItemField>(vilcap.ids.GetFieldId("VC Administration|Master Schedule|Priority"));
+                    var priorityMasterT = masterT.Field<CategoryItemField>(vilcap.ids.Get("VC Administration|Master Schedule|Priority"));
                     if( priorityMasterT.Options.Any() )
                     {
-                        var priorityCloneT = cloneT.Field<CategoryItemField>(vilcap.ids.GetFieldId("Task List|Priority"));
+                        var priorityCloneT = cloneT.Field<CategoryItemField>(vilcap.ids.Get("Task List|Priority"));
                         priorityCloneT.OptionText = priorityMasterT.Options.First().Text;
                     }
 
-                    var phaseMasterT = masterT.Field<CategoryItemField>(vilcap.ids.GetFieldId("VC Administration|Master Schedule|Phase"));
+                    var phaseMasterT = masterT.Field<CategoryItemField>(vilcap.ids.Get("VC Administration|Master Schedule|Phase"));
                     if( phaseMasterT.Options.Any() )
                     {
-                        var phaseCloneT = cloneT.Field<CategoryItemField>(vilcap.ids.GetFieldId("Task List|Phase"));
+                        var phaseCloneT = cloneT.Field<CategoryItemField>(vilcap.ids.Get("Task List|Phase"));
                         phaseCloneT.OptionText = phaseMasterT.Options.First().Text;
                     }
 
-                    var esoMasterT = masterT.Field<CategoryItemField>(vilcap.ids.GetFieldId("VC Administration|Master Schedule|ESO Member Role"));
+                    var esoMasterT = masterT.Field<CategoryItemField>(vilcap.ids.Get("VC Administration|Master Schedule|ESO Member Role"));
                     if( esoMasterT.Options.Any() )
                     {
-                        var esoCloneT = cloneT.Field<CategoryItemField>(vilcap.ids.GetFieldId("Task List|ESO Member Role"));
+                        var esoCloneT = cloneT.Field<CategoryItemField>(vilcap.ids.Get("Task List|ESO Member Role"));
                         esoCloneT.OptionText = esoMasterT.Options.First().Text;
                     }
 
-                    var depMasterT = masterT.Field<TextItemField>(vilcap.ids.GetFieldId("VC Administration|Master Schedule|Dependancy"));
+                    var depMasterT = masterT.Field<TextItemField>(vilcap.ids.Get("VC Administration|Master Schedule|Dependancy"));
                     if( depMasterT.Value != null )
                     {
-                        var depCloneT = cloneT.Field<TextItemField>(vilcap.ids.GetFieldId("Task List|Additional Dependencies"));
+                        var depCloneT = cloneT.Field<TextItemField>(vilcap.ids.Get("Task List|Additional Dependencies"));
                         depCloneT.Value = depMasterT.Value;
                     }
 
@@ -309,14 +309,14 @@ namespace newVilcapCopyFileToGoogleDrive
 
                     #region // Dep. Task Date Calcs //
 
-                    var durationMasterT = masterT.Field<NumericItemField>(vilcap.ids.GetFieldId("VC Administration|Master Schedule|Duration (Days)"));
-                    var dateCloneT = cloneT.Field<DateItemField>(vilcap.ids.GetFieldId("Task List|Date"));
-                    var durationCloneT = cloneT.Field<DurationItemField>(vilcap.ids.GetFieldId("Task List|Duration"));
+                    var durationMasterT = masterT.Field<NumericItemField>(vilcap.ids.Get("VC Administration|Master Schedule|Duration (Days)"));
+                    var dateCloneT = cloneT.Field<DateItemField>(vilcap.ids.Get("Task List|Date"));
+                    var durationCloneT = cloneT.Field<DurationItemField>(vilcap.ids.Get("Task List|Duration"));
 
                     if( durationMasterT.Value != null )
                     {
                         durationCloneT.Value = new TimeSpan((int)durationMasterT.Value.GetValueOrDefault(), 0, 0);
-                        var taskStart = new DateTime(child.Field<DateItemField>(vilcap.ids.GetFieldId("Workshop Modules|Date")).Start.Value.Ticks).Subtract(taskOffset.Value.GetValueOrDefault());
+                        var taskStart = new DateTime(child.Field<DateItemField>(vilcap.ids.Get("Workshop Modules|Date")).Start.Value.Ticks).Subtract(taskOffset.Value.GetValueOrDefault());
                         dateCloneT.Start = taskStart.Date;
                         var taskEnd = new DateTime(taskStart.AddDays(durationMasterT.Value.GetValueOrDefault()).Ticks);
                         dateCloneT.End = taskEnd.Date;
@@ -325,9 +325,9 @@ namespace newVilcapCopyFileToGoogleDrive
 
                     #region // Dep. Task Gdrive Integration //
 
-                    fieldId = vilcap.ids.GetFieldId("VC Administration|Master Schedule|Gdrive Link");
+                    fieldId = vilcap.ids.Get("VC Administration|Master Schedule|Gdrive Link");
                     var embedMasterT = masterT.Field<EmbedItemField>(fieldId);
-                    fieldId = vilcap.ids.GetFieldId("Task List|Linked Files");
+                    fieldId = vilcap.ids.Get("Task List|Linked Files");
                     var embedChildT = cloneT.Field<EmbedItemField>(fieldId);
                     var embedsT = new List<Embed>();
                     var parentFolderIdT = Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");

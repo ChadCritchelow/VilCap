@@ -43,10 +43,10 @@ namespace VilcapSetNumericScore
                     check.CurrentRevision.Revision
                 );
                 var firstRevision = revision.First();
-                var selectionProcess = check.Field<CategoryItemField>(ids.GetFieldId("Diligence and Selection|Score"));
+                var selectionProcess = check.Field<CategoryItemField>(ids.Get("Diligence and Selection|Score"));
                 if( firstRevision.FieldId == selectionProcess.FieldId )
                 {
-                    var selectionRound = check.Field<CategoryItemField>(ids.GetFieldId("Diligence and Selection|Selection Round")).Options.First().Text;
+                    var selectionRound = check.Field<CategoryItemField>(ids.Get("Diligence and Selection|Selection Round")).Options.First().Text;
                     var semiFinalScore = "";
                     var finalScore = "";
                     var status = "Complete";
@@ -54,20 +54,20 @@ namespace VilcapSetNumericScore
                     switch( selectionRound )
                     {
                         case "Semi-Final Round":
-                            semiFinalScore = check.Field<CategoryItemField>(ids.GetFieldId("Diligence and Selection|Score")).Options.First().Text;
+                            semiFinalScore = check.Field<CategoryItemField>(ids.Get("Diligence and Selection|Score")).Options.First().Text;
                             finalScore = null;
-                            updateMe.Field<NumericItemField>(ids.GetFieldId("Diligence and Selection|Score (Numeric) Semi-Final")).Value =
+                            updateMe.Field<NumericItemField>(ids.Get("Diligence and Selection|Score (Numeric) Semi-Final")).Value =
                                 int.Parse(semiFinalScore);
-                            updateMe.Field<NumericItemField>(ids.GetFieldId("Diligence and Selection|Score (Numeric) Final")).Status = null;
+                            updateMe.Field<NumericItemField>(ids.Get("Diligence and Selection|Score (Numeric) Final")).Status = null;
                             break;
                         case "Final Round":
                             semiFinalScore = null;
-                            finalScore = check.Field<CategoryItemField>(ids.GetFieldId("Diligence and Selection|Score")).Options.First().Text;
-                            updateMe.Field<NumericItemField>(ids.GetFieldId("Diligence and Selection|Score (Numeric) Semi-Final")).Status = null;
-                            updateMe.Field<NumericItemField>(ids.GetFieldId("Diligence and Selection|Score (Numeric) Final")).Value = int.Parse(finalScore);
+                            finalScore = check.Field<CategoryItemField>(ids.Get("Diligence and Selection|Score")).Options.First().Text;
+                            updateMe.Field<NumericItemField>(ids.Get("Diligence and Selection|Score (Numeric) Semi-Final")).Status = null;
+                            updateMe.Field<NumericItemField>(ids.Get("Diligence and Selection|Score (Numeric) Final")).Value = int.Parse(finalScore);
                             break;
                     }
-                    updateMe.Field<CategoryItemField>(ids.GetFieldId("Diligence and Selection|Status")).OptionText = status;
+                    updateMe.Field<CategoryItemField>(ids.Get("Diligence and Selection|Status")).OptionText = status;
                     await podio.UpdateItem(updateMe, true);
 
                 }

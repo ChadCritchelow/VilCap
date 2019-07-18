@@ -93,7 +93,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 case "WS Batch":
                     #region // Create Workshops //
-                    var wsBatchId = ids.GetFieldId("Admin|WS Batch");
+                    var wsBatchId = ids.Get("Admin|WS Batch");
                     if( item.Field<CategoryItemField>(wsBatchId).Options.Any() )
                     {
                         context.Logger.LogLine($"Running 'WS Batch {item.Field<CategoryItemField>(wsBatchId).Options.First().Text}'");
@@ -108,7 +108,7 @@ namespace newVilcapCopyFileToGoogleDrive
                             if( nextBatch > 1 )
                             {
                                 commentText = $"WS Batch {nextBatch - 1} Completed.";
-                                item.Field<CategoryItemField>(ids.GetFieldId("Admin|WS Batch")).OptionText = $"{nextBatch}";
+                                item.Field<CategoryItemField>(ids.Get("Admin|WS Batch")).OptionText = $"{nextBatch}";
                                 await saasafrasClient.UnlockFunction(functionName, lockString, lockValue);
                                 await comm.AddCommentToObject("item", item.ItemId, commentText, hook: true);
                                 //await podio.UpdateItem(item, hook: true);
@@ -140,7 +140,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 case "Deploy Addons":
                     #region // Deploy Addon Modules //
-                    var aoBatchId = ids.GetFieldId("Admin|Deploy Addons");
+                    var aoBatchId = ids.Get("Admin|Deploy Addons");
                     if( item.Field<CategoryItemField>(aoBatchId).Options.Any() )
                     {
                         context.Logger.LogLine($"Running 'WS Batch {item.Field<CategoryItemField>(aoBatchId).Options.First().Text}'");
@@ -179,7 +179,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 case "TL Batch":
                     #region // Create Task List //
-                    var tlBatchId = ids.GetFieldId("Admin|TL Batch");
+                    var tlBatchId = ids.Get("Admin|TL Batch");
                     if( item.Field<CategoryItemField>(tlBatchId).Options.Any() )
                     {
                         context.Logger.LogLine($"Running 'TL Batch {item.Field<CategoryItemField>(tlBatchId).Options.First().Text}'");
@@ -193,7 +193,7 @@ namespace newVilcapCopyFileToGoogleDrive
                             if( nextBatch > 1 )
                             {
                                 commentText = $"TL Batch {nextBatch - 1} Completed.";
-                                item.Field<CategoryItemField>(ids.GetFieldId("Admin|TL Batch")).OptionText = $"{nextBatch}";
+                                item.Field<CategoryItemField>(ids.Get("Admin|TL Batch")).OptionText = $"{nextBatch}";
                                 await saasafrasClient.UnlockFunction(functionName, lockString, lockValue);
                                 await comm.AddCommentToObject("item", item.ItemId, commentText, hook: true);
                                 //await podio.UpdateItem(item, hook: true);

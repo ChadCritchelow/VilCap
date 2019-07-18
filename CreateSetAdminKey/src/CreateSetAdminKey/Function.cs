@@ -37,7 +37,7 @@ namespace CreateSetAdminKey
                 var updateMe = new Item() { ItemId = check.ItemId };
 
                 //Field to update:
-                var searchKey = updateMe.Field<TextItemField>(ids.GetFieldId("Admin|Search Key"));
+                var searchKey = updateMe.Field<TextItemField>(ids.Get("Admin|Search Key"));
                 searchKey.Value = "vilcapadmin";
                 await podio.UpdateItem(updateMe, true);
             }

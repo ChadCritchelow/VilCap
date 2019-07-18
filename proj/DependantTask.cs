@@ -24,61 +24,61 @@ namespace newVilcapCopyFileToGoogleDrive
 
             //--- Assign Fields ---//	
 
-            fieldId = ids.GetFieldId("VC Administration|Master Schedule|Task Name");
+            fieldId = ids.Get("VC Administration|Master Schedule|Task Name");
             var nameMaster = master.Field<TextItemField>(fieldId);
             if (nameMaster.Value != null)
             {
-                fieldId = ids.GetFieldId("Task List|Title");
+                fieldId = ids.Get("Task List|Title");
                 var nameChild = child.Field<TextItemField>(fieldId);
                 nameChild.Value = nameMaster.Value;
             }
 
-            fieldId = ids.GetFieldId("VC Administration|Master Schedule|Desciption");
+            fieldId = ids.Get("VC Administration|Master Schedule|Desciption");
             var descrMaster = master.Field<TextItemField>(fieldId);
             if (descrMaster.Value != null)
             {
-                fieldId = ids.GetFieldId("Task List|Description");
+                fieldId = ids.Get("Task List|Description");
                 var descrChild = child.Field<TextItemField>(fieldId);
                 //descrChild.Value = StripHTML(descrMaster.Value);
                 descrChild.Value = descrMaster.Value;
             }
 
-            fieldId = ids.GetFieldId("VC Administration|Master Schedule|Phase");
+            fieldId = ids.Get("VC Administration|Master Schedule|Phase");
             var phaseMaster = master.Field<CategoryItemField>(fieldId);
             if (phaseMaster.Options.Any())
             {
-                fieldId = ids.GetFieldId("Task List|Phase");
+                fieldId = ids.Get("Task List|Phase");
                 var phaseChild = child.Field<CategoryItemField>(fieldId);
                 phaseChild.OptionText = phaseMaster.Options.First().Text;
             }
 
-            fieldId = ids.GetFieldId("VC Administration|Master Schedule|ESO Member Role");
+            fieldId = ids.Get("VC Administration|Master Schedule|ESO Member Role");
             var esoMaster = master.Field<CategoryItemField>(fieldId);
             if (esoMaster.Options.Any())
             {
-                fieldId = ids.GetFieldId("Task List|ESO Member Role");
+                fieldId = ids.Get("Task List|ESO Member Role");
                 var esoChild = child.Field<CategoryItemField>(fieldId);
                 esoChild.OptionText = esoMaster.Options.First().Text;
             }
 
-            fieldId = ids.GetFieldId("Task List|Completetion");
+            fieldId = ids.Get("Task List|Completetion");
             var comChild = child.Field<CategoryItemField>(fieldId);
             comChild.OptionText = "Incomplete";
 
-            fieldId = ids.GetFieldId("VC Administration|Master Schedule|Dependancy");
+            fieldId = ids.Get("VC Administration|Master Schedule|Dependancy");
             var depMaster = master.Field<TextItemField>(fieldId);
             if (depMaster.Value != null)
             {
-                fieldId = ids.GetFieldId("Task List|Additional Dependencies");
+                fieldId = ids.Get("Task List|Additional Dependencies");
                 var depChild = child.Field<TextItemField>(fieldId);
                 depChild.Value = depMaster.Value;
             }
 
             // GDrive Integration //
 
-            fieldId = ids.GetFieldId("VC Administration|Master Schedule|Gdrive Link");
+            fieldId = ids.Get("VC Administration|Master Schedule|Gdrive Link");
             var embedMaster = master.Field<EmbedItemField>(fieldId);
-            fieldId = ids.GetFieldId("Task List|Linked Files");
+            fieldId = ids.Get("Task List|Linked Files");
             var embedChild = child.Field<EmbedItemField>(fieldId);
             var embeds = new List<Embed>();
             var parentFolderId = Environment.GetEnvironmentVariable("GOOGLE_PARENT_FOLDER_ID");
@@ -99,7 +99,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
             // Create the actual Podio Item //
 
-            var taskListAppId = ids.GetFieldId("Task List");
+            var taskListAppId = ids.Get("Task List");
             var waitSeconds = 5;
             CallPodio:
             try

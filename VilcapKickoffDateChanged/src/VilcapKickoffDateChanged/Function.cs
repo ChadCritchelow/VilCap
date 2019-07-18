@@ -38,8 +38,8 @@ namespace VilcapKickoffDateChanged
                     return;
                 }
 
-                var date = check.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
-                var calendarColor = check.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Calendar Color"));
+                var date = check.Field<DateItemField>(ids.Get("Workshop Modules|Date"));
+                var calendarColor = check.Field<CategoryItemField>(ids.Get("Workshop Modules|Calendar Color"));
                 var revision = await podio.GetRevisionDifference
                 (
                     Convert.ToInt32(check.ItemId),
@@ -59,8 +59,8 @@ namespace VilcapKickoffDateChanged
                         var oldTime = revision.First().From.First.Value<DateTime>("start");
                         var diff = date.Start.Value.Subtract(oldTime);
                         context.Logger.LogLine($"Got Values");
-                        var fieldIdToSearch = ids.GetFieldId("Workshop Modules|Day #");
-                        var filterValue = check.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Day Number")).Options.First().Text;
+                        var fieldIdToSearch = ids.Get("Workshop Modules|Day #");
+                        var filterValue = check.Field<CategoryItemField>(ids.Get("Workshop Modules|Day Number")).Options.First().Text;
                         var filter = new Dictionary<int, object>
                         {
                             { fieldIdToSearch, filterValue }
@@ -72,14 +72,14 @@ namespace VilcapKickoffDateChanged
                         context.Logger.LogLine("Checking for duplicates");
 
 
-                        var workshopAppId = ids.GetFieldId("Workshop Modules");
+                        var workshopAppId = ids.Get("Workshop Modules");
                         var items = await podio.FilterItems(workshopAppId, newOptions);
                         context.Logger.LogLine("Got Items");
                         foreach( var item in items.Items )
                         {
                             var updateMe = new Item();
-                            var checkCalendarColor = check.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Calendar Color"));
-                            var foreachItemCalendarColor = item.Field<CategoryItemField>(ids.GetFieldId("Workshop Modules|Calendar Color"));
+                            var checkCalendarColor = check.Field<CategoryItemField>(ids.Get("Workshop Modules|Calendar Color"));
+                            var foreachItemCalendarColor = item.Field<CategoryItemField>(ids.Get("Workshop Modules|Calendar Color"));
                             if(
                                 (checkCalendarColor.Options.Any() &&
                                 checkCalendarColor.Options.First().Text == "Date Manager" &&
@@ -93,9 +93,9 @@ namespace VilcapKickoffDateChanged
                                 )
                             {
                                 updateMe = new Item() { ItemId = item.ItemId };
-                                var updateDate = updateMe.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
-                                var checkDate = item.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
-                                var duration = item.Field<DurationItemField>(ids.GetFieldId("Workshop Modules|Duration"));
+                                var updateDate = updateMe.Field<DateItemField>(ids.Get("Workshop Modules|Date"));
+                                var checkDate = item.Field<DateItemField>(ids.Get("Workshop Modules|Date"));
+                                var duration = item.Field<DurationItemField>(ids.Get("Workshop Modules|Duration"));
                                 updateDate.Start = checkDate.Start.Value.Add(diff);
                                 updateDate.End = checkDate.Start.Value.Add(diff + duration.Value.Value);
                             }

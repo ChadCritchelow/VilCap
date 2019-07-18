@@ -90,12 +90,12 @@ namespace CommentNextBatch
                         case "WS":
                             #region //update WS Batch number//
                             context.Logger.LogLine("Type==WS");
-                            context.Logger.LogLine("Getting Field ID");
-                            fieldId = ids.GetFieldId("Admin|WS Batch");
-                            context.Logger.LogLine($"Field ID: {fieldId}");
+                            //context.Logger.LogLine("Getting Field ID");
+                            fieldId = ids.Get("Admin|WS Batch");
+                            //context.Logger.LogLine($"Field ID: {fieldId}");
                             var wsBatchField = updateMe.Field<CategoryItemField>(fieldId);
-                            context.Logger.LogLine("Got Field");
-                            context.Logger.LogLine("Adding 1 to current batch");
+                            //context.Logger.LogLine("Got Field");
+                            //context.Logger.LogLine("Adding 1 to current batch");
                             wsBatchField.OptionText = (++currentBatch).ToString();
                             context.Logger.LogLine($"New Batch Value: {currentBatch}");
                             break;
@@ -103,12 +103,12 @@ namespace CommentNextBatch
                         case "TL":
                             #region //update TL Batch number//
                             context.Logger.LogLine("Type==TL");
-                            context.Logger.LogLine("Getting Field ID");
-                            fieldId = ids.GetFieldId("Admin|TL Batch");
-                            context.Logger.LogLine($"Field ID: {fieldId}");
+                            //context.Logger.LogLine("Getting Field ID");
+                            fieldId = ids.Get("Admin|TL Batch");
+                            //context.Logger.LogLine($"Field ID: {fieldId}");
                             var tlBatchField = updateMe.Field<CategoryItemField>(fieldId);
-                            context.Logger.LogLine("Got Field");
-                            context.Logger.LogLine("Adding 1 to current batch");
+                            //context.Logger.LogLine("Got Field");
+                            //context.Logger.LogLine("Adding 1 to current batch");
                             tlBatchField.OptionText = (++currentBatch).ToString();
                             context.Logger.LogLine($"New Batch Value: {currentBatch}");
                             break;

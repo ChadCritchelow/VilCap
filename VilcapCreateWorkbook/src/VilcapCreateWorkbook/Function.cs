@@ -47,12 +47,12 @@ namespace VilcapCreateWorkbook
                 );
                 var firstRevision = revision.First();
 
-                var materials = item.Field<AppItemField>(ids.GetFieldId("Content"));
+                var materials = item.Field<AppItemField>(ids.Get("Content"));
                 var pages = new List<File>();
                 var workbook = new File();
                 foreach( var material in materials.Items )
                 {
-                    var matEmbed = material.Field<EmbedItemField>(ids.GetFieldId("Materials|Link to Material"));
+                    var matEmbed = material.Field<EmbedItemField>(ids.Get("Materials|Link to Material"));
                     foreach( var embed in matEmbed.Embeds )
                     {
                         //pages.Add(google.GetOneFile(drive, embed, e));

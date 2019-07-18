@@ -51,16 +51,16 @@ namespace VilcapConfirmAppEmail
                 check.CurrentRevision.Revision
                 );
                 var firstRevision = revision.First();
-                var complete = check.Field<CategoryItemField>( ids.GetFieldId( "Applications|Complete This Application" ) );
+                var complete = check.Field<CategoryItemField>( ids.Get( "Applications|Complete This Application" ) );
                 if( firstRevision.FieldId == complete.FieldId )
                 {
                     if( complete.Options.Any() && complete.Options.First().Text == "Submit" )
                     {
-                        var recipient = check.Field<EmailItemField>( ids.GetFieldId( "Applications|Email" ) ).Value.First().Value;
+                        var recipient = check.Field<EmailItemField>( ids.Get( "Applications|Email" ) ).Value.First().Value;
                         //get admin item to get program manager name
-                        var items = await podio.FilterItems( ids.GetFieldId( "Admin" ), new FilterOptions() { Limit = 1 } );
+                        var items = await podio.FilterItems( ids.Get( "Admin" ), new FilterOptions() { Limit = 1 } );
                         var adminItem = await podio.GetItem( items.Items.First().ItemId );
-                        var fromName = adminItem.Field<ContactItemField>( ids.GetFieldId( "Admin|Program Manager" ) ).Contacts.First().Name;
+                        var fromName = adminItem.Field<ContactItemField>( ids.Get( "Admin|Program Manager" ) ).Contacts.First().Name;
                         //var subject = "Thank you for submitting your application!";
                         var messageBody = $"Thank you for submitting your application to {ids.GetLongName( $"{e.environmentId}-FN" )}'s Future of Work" +
                             " and Learning Program 2019. We will be reviewing your application and following up in the " +

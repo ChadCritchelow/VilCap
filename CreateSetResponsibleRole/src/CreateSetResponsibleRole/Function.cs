@@ -39,13 +39,13 @@ namespace CreateSetResponsibleRole
             try
             {
                 //context.Logger.LogLine("Checking for duplicates");
-                var items = await podio.FilterItems(ids.GetFieldId("Admin"), new FilterOptions { Limit = 1 });
+                var items = await podio.FilterItems(ids.Get("Admin"), new FilterOptions { Limit = 1 });
                 var AdminOptionToCheck = await podio.GetItem(items.Items.First().ItemId);
                 var contactids = new List<int>();
-                var esoMemberRole = item.Field<CategoryItemField>(ids.GetFieldId("Task List|ESO Member Role"));
+                var esoMemberRole = item.Field<CategoryItemField>(ids.Get("Task List|ESO Member Role"));
                 if( esoMemberRole.Options.Any() )
                 {
-                    var responsibleMember = new Item() { ItemId = item.ItemId }.Field<ContactItemField>(ids.GetFieldId("Task List|Responsible Member"));
+                    var responsibleMember = new Item() { ItemId = item.ItemId }.Field<ContactItemField>(ids.Get("Task List|Responsible Member"));
                     var esoValue = esoMemberRole.Options.First().Text;
                     switch( esoValue )
                     {
@@ -56,7 +56,7 @@ namespace CreateSetResponsibleRole
                         case "Program Manager":
                         case "Program Director":
                             responsibleMember.ContactIds =
-                                AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId($"Admin|{esoValue}")).Contacts.Select(X => X.ProfileId);
+                                AdminOptionToCheck.Field<ContactItemField>(ids.Get($"Admin|{esoValue}")).Contacts.Select(X => X.ProfileId);
                             break;
                     }
                     await podio.UpdateItem(new Item() { ItemId = item.ItemId }, true);

@@ -19,22 +19,22 @@ namespace newVilcapCopyFileToGoogleDrive
 
         public Scheduler(Item check, RoutedPodioEvent e, GetIds ids, int PARTITIONS)
         {
-            var pId = ids.GetFieldId("Admin|Program Design");
+            var pId = ids.Get("Admin|Program Design");
             pStart = new DateTime(check.Field<DateItemField>(pId).Start.Value.Ticks);
             pEnd = new DateTime(check.Field<DateItemField>(pId).End.Value.Ticks);
             pTSpan = (check.Field<DateItemField>(pId).End.Value - pStart) / PARTITIONS;
 
-            var rId = ids.GetFieldId("Admin|Recruitment");
+            var rId = ids.Get("Admin|Recruitment");
             rStart = new DateTime(check.Field<DateItemField>(rId).Start.Value.Ticks);
             rEnd = new DateTime(check.Field<DateItemField>(rId).End.Value.Ticks);
             rTSpan = (check.Field<DateItemField>(rId).End.Value - rStart) / PARTITIONS;
 
-            var sId = ids.GetFieldId("Admin|Selection");
+            var sId = ids.Get("Admin|Selection");
             sStart = new DateTime(check.Field<DateItemField>(sId).Start.Value.Ticks);
             sEnd = new DateTime(check.Field<DateItemField>(sId).End.Value.Ticks);
             sTSpan = (check.Field<DateItemField>(sId).End.Value - sStart) / PARTITIONS;
 
-            var wId = ids.GetFieldId("Admin|Workshop Operations");
+            var wId = ids.Get("Admin|Workshop Operations");
             wStart = new DateTime(check.Field<DateItemField>(wId).Start.Value.Ticks);
             wEnd = new DateTime(check.Field<DateItemField>(wId).End.Value.Ticks);
             wTSpan = (check.Field<DateItemField>(wId).End.Value - wStart) / PARTITIONS;
@@ -44,7 +44,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
         public Item SetDate(Item child, GetIds ids, string phase, int assignmentVal, double durMaster)
         {
-            var date = child.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
+            var date = child.Field<DateItemField>(ids.Get("Task List|Date"));
             switch (phase)
                 {
                     case "Program Design":
