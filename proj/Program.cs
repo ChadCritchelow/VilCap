@@ -20,6 +20,9 @@ namespace newVilcapCopyFileToGoogleDrive
 {
     public class newVilcapCopyFileToGoogleDrive
     {
+        newVilcapCopyFileToGoogleDrive()
+        {
+        }
 
         #region  // Utility Vars //
         // private
@@ -47,6 +50,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
         public async Task FunctionHandler( RoutedPodioEvent e, ILambdaContext context )
         {
+            newVilcapCopyFileToGoogleDrive vilcap = this;
             podio = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId).ForClient(e.clientId, e.environmentId);
             item = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
             //context.Logger.LogLine($"Got item with ID: {item.ItemId}");
@@ -103,7 +107,7 @@ namespace newVilcapCopyFileToGoogleDrive
                         try
                         {
                             var wm = new WorkshopModules2();
-                            nextBatch = await wm.CreateWorkshopModules2(this);
+                            nextBatch = await wm.CreateWorkshopModules2(vilcap);
 
                             if( nextBatch > 1 )
                             {
