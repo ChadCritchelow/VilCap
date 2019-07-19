@@ -40,7 +40,7 @@ namespace VilcapDateAssignTask
             var taskServ = new TaskService(podio);
             var itemServ = new ItemService(podio);
 
-            var fieldIdToSearch = ids.GetFieldId("Task List|Date");
+            var fieldIdToSearch = ids.Get("Task List|Date");
             var filterValue = DateTime.Now.AddDays(7).Ticks;
 
             var viewServ = new ViewService(podio);
@@ -56,10 +56,10 @@ namespace VilcapDateAssignTask
 
             foreach( var item in filter.Items )
             {
-                var responsibleMember = item.Field<ContactItemField>(ids.GetFieldId("Task List|Responsible Member"));
-                var title = item.Field<TextItemField>(ids.GetFieldId("Task List|Title"));
-                var date = item.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
-                var description = item.Field<TextItemField>(ids.GetFieldId("Task List|Description"));
+                var responsibleMember = item.Field<ContactItemField>(ids.Get("Task List|Responsible Member"));
+                var title = item.Field<TextItemField>(ids.Get("Task List|Title"));
+                var date = item.Field<DateItemField>(ids.Get("Task List|Date"));
+                var description = item.Field<TextItemField>(ids.Get("Task List|Description"));
 
                 var t = new TaskCreateUpdateRequest
                 {
@@ -88,7 +88,7 @@ namespace VilcapDateAssignTask
                 }
 
                 var updateMe = new Item() { ItemId = item.ItemId };
-                var dupecheck = updateMe.Field<CategoryItemField>(ids.GetFieldId("Task List|Task Assigned?"));
+                var dupecheck = updateMe.Field<CategoryItemField>(ids.Get("Task List|Task Assigned?"));
                 dupecheck.OptionText = "Yes";
                 await itemServ.UpdateItem(updateMe, hook: false);
                 context.Logger.LogLine($"Updated Item");

@@ -49,7 +49,7 @@ namespace VilcapCreateFinalSelCards
                 check.CurrentRevision.Revision
                 );
                 var firstRevision = revision.First();
-                var selectionProcess = check.Field<CategoryItemField>(ids.GetFieldId("Company Profiles|Selection Process"));
+                var selectionProcess = check.Field<CategoryItemField>(ids.Get("Company Profiles|Selection Process"));
                 if( firstRevision.FieldId == selectionProcess.FieldId )
                 {
                     if( selectionProcess.Options.Any() &&
@@ -73,26 +73,26 @@ namespace VilcapCreateFinalSelCards
                                 selectionRound = "Semi-Final Round";
                                 break;
                         }
-                        var views = await viewServ.GetViews(ids.GetFieldId("Program Support"));
+                        var views = await viewServ.GetViews(ids.Get("Program Support"));
                         var view = from v in views
                                    where v.Name == viewName
                                    select v;
-                        var viewItems = await filterServ.FilterItemsByView(ids.GetFieldId("Program Support"), int.Parse(view.First().ViewId), limit: 500);
+                        var viewItems = await filterServ.FilterItemsByView(ids.Get("Program Support"), int.Parse(view.First().ViewId), limit: 500);
                         foreach( var item in viewItems.Items )
                         {
                             var create = new Item();
-                            create.Field<CategoryItemField>(ids.GetFieldId("Diligence and Selection|Selection Round")).OptionText
+                            create.Field<CategoryItemField>(ids.Get("Diligence and Selection|Selection Round")).OptionText
                                 = selectionRound;
-                            create.Field<AppItemField>(ids.GetFieldId("Diligence and Selection|Company")).ItemId = check.ItemId;
-                            create.Field<AppItemField>(ids.GetFieldId("Diligence and Selection|Selection Comittee Member")).ItemId = item.ItemId;
-                            create.Field<EmailItemField>(ids.GetFieldId("Diligence and Selection|Shared Email")).Value =
-                                item.Field<EmailItemField>(ids.GetFieldId("Program Support|Email")).Value;
-                            var card = await podio.CreateItem(create, ids.GetFieldId("Diligence and Selection"), true);
+                            create.Field<AppItemField>(ids.Get("Diligence and Selection|Company")).ItemId = check.ItemId;
+                            create.Field<AppItemField>(ids.Get("Diligence and Selection|Selection Comittee Member")).ItemId = item.ItemId;
+                            create.Field<EmailItemField>(ids.Get("Diligence and Selection|Shared Email")).Value =
+                                item.Field<EmailItemField>(ids.Get("Program Support|Email")).Value;
+                            var card = await podio.CreateItem(create, ids.Get("Diligence and Selection"), true);
 
                             var serv = new GrantService(podio);
                             //Create Email:
-                            var recipient = item.Field<EmailItemField>(ids.GetFieldId("Program Support|Email")).Value.FirstOrDefault().Value;
-                            var orgName = create.Field<TextItemField>(ids.GetFieldId("Diligence and Selection|Company")).Value;
+                            var recipient = item.Field<EmailItemField>(ids.Get("Program Support|Email")).Value.FirstOrDefault().Value;
+                            var orgName = create.Field<TextItemField>(ids.Get("Diligence and Selection|Company")).Value;
                             var m = $"Please Rate the {selectionRound} Company: {orgName}. \n" +
                             "You can view all of your Podio items by at: <https://podio.com/vilcapcom/organization/grants>.\n " +
                             "Please bookmark this link before changing your email notification settings.";

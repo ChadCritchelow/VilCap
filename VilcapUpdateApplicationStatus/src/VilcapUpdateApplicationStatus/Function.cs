@@ -44,28 +44,28 @@ namespace VilcapUpdateApplicationStatus
                     check.CurrentRevision.Revision
                     );
                 var firstRevision = revision.First();
-                var completionStatus = check.Field<CategoryItemField>(ids.GetFieldId("Applications|Complete This Application"));
+                var completionStatus = check.Field<CategoryItemField>(ids.Get("Applications|Complete This Application"));
                 if( firstRevision.FieldId == completionStatus.FieldId )
                 {
                     if( completionStatus.Options.Any() && completionStatus.Options.First().Text == "Submit" )
                     {
 
-                        var fieldIdToSearch = ids.GetFieldId("Admin");
+                        var fieldIdToSearch = ids.Get("Admin");
                         var newOptions = new FilterOptions
                         {
                             Limit = 1
                         };
                         context.Logger.LogLine("Checking for duplicates");
 
-                        var items = await podio.FilterItems(ids.GetFieldId("Admin"), newOptions);
+                        var items = await podio.FilterItems(ids.Get("Admin"), newOptions);
                         var AdminOptionToCheck = await podio.GetItem(items.Items.First().ItemId);
 
                         //assign tasks:
                         var taskServ = new TaskService(podio);
 
-                        var programAssociates = AdminOptionToCheck.Field<ContactItemField>(ids.GetFieldId("Admin|Programs Associate"));
+                        var programAssociates = AdminOptionToCheck.Field<ContactItemField>(ids.Get("Admin|Programs Associate"));
                         var title = "Review Completed Application for " +
-                            $"{check.Field<TextItemField>(ids.GetFieldId("Applications|Company Name")).Value} here: {check.Link}";
+                            $"{check.Field<TextItemField>(ids.Get("Applications|Company Name")).Value} here: {check.Link}";
 
                         var date = DateTime.Now.AddDays(5);
                         var t = new TaskCreateUpdateRequest

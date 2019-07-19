@@ -44,11 +44,11 @@ namespace VilcapDependentTaskDate
                     check.CurrentRevision.Revision
                 );
                 var firstRevision = revision.First();
-                var date = check.Field<DateItemField>(ids.GetFieldId("Workshop Modules|Date"));
+                var date = check.Field<DateItemField>(ids.Get("Workshop Modules|Date"));
                 if( firstRevision.FieldId == date.FieldId )
                 {
                     // Get Dep Tasks
-                    var depTasks = check.Field<AppItemField>(ids.GetFieldId("Workshop Modules|Dependent Task"));
+                    var depTasks = check.Field<AppItemField>(ids.Get("Workshop Modules|Dependent Task"));
                     context.Logger.LogLine($"- # of Dep Tasks: {depTasks.Values.Count}");
                     var oldTime = revision.First().From.First.Value<DateTime>("start");
                     var diff = date.Start.Value.Subtract(oldTime);
@@ -59,8 +59,8 @@ namespace VilcapDependentTaskDate
                         var updateMe = new Item();
                         context.Logger.LogLine($"- Iterating...");
                         updateMe = new Item() { ItemId = depTask.ItemId };
-                        var taskDate = updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
-                        var checkDate = updateMe.Field<DateItemField>(ids.GetFieldId("Task List|Date"));
+                        var taskDate = updateMe.Field<DateItemField>(ids.Get("Task List|Date"));
+                        var checkDate = updateMe.Field<DateItemField>(ids.Get("Task List|Date"));
                         var duration = taskDate.End.GetValueOrDefault() - taskDate.Start.GetValueOrDefault();
                         if( duration.Ticks < 0 ) duration = new TimeSpan(0);
                         context.Logger.LogLine($"Old Task Time: {taskDate.Start.GetValueOrDefault()} Old Task End: {taskDate.End.GetValueOrDefault()}");

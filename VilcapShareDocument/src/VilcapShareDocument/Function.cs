@@ -43,13 +43,13 @@ namespace VilcapShareDocument
 
                 var serv = new GrantService(podio);
                 var people = new List<Ref>();
-                var entrepreneurs = check.Field<AppItemField>(ids.GetFieldId("Cohort Documents|Entreprenuers"));
+                var entrepreneurs = check.Field<AppItemField>(ids.Get("Cohort Documents|Entreprenuers"));
                 context.Logger.LogLine($"--- count: {entrepreneurs.Items.Count()}");
 
                 foreach( var entrepreneur in entrepreneurs.Items )
                 {
                     var item = await podio.GetItem(entrepreneur.ItemId);
-                    var fieldId = ids.GetFieldId("Entrepreneurs|Entrepreneur Email");
+                    var fieldId = ids.Get("Entrepreneurs|Entrepreneur Email");
                     var emailField = item.Field<EmailItemField>(fieldId);
                     var email = emailField.Value.FirstOrDefault().Value;
                     var person = new Ref
@@ -61,7 +61,7 @@ namespace VilcapShareDocument
                     context.Logger.LogLine($"--- Added Email: {email}");
                 }
 
-                var description = check.Field<TextItemField>(ids.GetFieldId("Cohort Documents|Docment Desciption")).Value;
+                var description = check.Field<TextItemField>(ids.Get("Cohort Documents|Docment Desciption")).Value;
                 var message = $"Thank you for sending us your documents {description}. Please follow this link to view your submission.";
                 await serv.CreateGrant("item", check.ItemId, people, "view", message);
 
@@ -70,7 +70,7 @@ namespace VilcapShareDocument
                 {
                     var docName = check.Files[0].Name;
                     var updateMe = new Item() { ItemId = check.ItemId };
-                    description = updateMe.Field<TextItemField>(ids.GetFieldId("Cohort Documents|Docment Desciption")).Value;
+                    description = updateMe.Field<TextItemField>(ids.Get("Cohort Documents|Docment Desciption")).Value;
                     await podio.UpdateItem(updateMe, true);
                 }
                 context.Logger.LogLine("--- ok");

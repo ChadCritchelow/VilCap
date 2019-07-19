@@ -15,21 +15,21 @@ namespace newVilcapCopyFileToGoogleDrive
             var clone = new Item();
 
             //--- Text ---//
-            if( from.Field<TextItemField>(ids.GetFieldId("VC Administration|Material Curation|Title")).Value != null )
+            if( from.Field<TextItemField>(ids.Get("VC Administration|Material Curation|Title")).Value != null )
             {
-                clone.Field<TextItemField>(ids.GetFieldId("Materials|Title")).Value =
-                    from.Field<TextItemField>(ids.GetFieldId("VC Administration|Material Curation|Title")).Value;
+                clone.Field<TextItemField>(ids.Get("Materials|Title")).Value =
+                    from.Field<TextItemField>(ids.Get("VC Administration|Material Curation|Title")).Value;
             }
-            if( from.Field<TextItemField>(ids.GetFieldId("VC Administration|Material Curation|Description")).Value != null )
+            if( from.Field<TextItemField>(ids.Get("VC Administration|Material Curation|Description")).Value != null )
             {
-                clone.Field<TextItemField>(ids.GetFieldId("Materials|Description")).Value =
-                from.Field<TextItemField>(ids.GetFieldId("VC Administration|Material Curation|Description")).Value;
+                clone.Field<TextItemField>(ids.Get("Materials|Description")).Value =
+                from.Field<TextItemField>(ids.Get("VC Administration|Material Curation|Description")).Value;
             }
             //--- Category ---//
-            if( from.Field<CategoryItemField>(ids.GetFieldId("VC Administration|Material Curation|Type")).Options.First() != null )
+            if( from.Field<CategoryItemField>(ids.Get("VC Administration|Material Curation|Type")).Options.First() != null )
             {
-                clone.Field<CategoryItemField>(ids.GetFieldId("Materials|Type")).OptionText =
-                    from.Field<CategoryItemField>(ids.GetFieldId("VC Administration|Material Curation|Type")).Options.First().Text;
+                clone.Field<CategoryItemField>(ids.Get("Materials|Type")).OptionText =
+                    from.Field<CategoryItemField>(ids.Get("VC Administration|Material Curation|Type")).Options.First().Text;
             }
 
             var createdItemId = await podio.CreateItem(clone, appId, true);

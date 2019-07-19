@@ -36,11 +36,11 @@ namespace VilcapShareWithCom
                     return;
                 }
                 //When an item is created in Diligence and Selection:
-                var em = check.Field<EmailItemField>(ids.GetFieldId("Diligence and Selection|Shared Email"));
+                var em = check.Field<EmailItemField>(ids.Get("Diligence and Selection|Shared Email"));
                 var m = "Please rate this application";
                 var email = em;
                 var updateMe = new Item() { ItemId = check.ItemId };
-                updateMe.Field<CategoryItemField>(ids.GetFieldId("Diligence and Selection|Status")).OptionText = "Not Scored";
+                updateMe.Field<CategoryItemField>(ids.Get("Diligence and Selection|Status")).OptionText = "Not Scored";
                 await podio.UpdateItem(updateMe, true);
                 var serv = new GrantService(podio);
                 //Send email

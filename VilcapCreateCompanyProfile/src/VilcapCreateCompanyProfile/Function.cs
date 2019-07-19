@@ -16,6 +16,7 @@ namespace VilcapCreateCompanyProfile
     {
         public async System.Threading.Tasks.Task FunctionHandler( RoutedPodioEvent e, ILambdaContext context )
         {
+            #region // Generic Setup //
             var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
             var podio = factory.ForClient(e.clientId, e.environmentId);
             var submittedApplication = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
@@ -24,17 +25,17 @@ namespace VilcapCreateCompanyProfile
             var dictMaster = await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0");
             string lockValue;
             var ids = new GetIds(dictChild, dictMaster, e.environmentId);
-            //Make sure to implement by checking to see if Deploy Curriculum has just changed
-            //Deploy Curriculum field
             var functionName = "VilcapCreateCompanyProfile";
             lockValue = await saasafrasClient.LockFunction(functionName, submittedApplication.ItemId.ToString());
+            if( string.IsNullOrEmpty(lockValue) )
+            {
+                context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {submittedApplication.ItemId}");
+                return;
+            }
+            #endregion
             try
             {
-                if( string.IsNullOrEmpty(lockValue) )
-                {
-                    context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {submittedApplication.ItemId}");
-                    return;
-                }
+                
                 //When an item is updated in Applications:
                 var revision = await podio.GetRevisionDifference
                     (
@@ -43,39 +44,32 @@ namespace VilcapCreateCompanyProfile
                     submittedApplication.CurrentRevision.Revision
                     );
                 var firstRevision = revision.First();
-                var completionStatus = submittedApplication.Field<CategoryItemField>(ids.GetFieldId("Applications|Complete This Application"));
+                var completionStatus = submittedApplication.Field<CategoryItemField>(ids.Get("Applications|Complete This Application"));
                 if( firstRevision.FieldId == completionStatus.FieldId )
                 {
                     if( completionStatus.Options.Any() && completionStatus.Options.First().Text == "Submit" )
                     {
                         var companyProfile = new Item();
-                        companyProfile.Field<CategoryItemField>(ids.GetFieldId("Company Profiles|Selection Process")).OptionText = "New Application";
-                        companyProfile.Field<AppItemField>(ids.GetFieldId("Company Profiles|Application")).ItemId = submittedApplication.ItemId;
+                        companyProfile.Field<CategoryItemField>(ids.Get("Company Profiles|Selection Process")).OptionText = "New Application";
+                        companyProfile.Field<AppItemField>(ids.Get("Company Profiles|Application")).ItemId = submittedApplication.ItemId;
 
-                        #region >>> Copy Values >>>
+                        #region // Copy Values //
                         try
                         {
-                            companyProfile.Field<LocationItemField>(ids.GetFieldId("Company Profiles|Location")).Values =
-                            submittedApplication.Field<LocationItemField>(ids.GetFieldId("Applications|Location")).Values;
-                            companyProfile.Field<PhoneItemField>(ids.GetFieldId("Company Profiles|Phone")).Values =
-                                submittedApplication.Field<PhoneItemField>(ids.GetFieldId("Applications|Phone")).Values;
-                            companyProfile.Field<EmailItemField>(ids.GetFieldId("Company Profiles|Email")).Values =
-                                submittedApplication.Field<EmailItemField>(ids.GetFieldId("Applications|Email")).Values;
-                            companyProfile.Field<DateItemField>(ids.GetFieldId("Company Profiles|Company Founding Date")).Values =
-                                submittedApplication.Field<DateItemField>(ids.GetFieldId("Applications|Company Founding Date ")).Values;
+                            companyProfile.Field<LocationItemField>(ids.Get("Company Profiles|Location")).Values =
+                            submittedApplication.Field<LocationItemField>(ids.Get("Applications|Location")).Values;
+                            companyProfile.Field<PhoneItemField>(ids.Get("Company Profiles|Phone")).Values =
+                                submittedApplication.Field<PhoneItemField>(ids.Get("Applications|Phone")).Values;
+                            companyProfile.Field<EmailItemField>(ids.Get("Company Profiles|Email")).Values =
+                                submittedApplication.Field<EmailItemField>(ids.Get("Applications|Email")).Values;
+                            companyProfile.Field<DateItemField>(ids.Get("Company Profiles|Company Founding Date")).Values =
+                                submittedApplication.Field<DateItemField>(ids.Get("Applications|Company Founding Date ")).Values;
 
-                            companyProfile.Field<TextItemField>(ids.GetFieldId("Company Profiles|Twitter Handle")).Value =
-                                submittedApplication.Field<TextItemField>(ids.GetFieldId("Applications|Twitter Handle")).Value; // BECOMING OBSOLETE
-                            companyProfile.Field<TextItemField>(ids.GetFieldId("Company Profiles|LinkedIn Page")).Value =
-                                submittedApplication.Field<TextItemField>(ids.GetFieldId("Applications|LinkedIn Page")).Value; // BECOMING OBSOLETE
-                            companyProfile.Field<TextItemField>(ids.GetFieldId("Company Profiles|Facebook Page")).Value =
-                                submittedApplication.Field<TextItemField>(ids.GetFieldId("Applications|Facebook Page")).Value; // BECOMING OBSOLETE
-
-                            var embedField = companyProfile.Field<EmbedItemField>(ids.GetFieldId("Company Profiles|Website"));
-                            var website = submittedApplication.Field<EmbedItemField>(ids.GetFieldId("Applications|Website")).Embeds.FirstOrDefault().ResolvedUrl;
-                            website = submittedApplication.Field<EmbedItemField>(ids.GetFieldId("Applications|Company Website")) != null
-                                ? submittedApplication.Field<EmbedItemField>(ids.GetFieldId("Applications|Company Website")).Embeds.FirstOrDefault().ResolvedUrl
-                                : submittedApplication.Field<EmbedItemField>(ids.GetFieldId("Applications|Website")).Embeds.FirstOrDefault().ResolvedUrl;
+                            var embedField = companyProfile.Field<EmbedItemField>(ids.Get("Company Profiles|Website"));
+                            var website = submittedApplication.Field<EmbedItemField>(ids.Get("Applications|Website")).Embeds.FirstOrDefault().ResolvedUrl;
+                            website = submittedApplication.Field<EmbedItemField>(ids.Get("Applications|Company Website")) != null
+                                ? submittedApplication.Field<EmbedItemField>(ids.Get("Applications|Company Website")).Embeds.FirstOrDefault().ResolvedUrl
+                                : submittedApplication.Field<EmbedItemField>(ids.Get("Applications|Website")).Embeds.FirstOrDefault().ResolvedUrl;
                             var em = new Embed { OriginalUrl = website };
                             embedField.Embeds.Append(em);
                         }
@@ -86,7 +80,7 @@ namespace VilcapCreateCompanyProfile
                         }
                         #endregion
 
-                        await podio.CreateItem(companyProfile, ids.GetFieldId("Company Profiles"), true);
+                        await podio.CreateItem(companyProfile, ids.Get("Company Profiles"), true);
                     }
                 }
             }
