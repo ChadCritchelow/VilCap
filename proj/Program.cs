@@ -47,24 +47,36 @@ namespace newVilcapCopyFileToGoogleDrive
 
         public async Task FunctionHandler( RoutedPodioEvent e, ILambdaContext context )
         {
+            var functionName = "VilcapDeploy";
+            this.e = e;
+            this.context = context;
+
+            var saasafrasClient = new SaasafrasClient(Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
             podio = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId).ForClient(e.clientId, e.environmentId);
             item = await podio.GetItem(Convert.ToInt32(e.podioEvent.item_id));
-            //context.Logger.LogLine($"Got item with ID: {item.ItemId}");
-            var saasafrasClient = new SaasafrasClient(Environment.GetEnvironmentVariable("BBC_SERVICE_URL"), Environment.GetEnvironmentVariable("BBC_SERVICE_API_KEY"));
-            var functionName = "VilcapDeploy";
 
             var cred = GoogleCredential.FromJson(Environment.GetEnvironmentVariable("GOOGLE_SERVICE_ACCOUNT")).CreateScoped(Scopes).UnderlyingCredential;
-            service = new DriveService(new BaseClientService.Initializer() { HttpClientInitializer = cred, ApplicationName = ApplicationName });
-
             google = new GoogleIntegration();
-            //var saasGoogleIntegration = new SaasafrasGoogleIntegration();
-            pre = new PreSurvAndExp();
+            service = new DriveService(new BaseClientService.Initializer() { HttpClientInitializer = cred, ApplicationName = ApplicationName });
+            viewServ = new ViewService(podio);
             ids = new GetIds(
                 await saasafrasClient.GetDictionary(e.clientId, e.environmentId, e.solutionId, e.version),
                 await saasafrasClient.GetDictionary("vcadministration", "vcadministration", "vilcap", "0.0"),
                 e.environmentId);
+
+
+            //context.Logger.LogLine($"Got item with ID: {item.ItemId}");
+            var lockString = item.ItemId.ToString();// + "_" + firstRevision.Label;
+            var lockValue = await saasafrasClient.LockFunction(functionName, lockString);
+            if (string.IsNullOrEmpty(lockValue))
+            {
+                context.Logger.LogLine($"Failed to acquire lock for {functionName} | {lockString}");
+                return;
+            }
+            context.Logger.LogLine($"Locking Value: {lockValue}");
+
+            //var saasGoogleIntegration = new SaasafrasGoogleIntegration();
             var comm = new CommentService(podio);
-            viewServ = new ViewService(podio);
 
             // Main Process //
 
@@ -77,20 +89,12 @@ namespace newVilcapCopyFileToGoogleDrive
             if( buttonPresser.Id.GetValueOrDefault() != 4610903 )
             {
                 context.Logger.LogLine("User ' https://podio.com/users/" + buttonPresser.Id + " ' is not authorized to perform this action.");
+                await saasafrasClient.UnlockFunction(functionName, lockString, lockValue);
                 return;
             }
-            var lockString = item.ItemId.ToString() + "_" + firstRevision.Label;
-            var lockValue = await saasafrasClient.LockFunction(functionName, lockString);
-            if( string.IsNullOrEmpty(lockValue) )
-            {
-                context.Logger.LogLine($"Failed to acquire lock for {functionName} | {lockString}");
-                return;
-            }
-            context.Logger.LogLine($"Lock Value: {lockValue}");
-
+            
             switch( firstRevision.Label )
             {
-
                 case "WS Batch":
                     #region // Create Workshops //
                     var wsBatchId = ids.GetFieldId("Admin|WS Batch");
@@ -135,7 +139,7 @@ namespace newVilcapCopyFileToGoogleDrive
                             await saasafrasClient.UnlockFunction(functionName, lockString, lockValue);
                         }
                     }
-                    break;
+                    return;
                 #endregion
 
                 case "Deploy Addons":
@@ -217,14 +221,15 @@ namespace newVilcapCopyFileToGoogleDrive
                             await saasafrasClient.UnlockFunction(functionName, lockString, lockValue);
                         }
                     }
-                    break;
+                    return;
                 #endregion
 
                 default:
                     context.Logger.LogLine($"NO ACTION: Value '{firstRevision.Label}' not Recognized.");
                     await saasafrasClient.UnlockFunction(functionName, lockString, lockValue);
-                    break;
+                    return;
             }
+            await saasafrasClient.UnlockFunction(functionName, lockString, lockValue);
         }
     }
 }

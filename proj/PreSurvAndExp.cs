@@ -14,7 +14,7 @@ namespace newVilcapCopyFileToGoogleDrive
 	{        
         public static async Task CreateExpendituresAndPreWSSurvs( newVilcapCopyFileToGoogleDrive vilcap )
         {
-            vilcap.context.Logger.LogLine("Creating Expenditures and Pre WS Surveys");
+            Console.WriteLine("Creating Expenditures and Pre WS Surveys");
             try
 			{
 				var fieldId = 0;
@@ -85,12 +85,12 @@ namespace newVilcapCopyFileToGoogleDrive
 					}
 					catch (PodioUnavailableException ex)
 					{
-						vilcap.context.Logger.LogLine($"{ex.Message}");
-						vilcap.context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
+						Console.WriteLine($"{ex.Message}");
+						Console.WriteLine($"Trying again in {waitSeconds} seconds.");
 						for (var i = 0; i < waitSeconds; i++)
 						{
 							System.Threading.Thread.Sleep(1000);
-							vilcap.context.Logger.LogLine(".");
+							Console.WriteLine(".");
 						}
 						waitSeconds *= 2;
 						goto CallPodio;
@@ -99,7 +99,7 @@ namespace newVilcapCopyFileToGoogleDrive
 				}
 
 				//--- Create Pre-Workshop Surveys ---//
-				vilcap.context.Logger.LogLine("Creating surveys");
+				Console.WriteLine("Creating surveys");
 				views = await vilcap.viewServ.GetViews(newVilcapCopyFileToGoogleDrive.MASTER_SURVEY_APP);
 				view = from v in views
 					   where v.Name == "PreWS"
@@ -172,12 +172,12 @@ namespace newVilcapCopyFileToGoogleDrive
 					}
 					catch (PodioUnavailableException ex)
 					{
-						vilcap.context.Logger.LogLine($"{ex.Message}");
-						vilcap.context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
+						Console.WriteLine($"{ex.Message}");
+						Console.WriteLine($"Trying again in {waitSeconds} seconds.");
 						for (var i = 0; i < waitSeconds; i++)
 						{
 							System.Threading.Thread.Sleep(1000);
-							vilcap.context.Logger.LogLine(".");
+							Console.WriteLine(".");
 						}
 						waitSeconds *= 2;
 						goto CallPodio;
@@ -187,7 +187,7 @@ namespace newVilcapCopyFileToGoogleDrive
 			}
 			catch (Exception ex)
 			{
-				vilcap.context.Logger.LogLine(ex.Message);
+				Console.WriteLine(ex.Message);
 			}
 		}
 	}

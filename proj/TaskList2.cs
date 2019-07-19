@@ -45,7 +45,7 @@ namespace newVilcapCopyFileToGoogleDrive
             // Get/Create View //
 
             var viewServ = new ViewService(vilcap.podio);
-            vilcap.context.Logger.LogLine("Got View Service ...");
+            Console.WriteLine("Got View Service ...");
             var views = await viewServ.GetViews(MASTER_SCHEDULE_APP);
             var view = from v in views
                        where v.Name == tlPackageName
@@ -53,11 +53,11 @@ namespace newVilcapCopyFileToGoogleDrive
 
             if (view.Any())
             {
-                vilcap.context.Logger.LogLine($"Got View '{tlPackageName}' ...");
+                Console.WriteLine($"Got View '{tlPackageName}' ...");
             }
             else
             {
-                vilcap.context.Logger.LogLine($"Creating View '{tlPackageName}' ...");
+                Console.WriteLine($"Creating View '{tlPackageName}' ...");
                 var viewReq = new ViewCreateUpdateRequest
                 {
                     Name = $"AWS - {tlPackageName}",
@@ -71,7 +71,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 view = from v in views
                        where v.Name == viewReq.Name
                        select v;
-                vilcap.context.Logger.LogLine($"Got new View '{viewReq.Name}' ...");
+                Console.WriteLine($"Got new View '{viewReq.Name}' ...");
             }
 
             var op = new FilterOptions { Filters = view.First().Filters };
@@ -82,14 +82,14 @@ namespace newVilcapCopyFileToGoogleDrive
             if (0 <= batchNum && batchNum <= MAX_BATCHES)
             {
                 op.Offset = op.Limit * (batchNum - 1);
-                vilcap.context.Logger.LogLine($"Grabbing Items {op.Offset.Value + 1}-{op.Offset.Value + LIMIT} ...");
+                Console.WriteLine($"Grabbing Items {op.Offset.Value + 1}-{op.Offset.Value + LIMIT} ...");
                 filter = await vilcap.podio.FilterItems(MASTER_SCHEDULE_APP, op);
-                vilcap.context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
+                Console.WriteLine($"Items in filter:{filter.Items.Count()}");
                 commentText = $"TL Batch {batch} finished.";
             }
             else
             {
-                vilcap.context.Logger.LogLine("WARNING: No items found for batch!");
+                Console.WriteLine("WARNING: No items found for batch!");
                 commentText = "TL Batch # not recognized.";
             }
 
@@ -101,7 +101,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 // Setup //
 
                 count += 1;
-                vilcap.context.Logger.LogLine($"On item #{count} ...");
+                Console.WriteLine($"On item #{count} ...");
                 var child = new Item();
 
                 //--- Assign Fields ---//	
@@ -196,7 +196,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 foreach (var embed in embeds)
                 {
                     embedChild.AddEmbed(embed.EmbedId);
-                    vilcap.context.Logger.LogLine($"... Added field:{embedMaster.Label} ...");
+                    Console.WriteLine($"... Added field:{embedMaster.Label} ...");
                 }
 
                 // Child Item Creation //
@@ -210,16 +210,16 @@ namespace newVilcapCopyFileToGoogleDrive
                 }
                 catch (PodioUnavailableException ex)
                 {
-                    vilcap.context.Logger.LogLine($"EXCEPTION '{ex.Message}'! Trying again in {waitSeconds} seconds ...");
+                    Console.WriteLine($"EXCEPTION '{ex.Message}'! Trying again in {waitSeconds} seconds ...");
                     for (var i = 0; i < waitSeconds; i++)
                     {
                         System.Threading.Thread.Sleep(1000);
-                        vilcap.context.Logger.LogLine(".");
+                        Console.WriteLine(".");
                     }
                     waitSeconds *= 2;
                     goto CallPodio;
                 }
-                vilcap.context.Logger.LogLine($"... Created item #{count}");
+                Console.WriteLine($"... Created item #{count}");
             }
 
             // Update Admin Item for next Batch //

@@ -54,7 +54,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
             var packageId = vilcap.ids.GetFieldId("Admin|Curriculum Package");
             var package = check.Field<CategoryItemField>(packageId).Options.First().Text;
-            vilcap.context.Logger.LogLine($"Curriculum Batch '{batch}'");
+            //Console.WriteLine($"Curriculum Batch '{batch}'");
             #endregion
 
             #region // Get Batch //
@@ -65,10 +65,11 @@ namespace newVilcapCopyFileToGoogleDrive
             var view = from v in views
                        where v.Name == $"{package} Batch {batchNum}"
                        select v;
-            vilcap.context.Logger.LogLine($"Got View '{package}'");
+            Console.WriteLine($"CONSOLE: Got View '{package}'");
+            //Console.WriteLine($"Got View '{package}'");
 
             var op = new FilterOptions { Filters = view.First().Filters };
-            vilcap.context.Logger.LogLine($"Filter: ({op.Filters.ToStringOrNull()}) ");
+            //Console.WriteLine($"Filter: ({op.Filters.ToStringOrNull()}) ");
             op.SortBy = SORT_ID_FIELD; // fieldId of Package Sequence (num) from Content_Curation_
             op.SortDesc = false;
             op.Limit = LIMIT;
@@ -78,18 +79,18 @@ namespace newVilcapCopyFileToGoogleDrive
                 //op.Offset = op.Limit * (batchNum - 1); // 1. USING OFFSET & LIMIT 
                 //context.Logger.LogLine($"Grabbing Items 1-{filter.Items.Count()} ..."); // 1. USING OFFSET & LIMIT
                 filter = await vilcap.podio.FilterItems(MASTER_CONTENT_APP, op);
-                vilcap.context.Logger.LogLine($"Items in filter:{filter.Items.Count()}");
+                //Console.WriteLine($"Items in filter:{filter.Items.Count()}");
                 commentText = $"WS Batch {batch} finished ( {filter.Items.Count()} items)";
                 if( !filter.Items.Any() )
                 {
                     commentText = "No Items found for the given filter";
-                    vilcap.context.Logger.LogLine(commentText);
+                    //Console.WriteLine(commentText);
                     return -1; // Let nVCFTGD.Program know somethings borked
                 }
             }
             else
             {
-                vilcap.context.Logger.LogLine("WS Batch # not recognized!");
+                //Console.WriteLine("WS Batch # not recognized!");
                 commentText = "WS Batch # not recognized";
                 return -1; // Let nVCFTGD.Program know somethings borked
             }
@@ -101,7 +102,7 @@ namespace newVilcapCopyFileToGoogleDrive
             {
                 // Setup //
                 count += 1;
-                vilcap.context.Logger.LogLine($"On item #: {count}");
+                //Console.WriteLine($"On item #: {count}");
                 var child = new Item();
 
                 #region // Check for new Day //
@@ -191,7 +192,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 {
                     var newMaterial = Materials.Copy(mMaterial, null, vilcap.ids, vilcap.podio, materialsAppId);
                     cEntrepreneurMaterials.Values.Add(newMaterial);
-                    vilcap.context.Logger.LogLine($"Created Material #{newMaterial.Id}");
+                    Console.WriteLine($"Created Material #{newMaterial.Id}");
                     /////////////////   TODO
                 }
                 #endregion
@@ -219,7 +220,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     var childTime = child.Field<DateItemField>(fieldId);
                     childTime.Start = childDateTimeStart;
                     childTime.End = childDateTimeEnd;
-                    vilcap.context.Logger.LogLine($"Scheduled for {childTime.Start.ToString()} - {childTime.End.ToString()}");
+                    Console.WriteLine($"Scheduled for {childTime.Start.ToString()} - {childTime.End.ToString()}");
                 }
                 #endregion
 
@@ -253,9 +254,9 @@ namespace newVilcapCopyFileToGoogleDrive
                 foreach( var masterTask in masterTasks.Items )
                 {
                     var masterT = new Item();
-                    vilcap.context.Logger.LogLine("Creating empty master item");
+                    Console.WriteLine("Creating empty master item");
                     masterT = await vilcap.podio.GetItem(masterTask.ItemId);
-                    vilcap.context.Logger.LogLine("Got master item");
+                    Console.WriteLine("Got master item");
                     var cloneT = new Item();
 
                     #region // Assign Dep. Task Fields //
@@ -354,45 +355,45 @@ namespace newVilcapCopyFileToGoogleDrive
                     {
                         var newTaskId = await vilcap.podio.CreateItem(cloneT, tasklistAppId, true); //child Task List appId
                         cloneT = await vilcap.podio.GetFullItem(newTaskId);
-                        vilcap.context.Logger.LogLine($"newTaskId ({newTaskId}) - cloned itemId ({cloneT.ItemId}) - cloned exId ({cloneT.ExternalId})");
-                        vilcap.context.Logger.LogLine($"Created Dependent Task");
+                        Console.WriteLine($"newTaskId ({newTaskId}) - cloned itemId ({cloneT.ItemId}) - cloned exId ({cloneT.ExternalId})");
+                        Console.WriteLine($"Created Dependent Task");
                         childTasks.ItemId = cloneT.ItemId;
-                        vilcap.context.Logger.LogLine($"childTasks values: {childTasks.Values.FirstOrDefault().ToString()}");
+                        Console.WriteLine($"childTasks values: {childTasks.Values.FirstOrDefault().ToString()}");
                     }
                     catch( PodioUnavailableException ex )
                     {
-                        vilcap.context.Logger.LogLine($"{ex.Message}");
-                        vilcap.context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
+                        Console.WriteLine($"{ex.Message}");
+                        Console.WriteLine($"Trying again in {waitSeconds} seconds.");
                         for( var i = 0 ; i < waitSeconds ; i++ )
                         {
                             System.Threading.Thread.Sleep(1000);
-                            vilcap.context.Logger.LogLine(".");
+                            Console.WriteLine(".");
                         }
                         waitSeconds *= 2;
                         goto CallPodioTasks;
                     }
                     #endregion
                 }
-                vilcap.context.Logger.LogLine($"Calling Podio");
+                Console.WriteLine($"Calling Podio");
             CallPodio:
                 try
                 {
-                    vilcap.context.Logger.LogLine($"child.ItemId={child.ItemId} & child.exId={child.ExternalId}");
+                    Console.WriteLine($"child.ItemId={child.ItemId} & child.exId={child.ExternalId}");
                     await vilcap.podio.CreateItem(child, workshopAppId, true);
                 }
                 catch( PodioUnavailableException ex )
                 {
-                    vilcap.context.Logger.LogLine($"{ex.Message}");
-                    vilcap.context.Logger.LogLine($"Trying again in {waitSeconds} seconds.");
+                    Console.WriteLine($"{ex.Message}");
+                    Console.WriteLine($"Trying again in {waitSeconds} seconds.");
                     for( var i = 0 ; i < waitSeconds ; i++ )
                     {
                         System.Threading.Thread.Sleep(1000);
-                        vilcap.context.Logger.LogLine(".");
+                        Console.WriteLine(".");
                     }
                     waitSeconds *= 2;
                     goto CallPodio;
                 }
-                vilcap.context.Logger.LogLine($"Created item #{count}");
+                Console.WriteLine($"Created item #{count}");
                 #endregion
             }
 
