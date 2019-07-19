@@ -8,6 +8,7 @@ using PodioCore.Items;
 using PodioCore.Models;
 using PodioCore.Utils.ItemFields;
 using Saasafras;
+using Task = System.Threading.Tasks.Task;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
@@ -16,8 +17,9 @@ namespace UpdateDeployCurriculum
 {
     public class Function
     {
-        public async System.Threading.Tasks.Task FunctionHandler( RoutedPodioEvent e, ILambdaContext context )
+        public async Task FunctionHandler( RoutedPodioEvent e, ILambdaContext context )
         {
+            #region // Generic Setup //
             const int ADMIN_ID = 4610903;
             var factory = new AuditedPodioClientFactory(e.solutionId, e.version, e.clientId, e.environmentId);
             var podio = factory.ForClient(e.clientId, e.environmentId);
@@ -31,14 +33,14 @@ namespace UpdateDeployCurriculum
             //Deploy Curriculum field
             var functionName = "UpdateDeployCurriculum";
             lockValue = await saasafrasClient.LockFunction(functionName, check.ItemId.ToString());
-            try
+            if (string.IsNullOrEmpty(lockValue))
             {
-                if( string.IsNullOrEmpty(lockValue) )
-                {
-                    context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
-                    return;
-                }
-
+                context.Logger.LogLine($"Failed to acquire lock for {functionName} and id {check.ItemId}");
+                return;
+            }
+            #endregion
+            try
+            {   
                 var revision = await podio.GetRevisionDifference(Convert.ToInt32(check.ItemId), check.CurrentRevision.Revision - 1, check.CurrentRevision.Revision);
                 var firstRevision = revision.First();
                 if( check.CurrentRevision.CreatedBy.Id.GetValueOrDefault() != ADMIN_ID )
@@ -48,6 +50,8 @@ namespace UpdateDeployCurriculum
                         $":loudspeaker: User ' https://podio.com/users/" + check.CurrentRevision.CreatedBy.Id.GetValueOrDefault() + " ' is not authorized to perform this action.", hook: false);
                     return;
                 }
+
+                context.Logger.LogLine($"Entering Switch");
 
                 switch( firstRevision.Label )
                 {
