@@ -20,9 +20,6 @@ namespace newVilcapCopyFileToGoogleDrive
 {
     public class newVilcapCopyFileToGoogleDrive
     {
-        newVilcapCopyFileToGoogleDrive()
-        {
-        }
 
         #region  // Utility Vars //
         // private
