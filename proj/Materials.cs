@@ -26,7 +26,7 @@ namespace newVilcapCopyFileToGoogleDrive
                 from.Field<TextItemField>(ids.Get("VC Administration|Material Curation|Description")).Value;
             }
             //--- Category ---//
-            if( from.Field<CategoryItemField>(ids.Get("VC Administration|Material Curation|Type")).Options.First() != null )
+            if( from.Field<CategoryItemField>(ids.Get("VC Administration|Material Curation|Type")).Options.Any() )
             {
                 clone.Field<CategoryItemField>(ids.Get("Materials|Type")).OptionText =
                     from.Field<CategoryItemField>(ids.Get("VC Administration|Material Curation|Type")).Options.First().Text;

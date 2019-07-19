@@ -188,14 +188,17 @@ namespace newVilcapCopyFileToGoogleDrive
                 #endregion
 
                 #region// Auxillary Material Generation //
-
+                var createdMaterialIds = new List<int> { };
                 foreach( var mMaterial in mMaterials.Items )
                 {
-                    var createdMaterial = Materials.Copy(mMaterial, vilcap.ids, vilcap.podio, materialsAppId);
-                    cEntrepreneurMaterials.Values.Add(createdMaterial);
-                    Console.WriteLine($"Created Material #{createdMaterial.Id}");
+                    Console.WriteLine($"Creating Material #");
+                    var createdMaterial = await Materials.Copy(mMaterial, vilcap.ids, vilcap.podio, materialsAppId);
+                    Console.WriteLine($"Adding Material #");
+                    createdMaterialIds.Add(int.Parse(createdMaterial.ExternalId));
+                    Console.WriteLine($"Created Material #");
                     /////////////////   TODO
                 }
+                cEntrepreneurMaterials.ItemIds = createdMaterialIds;
                 #endregion
 
                 #region // Date Calcs //
@@ -402,8 +405,7 @@ namespace newVilcapCopyFileToGoogleDrive
             if( check.Field<CategoryItemField>(batchId).Options.First().Text == "1" ) { await PreSurvAndExp.CreateExpendituresAndPreWSSurvs(vilcap); }
 
             // Return the next Batch #, or -1 if all Items have been completed
-            if( count == 0 ) return -1;
-            return ++batchNum;
+            return count == 0 ? -1 : ++batchNum;
             //return count != 0 ? ++batchNum : -1;
         }
     }
