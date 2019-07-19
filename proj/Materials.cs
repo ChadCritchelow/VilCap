@@ -8,9 +8,9 @@ using PodioCore.Utils.ItemFields;
 
 namespace newVilcapCopyFileToGoogleDrive
 {
-    internal class Materials
+    public static class Materials
     {
-        public static async Task<Item> Copy( Item from, Item to, GetIds ids, Podio podio, int appId )
+        public static async Task<Item> Copy( Item from, GetIds ids, Podio podio, int appId )
         {
             var clone = new Item();
 

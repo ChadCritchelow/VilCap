@@ -191,9 +191,9 @@ namespace newVilcapCopyFileToGoogleDrive
 
                 foreach( var mMaterial in mMaterials.Items )
                 {
-                    var newMaterial = Materials.Copy(mMaterial, null, vilcap.ids, vilcap.podio, materialsAppId);
-                    cEntrepreneurMaterials.Values.Add(newMaterial);
-                    Console.WriteLine($"Created Material #{newMaterial.Id}");
+                    var createdMaterial = Materials.Copy(mMaterial, vilcap.ids, vilcap.podio, materialsAppId);
+                    cEntrepreneurMaterials.Values.Add(createdMaterial);
+                    Console.WriteLine($"Created Material #{createdMaterial.Id}");
                     /////////////////   TODO
                 }
                 #endregion
