@@ -17,27 +17,36 @@ namespace newVilcapCopyFileToGoogleDrive
 
         // Store derived values from the {client WS}|Admin app 
 
-        public Scheduler(Item check, RoutedPodioEvent e, GetIds ids, int PARTITIONS)
+        public Scheduler(Item check, GetIds ids, int PARTITIONS)
         {
-            var pId = ids.Get("Admin|Program Design");
-            pStart = new DateTime(check.Field<DateItemField>(pId).Start.Value.Ticks);
-            pEnd = new DateTime(check.Field<DateItemField>(pId).End.Value.Ticks);
-            pTSpan = (check.Field<DateItemField>(pId).End.Value - pStart) / PARTITIONS;
+            try
+            {
+                var pId = ids.Get("Admin|Program Design");
+                pStart = new DateTime(check.Field<DateItemField>(pId).Start.Value.Ticks);
+                pEnd = new DateTime(check.Field<DateItemField>(pId).End.Value.Ticks);
+                pTSpan = (check.Field<DateItemField>(pId).End.Value - pStart) / PARTITIONS;
 
-            var rId = ids.Get("Admin|Recruitment");
-            rStart = new DateTime(check.Field<DateItemField>(rId).Start.Value.Ticks);
-            rEnd = new DateTime(check.Field<DateItemField>(rId).End.Value.Ticks);
-            rTSpan = (check.Field<DateItemField>(rId).End.Value - rStart) / PARTITIONS;
+                var rId = ids.Get("Admin|Recruitment");
+                rStart = new DateTime(check.Field<DateItemField>(rId).Start.Value.Ticks);
+                rEnd = new DateTime(check.Field<DateItemField>(rId).End.Value.Ticks);
+                rTSpan = (check.Field<DateItemField>(rId).End.Value - rStart) / PARTITIONS;
 
-            var sId = ids.Get("Admin|Selection");
-            sStart = new DateTime(check.Field<DateItemField>(sId).Start.Value.Ticks);
-            sEnd = new DateTime(check.Field<DateItemField>(sId).End.Value.Ticks);
-            sTSpan = (check.Field<DateItemField>(sId).End.Value - sStart) / PARTITIONS;
+                var sId = ids.Get("Admin|Selection");
+                sStart = new DateTime(check.Field<DateItemField>(sId).Start.Value.Ticks);
+                sEnd = new DateTime(check.Field<DateItemField>(sId).End.Value.Ticks);
+                sTSpan = (check.Field<DateItemField>(sId).End.Value - sStart) / PARTITIONS;
 
-            var wId = ids.Get("Admin|Workshop Operations");
-            wStart = new DateTime(check.Field<DateItemField>(wId).Start.Value.Ticks);
-            wEnd = new DateTime(check.Field<DateItemField>(wId).End.Value.Ticks);
-            wTSpan = (check.Field<DateItemField>(wId).End.Value - wStart) / PARTITIONS;
+                var wId = ids.Get("Admin|Workshop Operations");
+                wStart = new DateTime(check.Field<DateItemField>(wId).Start.Value.Ticks);
+                wEnd = new DateTime(check.Field<DateItemField>(wId).End.Value.Ticks);
+                wTSpan = (check.Field<DateItemField>(wId).End.Value - wStart) / PARTITIONS;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("SCHEDULER ERROR: Task Timeframes probably set on admin item");
+                throw ex;
+            }
+            
         }
 
         // Set real dates based on the item's abstract phase & duration

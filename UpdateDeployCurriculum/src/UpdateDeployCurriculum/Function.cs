@@ -51,7 +51,7 @@ namespace UpdateDeployCurriculum
                     return;
                 }
 
-                context.Logger.LogLine($"Entering Switch");
+                context.Logger.LogLine($"Entering Switch for {e.clientId}");
 
                 switch( firstRevision.Label )
                 {
@@ -63,11 +63,15 @@ namespace UpdateDeployCurriculum
                             context.Logger.LogLine("Updating an Item or something");
                             var update = new Item() { ItemId = check.ItemId };
                             var tlBatch = update.Field<CategoryItemField>(ids.Get("Admin|TL Batch"));
-                            if( tlBatch.Options.First().Text == "1" )
+                            if( tlBatch.Options.Any() && tlBatch.Options.First().Text == "1")
                             {
                                 context.Logger.LogLine("... Reseting batch # field ... ");
-                                tlBatch.OptionText = null;
+                                tlBatch.OptionTexts = new List<string> { };
                                 await podio.UpdateItem(update, false);
+                            }
+                            else
+                            {
+                                context.Logger.LogLine("No reset ");
                             }
                             tlBatch.OptionText = "1";
                             await podio.UpdateItem(update, true);
@@ -85,7 +89,7 @@ namespace UpdateDeployCurriculum
                             var wsBatch = update.Field<CategoryItemField>(ids.Get("Admin|WS Batch"));
                             var currentWS = check.Field<CategoryItemField>(ids.Get("Admin|WS Batch"));
                             context.Logger.LogLine("Created 'update|WS Batch' ");
-                            if( currentWS.Options.First().Text == "1" )
+                            if( currentWS.Options.Any() && currentWS.Options.First().Text == "1" )
                             {
                                 context.Logger.LogLine("... Reseting batch # field ... ");
                                 wsBatch.OptionTexts = new List<string> { };

@@ -1,5 +1,6 @@
 using Amazon.Lambda.Core;
 using newVilcapCopyFileToGoogleDrive;
+using PodioCore.Exceptions;
 using PodioCore.Items;
 using PodioCore.Models;
 using PodioCore.Models.Request;
@@ -55,10 +56,52 @@ namespace VilcapShareAppWithApplicant
                 "You can view all of your Podio items by following the following link : <https://podio.com/vilcapcom/organization/grants>";
 
                 //Send Email:
-                await serv.CreateGrant("item", check.ItemId, people, "view", message);
+
+                var waitSeconds = 5;
                 var updateMe = new Item() { ItemId = check.ItemId };
                 updateMe.Field<CategoryItemField>(ids.Get("Applications|Application Status")).OptionText = "New Application";
-                await podio.UpdateItem(updateMe, true);
+            CallPodioG:
+                try
+                {
+                    Console.WriteLine($"Trying to create a Grant ...");
+                    await serv.CreateGrant("item", check.ItemId, people, "view", message);
+                }
+                catch (PodioUnavailableException ex)
+                {
+                    Console.WriteLine($"{ex.Message}");
+                    Console.WriteLine($"Trying again in {waitSeconds} seconds.");
+                    for (var i = 0; i < waitSeconds; i++)
+                    {
+                        System.Threading.Thread.Sleep(1000);
+                        Console.WriteLine(".");
+                    }
+                    waitSeconds *= 2;
+                    goto CallPodioG;
+                }
+                Console.WriteLine($"Created grant");
+
+            CallPodioU:
+                try
+                {
+                    Console.WriteLine($"Trying to update an Item ...");
+                    await podio.UpdateItem(updateMe, true);
+                }
+                catch (PodioUnavailableException ex)
+                {
+                    Console.WriteLine($"{ex.Message}");
+                    Console.WriteLine($"Trying again in {waitSeconds} seconds.");
+                    for (var i = 0; i < waitSeconds; i++)
+                    {
+                        System.Threading.Thread.Sleep(1000);
+                        Console.WriteLine(".");
+                    }
+                    waitSeconds *= 2;
+                    goto CallPodioU;
+                }
+                Console.WriteLine($"... Updated Item");
+
+                
+                
             }
             catch (Exception ex) { throw ex; }
             finally { await saasafrasClient.UnlockFunction(functionName, check.ItemId.ToString(), lockValue); }

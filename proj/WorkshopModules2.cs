@@ -66,7 +66,7 @@ namespace newVilcapCopyFileToGoogleDrive
             var view = from v in views
                        where v.Name == $"{package} Batch {batchNum}"
                        select v;
-            Console.WriteLine($"CONSOLE: Got View '{package}'");
+            Console.WriteLine($"CONSOLE: Got View '{view.FirstOrDefault().Name}'");
             //Console.WriteLine($"Got View '{package}'");
 
             var op = new FilterOptions { Filters = view.First().Filters };
@@ -297,7 +297,7 @@ namespace newVilcapCopyFileToGoogleDrive
                     var esoMasterT = masterT.Field<CategoryItemField>(vilcap.ids.Get("VC Administration|Master Schedule|ESO Member Role"));
                     if( esoMasterT.Options.Any() )
                     {
-                        var esoCloneT = cloneT.Field<CategoryItemField>(vilcap.ids.Get("Task List|ESO Member Role"));
+                        var esoCloneT = cloneT.Field<CategoryItemField>(vilcap.ids.Get("Task List|Role"));
                         esoCloneT.OptionText = esoMasterT.Options.First().Text;
                     }
 

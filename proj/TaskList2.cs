@@ -40,7 +40,7 @@ namespace newVilcapCopyFileToGoogleDrive
 
             // Generate a rough calendar based on dates in the Admin app  //
 
-            var scheduler = new Scheduler(vilcap.item, vilcap.e, vilcap.ids, PARTITIONS);
+            var scheduler = new Scheduler(vilcap.item, vilcap.ids, PARTITIONS);
 
             // Get/Create View //
 
