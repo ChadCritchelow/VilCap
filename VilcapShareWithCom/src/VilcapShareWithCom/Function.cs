@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Amazon.Lambda.Core;
 using newVilcapCopyFileToGoogleDrive;
+using PodioCore.Exceptions;
 using PodioCore.Items;
 using PodioCore.Models;
 using PodioCore.Services;
@@ -55,10 +56,32 @@ namespace VilcapShareWithCom
                 people.Add(person);
                 var message = m;
 
-                await serv.CreateGrant("item", check.ItemId, people, "rate", message);
+
+                var waitSeconds = 5;
+            CallPodioG: // Create Grant
+                try
+                {
+                    Console.WriteLine($"Trying to create a Grant ...");
+                    await serv.CreateGrant("item", check.ItemId, people, "rate", message);
+                }
+                catch (PodioUnavailableException ex)
+                {
+                    Console.WriteLine($"{ex.Message}");
+                    Console.WriteLine($"Trying again in {waitSeconds} seconds.");
+                    for (var i = 0; i < waitSeconds; i++)
+                    {
+                        System.Threading.Thread.Sleep(1000);
+                        Console.WriteLine(".");
+                    }
+                    waitSeconds *= 2;
+                    goto CallPodioG;
+                }
+                Console.WriteLine($"Created grant");
+
             }
             catch( Exception ex )
             {
+                Console.WriteLine($"Exception Details: {ex.Message}");
                 throw ex;
             }
             finally
